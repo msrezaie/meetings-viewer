@@ -19,6 +19,17 @@ const theme = createTheme({
   typography: {
     fontFamily: "var(--font-roboto)",
   },
+  components: {
+    MuiDrawer: {
+      styleOverrides: {
+        paper: ({ theme }) => ({
+          ...theme.applyStyles("dark", {
+            backgroundColor: "#121212",
+          }),
+        }),
+      },
+    },
+  },
 });
 
 export default theme;

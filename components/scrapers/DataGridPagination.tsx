@@ -1,4 +1,3 @@
-import useMediaQuery from "@mui/material/useMediaQuery";
 import Pagination from "@mui/material/Pagination";
 import type { TablePaginationProps } from "@mui/material/TablePagination";
 import {
@@ -15,9 +14,6 @@ function PageActions({
 }: Pick<TablePaginationProps, "page" | "onPageChange" | "className">) {
   const apiRef = useGridApiContext();
   const pageCount = useGridSelector(apiRef, gridPageCountSelector);
-  // Below this, "1 ... 5 6 7 ... 12" plus first/last jump buttons is too
-  // much to fit next to the rows-per-page control without crowding.
-  const isNarrow = useMediaQuery("(max-width:600px)");
   if (pageCount <= 1) return null;
 
   return (
@@ -28,10 +24,12 @@ function PageActions({
       count={pageCount}
       page={page + 1}
       onChange={(_, value) => onPageChange(null, value - 1)}
-      showFirstButton={!isNarrow}
-      showLastButton={!isNarrow}
-      siblingCount={isNarrow ? 0 : 1}
-      sx={{ "& .MuiPagination-ul": { justifyContent: "flex-end", rowGap: 0.5 } }}
+      showFirstButton
+      showLastButton
+      siblingCount={1}
+      sx={{
+        "& .MuiPagination-ul": { justifyContent: "flex-end", rowGap: 0.5 },
+      }}
     />
   );
 }
@@ -51,21 +49,36 @@ export const dataGridPaginationSlotProps = {
         width: "100%",
         "& .MuiTablePagination-toolbar": {
           flexWrap: "wrap",
-          justifyContent: "flex-end",
+          justifyContent: { xs: "center", sm: "flex-end" },
           rowGap: 1,
-          columnGap: { xs: 1.5, sm: 2 },
-          minHeight: "auto",
-          py: 1,
-          px: { xs: 1.5, sm: 2 },
+          columnGap: 2,
+          p: 2,
+          "&::before": {
+            content: '""',
+            height: 0,
+            "@media (max-width:600px)": { flexBasis: "100%", order: 1 },
+          },
         },
-        "& .MuiTablePagination-spacer": {
-          display: "none",
-        },
-        "& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows": {
+        "& .MuiTablePagination-spacer": { display: "none" },
+        // MUI hides rows-per-page controls below 600px; force visible.
+        // Zero margins so columnGap controls spacing uniformly.
+        // On xs, wrap rows-per-page + displayed rows to line 2 (below arrows).
+        "& .MuiTablePagination-selectLabel": {
+          display: "block",
           margin: 0,
+          "@media (max-width:600px)": { order: 2 },
         },
-        "& .MuiTablePagination-actions": {
-          marginLeft: 0,
+        "& .MuiTablePagination-select": {
+          display: "inline-flex",
+          margin: 0,
+          "@media (max-width:600px)": { order: 2 },
+        },
+        "& .MuiTablePagination-displayedRows": {
+          margin: 0,
+          "@media (max-width:600px)": { order: 2 },
+        },
+        "& .MuiTablePagination-toolbar .MuiTablePagination-actions": {
+          margin: 0,
         },
       },
     },

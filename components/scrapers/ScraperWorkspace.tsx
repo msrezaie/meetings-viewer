@@ -2,13 +2,13 @@
 
 import { useCallback, useRef, useState } from "react";
 import Box from "@mui/material/Box";
-import type { MeetingRecord } from "@/lib/scrapers";
+import type { MeetingRecord } from "@/lib/scraper-data";
 import MeetingsToolbar from "@/components/scrapers/MeetingsToolbar";
 import FiltersPanel from "@/components/scrapers/FiltersPanel";
 import MeetingFilters from "@/components/scrapers/MeetingFilters";
 import MeetingsLayout from "@/components/scrapers/MeetingsLayout";
 import { useMeetingFilters } from "@/hooks/useMeetingFilters";
-import { SECTION_GAP } from "@/lib/layout";
+import { SECTION_GAP } from "@/lib/ui-constants";
 import { ColumnVisibilityProvider } from "@/contexts/ColumnVisibilityContext";
 
 const FILTERS_PANEL_ID = "meetings-filters-panel";

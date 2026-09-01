@@ -11,9 +11,16 @@ const DataGrid = dynamic(
 );
 import MuiLink from "@mui/material/Link";
 import NextLink from "@/components/ui/NextLink";
-import type { SpiderEntry } from "@/lib/scrapers";
+import type { SpiderEntry } from "@/lib/scraper-data";
 import { dataGridPaginationSlotProps } from "@/components/scrapers/DataGridPagination";
 import TruncatedText from "@/components/ui/TruncatedText";
+import {
+  MAX_TEXT_LINES,
+  DATAGRID_PAGE_SIZE_OPTIONS,
+  DATAGRID_DEFAULT_PAGE_SIZE,
+  DATAGRID_DENSITY,
+  dataGridRowSx,
+} from "@/lib/ui-constants";
 
 const PLACEHOLDER = "—";
 
@@ -46,7 +53,9 @@ const columns: GridColDef[] = [
     headerName: "Agency",
     flex: 2,
     minWidth: 200,
-    renderCell: ({ value }) => <TruncatedText text={value} wrap maxLines={4} />,
+    renderCell: ({ value }) => (
+      <TruncatedText text={value} wrap maxLines={MAX_TEXT_LINES} />
+    ),
   },
   {
     field: "last_run_status",
@@ -73,19 +82,18 @@ export default function ScrapersTable({ spiders }: { spiders: SpiderEntry[] }) {
         disableColumnMenu
         autoHeight
         getRowHeight={() => "auto"}
-        density="compact"
-        pageSizeOptions={[10, 25, 50]}
+        density={DATAGRID_DENSITY}
+        pageSizeOptions={DATAGRID_PAGE_SIZE_OPTIONS}
         initialState={{
-          pagination: { paginationModel: { pageSize: 25 } },
+          pagination: {
+            paginationModel: { pageSize: DATAGRID_DEFAULT_PAGE_SIZE },
+          },
         }}
         slotProps={dataGridPaginationSlotProps}
         aria-label="scrapers table"
         sx={{
           border: "none",
-          "& .MuiDataGrid-row": {
-            minHeight: "52px !important",
-            maxHeight: "96px !important",
-          },
+          ...dataGridRowSx(),
           "& .MuiDataGrid-cell": {
             display: "flex",
             alignItems: "center",

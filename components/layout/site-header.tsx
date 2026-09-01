@@ -15,8 +15,8 @@ import MenuIcon from "@mui/icons-material/Menu";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { usePathname } from "next/navigation";
 import { LogoMark } from "./logo-mark";
-import { siteConfig } from "@/lib/site";
-import { PAGE_PADDING, SECTION_GAP } from "@/lib/layout";
+import { siteConfig } from "@/lib/site-config";
+import { PAGE_PADDING, NAV_DRAWER_WIDTH } from "@/lib/ui-constants";
 import { Toolbar } from "@mui/material";
 
 type NavItem = {
@@ -46,7 +46,7 @@ export function SiteHeader() {
 
   const drawer = (
     <Box
-      sx={{ width: 280 }}
+      sx={{ width: NAV_DRAWER_WIDTH }}
       role="presentation"
       onClick={() => setDrawerOpen(false)}
     >
@@ -197,7 +197,7 @@ export function SiteHeader() {
       <Drawer
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
-        slotProps={{ paper: { sx: { width: 280 } } }}
+        slotProps={{ paper: { sx: { width: NAV_DRAWER_WIDTH } } }}
       >
         {drawer}
       </Drawer>

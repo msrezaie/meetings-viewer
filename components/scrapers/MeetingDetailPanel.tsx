@@ -8,14 +8,15 @@ import Typography from "@mui/material/Typography";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme } from "@mui/material/styles";
 import Close from "@mui/icons-material/Close";
-import { locationText, normalizeStatus } from "@/lib/meetings";
-import type { MeetingRecord } from "@/lib/scrapers";
+import { locationText, normalizeStatus } from "@/lib/meeting-utils";
+import type { MeetingRecord } from "@/lib/scraper-data";
 import { StatusChip } from "@/components/ui/StatusChip";
 import {
   useSelectedMeeting,
   useSetSelectedMeeting,
 } from "@/contexts/MeetingSelectionContext";
 import { linkifyText } from "@/components/ui/Linkify";
+import { DETAIL_PANEL_WIDTH } from "@/lib/ui-constants";
 
 function Section({
   label,
@@ -217,7 +218,7 @@ export default function MeetingDetailPanel() {
           sx={{
             position: "sticky",
             top: 16,
-            width: 340,
+            width: DETAIL_PANEL_WIDTH,
             flexShrink: 0,
             border: "1px solid",
             borderColor: "divider",
@@ -239,7 +240,7 @@ export default function MeetingDetailPanel() {
         ModalProps={{ disableScrollLock: true }}
         sx={{
           "& .MuiDrawer-paper": {
-            width: { xs: "100%", sm: 340 },
+            width: { xs: "100%", sm: DETAIL_PANEL_WIDTH },
             display: "flex",
             flexDirection: "column",
           },

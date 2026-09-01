@@ -1,14 +1,13 @@
+import { useState } from "react";
 import Box from "@mui/material/Box";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import { highlightMatches } from "./HighlightMatches";
 import { linkifyText } from "./Linkify";
-
-const MAX_LENGTH = 50;
+import { TOOLTIP_ENTER_DELAY } from "@/lib/ui-constants";
 
 interface TruncatedTextProps {
   text: string | null | undefined;
-  maxLength?: number;
   wrap?: boolean;
   maxLines?: number;
   /** Search keyword to highlight within the rendered text, if any. */
@@ -17,106 +16,80 @@ interface TruncatedTextProps {
 
 export default function TruncatedText({
   text,
-  maxLength = MAX_LENGTH,
   wrap = false,
   maxLines,
   highlight,
 }: TruncatedTextProps) {
+  const [showTooltip, setShowTooltip] = useState(false);
+
+  const handleMouseEnter = (e: React.MouseEvent<HTMLElement>) => {
+    const el = e.currentTarget;
+    setShowTooltip(el.scrollHeight > el.clientHeight);
+  };
+
   if (!text) return <>—</>;
 
-  const isTruncated = text.length > maxLength;
   const renderedText = highlightMatches(linkifyText(text), highlight ?? "");
 
+  const tooltipTitle = (
+    <Typography variant="body2" sx={{ whiteSpace: "pre-wrap", maxWidth: 320 }}>
+      {renderedText}
+    </Typography>
+  );
+
   if (wrap) {
-    const box = (
-      <Box
-        sx={{
-          whiteSpace: "normal",
-          wordBreak: "break-word",
-          width: "100%",
-          ...(maxLines && {
-            display: "-webkit-box",
-            WebkitLineClamp: maxLines,
-            WebkitBoxOrient: "vertical",
-            overflow: "hidden",
-          }),
-        }}
-      >
-        {isTruncated ? (
-          <span
-            style={{
-              cursor: "pointer",
-              borderBottom: "1px dashed currentColor",
-              textDecorationSkipInk: "none",
-            }}
-          >
-            {renderedText}
-          </span>
-        ) : (
-          renderedText
-        )}
-      </Box>
-    );
-
-    if (!isTruncated) return box;
-
     return (
       <Tooltip
-        title={
-          <Typography
-            variant="body2"
-            sx={{ whiteSpace: "pre-wrap", maxWidth: 320 }}
-          >
-            {renderedText}
-          </Typography>
-        }
+        title={tooltipTitle}
         placement="top"
         arrow
-        enterDelay={200}
+        enterDelay={TOOLTIP_ENTER_DELAY}
+        open={showTooltip}
+        onClose={() => setShowTooltip(false)}
         slotProps={TOOLTIP_SLOT_PROPS}
       >
-        {box}
+        <Box
+          onMouseEnter={handleMouseEnter}
+          sx={{
+            whiteSpace: "normal",
+            wordBreak: "break-word",
+            width: "100%",
+            ...(maxLines && {
+              display: "-webkit-box",
+              WebkitLineClamp: maxLines,
+              WebkitBoxOrient: "vertical",
+              overflow: "hidden",
+            }),
+          }}
+        >
+          {renderedText}
+        </Box>
       </Tooltip>
     );
   }
 
-  const inner = (
-    <Box
-      component="span"
-      sx={{
-        display: "block",
-        overflow: "hidden",
-        textOverflow: "ellipsis",
-        whiteSpace: "nowrap",
-        ...(isTruncated && {
-          cursor: "pointer",
-          borderBottom: "1px dashed currentColor",
-          textDecorationSkipInk: "none",
-        }),
-      }}
-    >
-      {renderedText}
-    </Box>
-  );
-
-  if (!isTruncated) return inner;
-
   return (
     <Tooltip
-      title={
-        <Typography
-          variant="body2"
-          sx={{ whiteSpace: "pre-wrap", maxWidth: 320 }}
-        >
-          {renderedText}
-        </Typography>
-      }
+      title={tooltipTitle}
       placement="top"
       arrow
-      enterDelay={200}
+      enterDelay={TOOLTIP_ENTER_DELAY}
+      open={showTooltip}
+      onClose={() => setShowTooltip(false)}
       slotProps={TOOLTIP_SLOT_PROPS}
     >
-      {inner}
+      <Box
+        component="span"
+        onMouseEnter={handleMouseEnter}
+        sx={{
+          display: "block",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
+        }}
+      >
+        {renderedText}
+      </Box>
     </Tooltip>
   );
 }

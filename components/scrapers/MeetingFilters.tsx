@@ -7,7 +7,7 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import DateRangeFilter from "@/components/scrapers/DateRangeFilter";
 import ColumnVisibilityFilter from "@/components/scrapers/ColumnVisibilityFilter";
-import { TRANSITION_MS } from "@/components/scrapers/FiltersPanel";
+import { FILTERS_TRANSITION_MS } from "@/lib/ui-constants";
 import {
   SEARCH_FIELD_OPTIONS,
   STATUS_OPTIONS,
@@ -64,11 +64,11 @@ export default function MeetingFilters({
       // so focusing doesn't fight the width/opacity animation.
       const timer = setTimeout(
         () => searchInputRef.current?.focus(),
-        TRANSITION_MS
+        FILTERS_TRANSITION_MS
       );
       return () => clearTimeout(timer);
     }
-  }, [open, TRANSITION_MS]);
+  }, [open, FILTERS_TRANSITION_MS]);
 
   return (
     <Stack spacing={2.5} sx={{ pt: 0.5 }}>

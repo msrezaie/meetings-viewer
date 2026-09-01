@@ -1,5 +1,5 @@
 import Box from "@mui/material/Box";
-import { PAGE_PADDING, SECTION_GAP } from "@/lib/layout";
+import { PAGE_PADDING, SECTION_GAP } from "@/lib/ui-constants";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (

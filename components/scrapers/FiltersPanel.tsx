@@ -6,9 +6,7 @@ import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 import Close from "@mui/icons-material/Close";
-
-const PANEL_WIDTH = 300;
-export const TRANSITION_MS = 150;
+import { FILTERS_PANEL_WIDTH, FILTERS_TRANSITION_MS } from "@/lib/ui-constants";
 
 interface FiltersPanelProps {
   /** Whether the panel is expanded. Controlled by the parent. */
@@ -69,7 +67,7 @@ export default function FiltersPanel({
         // `auto` (stretched by the column layout) rather than `100%` on xs:
         // an explicit percentage animates down to 0 when crossing into the
         // row layout, briefly starving the content column of all its width.
-        width: { xs: "auto", sm: open ? PANEL_WIDTH : 0 },
+        width: { xs: "auto", sm: open ? FILTERS_PANEL_WIDTH : 0 },
         maxHeight: { xs: open ? "none" : 0 },
         opacity: open ? 1 : 0,
         transform: open ? "translateX(0)" : "translateX(-6px)",
@@ -78,13 +76,13 @@ export default function FiltersPanel({
         transition: (theme) =>
           [
             theme.transitions.create(["width", "margin", "max-height"], {
-              duration: TRANSITION_MS,
+              duration: FILTERS_TRANSITION_MS,
               easing: theme.transitions.easing.easeInOut,
             }),
             theme.transitions.create(["opacity", "transform"], {
-              duration: TRANSITION_MS * 0.7,
+              duration: FILTERS_TRANSITION_MS * 0.7,
               easing: theme.transitions.easing.easeOut,
-              delay: open ? TRANSITION_MS * 0.3 : 0,
+              delay: open ? FILTERS_TRANSITION_MS * 0.3 : 0,
             }),
           ].join(", "),
         border: "1px solid",
@@ -98,7 +96,14 @@ export default function FiltersPanel({
         overflow: "hidden",
       }}
     >
-      <Box sx={{ p: 2, pb: 1.5, flexShrink: 0, width: { sm: PANEL_WIDTH } }}>
+      <Box
+        sx={{
+          p: 2,
+          pb: 1.5,
+          flexShrink: 0,
+          width: { sm: FILTERS_PANEL_WIDTH },
+        }}
+      >
         <Box
           sx={{
             display: "flex",
@@ -131,7 +136,7 @@ export default function FiltersPanel({
           overflowY: "auto",
           px: 2,
           pb: 2,
-          width: { sm: PANEL_WIDTH },
+          width: { sm: FILTERS_PANEL_WIDTH },
         }}
       >
         {children}

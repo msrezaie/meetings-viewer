@@ -2,6 +2,7 @@ import Box from "@mui/material/Box";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import { ReactNode } from "react";
+import { TOOLTIP_ENTER_DELAY } from "@/lib/ui-constants";
 
 interface LinkWithTooltipProps {
   href: string;
@@ -31,7 +32,7 @@ export default function LinkWithTooltip({
         </Typography>
       }
       placement="right"
-      enterDelay={200}
+      enterDelay={TOOLTIP_ENTER_DELAY}
       slotProps={{
         popper: {
           modifiers: [

@@ -1,4 +1,4 @@
-import { source } from "@/lib/source";
+import { source } from "@/lib/docs-source";
 
 export function GET() {
   const pages = source.getPages();

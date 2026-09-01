@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import PageHeader from "@/components/scrapers/PageHeader";
 import ScrapersTable from "@/components/scrapers/ScrapersTable";
-import { listScrapers } from "@/lib/scrapers";
-import { pageTitle, siteConfig } from "@/lib/site";
+import { listScrapers } from "@/lib/scraper-data";
+import { pageTitle, siteConfig } from "@/lib/site-config";
 
 export const metadata: Metadata = {
   title: pageTitle(siteConfig.pages.scrapers.title),

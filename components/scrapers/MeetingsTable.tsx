@@ -12,17 +12,28 @@ const DataGrid = dynamic(
   () => import("@mui/x-data-grid").then((mod) => mod.DataGrid),
   { ssr: false }
 );
-import type { MeetingRecord } from "@/lib/scrapers";
+import type { MeetingRecord } from "@/lib/scraper-data";
 import { LocationDisplay } from "@/components/ui/LocationDisplay";
-import { locationText, normalizeStatus } from "@/lib/meetings";
+import { locationText, normalizeStatus } from "@/lib/meeting-utils";
 import { StatusChip } from "@/components/ui/StatusChip";
-import { colorForDuplicateCount, type DuplicateInfo } from "@/lib/duplicates";
+import {
+  colorForDuplicateCount,
+  type DuplicateInfo,
+} from "@/lib/duplicate-detection";
 import { dataGridPaginationSlotProps } from "@/components/scrapers/DataGridPagination";
 import TruncatedText from "@/components/ui/TruncatedText";
 import LinkWithTooltip from "@/components/ui/LinkWithTooltip";
 import { useSetSelectedMeeting } from "@/contexts/MeetingSelectionContext";
 import { useColumnVisibility } from "@/contexts/ColumnVisibilityContext";
 import type { SearchField } from "@/hooks/useMeetingFilters";
+import {
+  MAX_TEXT_LINES,
+  MAX_VISIBLE_LINKS,
+  DATAGRID_PAGE_SIZE_OPTIONS,
+  DATAGRID_DEFAULT_PAGE_SIZE,
+  DATAGRID_DENSITY,
+  dataGridRowSx,
+} from "@/lib/ui-constants";
 
 export type SortKey =
   | "title"
@@ -75,7 +86,7 @@ function getDataGridColumns(
           <TruncatedText
             text={row.title}
             wrap
-            maxLines={4}
+            maxLines={MAX_TEXT_LINES}
             highlight={highlightFor("title")}
           />
           {row._isFirst && (
@@ -103,7 +114,7 @@ function getDataGridColumns(
         <TruncatedText
           text={row.description}
           wrap
-          maxLines={4}
+          maxLines={MAX_TEXT_LINES}
           highlight={highlightFor("description")}
         />
       ),
@@ -142,7 +153,7 @@ function getDataGridColumns(
         <TruncatedText
           text={row.time_notes}
           wrap
-          maxLines={4}
+          maxLines={MAX_TEXT_LINES}
           highlight={highlightFor("time_notes")}
         />
       ),
@@ -170,8 +181,8 @@ function getDataGridColumns(
       renderCell: ({ row }) => {
         const r = row as MeetingRecord;
         if (!r.links?.length) return "—";
-        const visible = r.links.slice(0, 3);
-        const extra = r.links.length - 3;
+        const visible = r.links.slice(0, MAX_VISIBLE_LINKS);
+        const extra = r.links.length - MAX_VISIBLE_LINKS;
         return (
           <Box sx={{ width: "100%", minWidth: 0 }}>
             {visible.map((link, i) => (
@@ -384,10 +395,12 @@ export default function MeetingsTable({
           disableColumnMenu
           autoHeight
           getRowHeight={() => "auto"}
-          density="compact"
-          pageSizeOptions={[10, 25, 50]}
+          density={DATAGRID_DENSITY}
+          pageSizeOptions={DATAGRID_PAGE_SIZE_OPTIONS}
           initialState={{
-            pagination: { paginationModel: { pageSize: 25 } },
+            pagination: {
+              paginationModel: { pageSize: DATAGRID_DEFAULT_PAGE_SIZE },
+            },
             sorting: {
               sortModel: [{ field: "start", sort: "asc" }],
             },
@@ -406,11 +419,7 @@ export default function MeetingsTable({
           aria-label="meetings table"
           sx={{
             border: "none",
-            "& .MuiDataGrid-row": {
-              cursor: "pointer",
-              minHeight: "52px !important",
-              maxHeight: "96px !important",
-            },
+            ...dataGridRowSx({ cursor: "pointer" }),
             ...duplicateColorStyles,
             "& .MuiDataGrid-cell": {
               display: "flex",

@@ -1,9 +1,9 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type { MeetingRecord } from "@/lib/scrapers";
-import { locationText, normalizeStatus } from "@/lib/meetings";
-import { buildDuplicateGroups, type DuplicateInfo } from "@/lib/duplicates";
+import type { MeetingRecord } from "@/lib/scraper-data";
+import { locationText, normalizeStatus } from "@/lib/meeting-utils";
+import { buildDuplicateGroups, type DuplicateInfo } from "@/lib/duplicate-detection";
 
 export const STATUS_OPTIONS = [
   { value: "all", label: "All" },

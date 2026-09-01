@@ -3,7 +3,7 @@ import InitColorSchemeScript from "@mui/material/InitColorSchemeScript";
 import Box from "@mui/material/Box";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Roboto } from "next/font/google";
-import { siteConfig } from "@/lib/site";
+import { siteConfig } from "@/lib/site-config";
 import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import { SiteHeader } from "@/components/layout/site-header";

@@ -3,8 +3,8 @@ import CheckCircleRounded from "@mui/icons-material/CheckCircleRounded";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
-import { PAGE_PADDING } from "@/lib/layout";
-import { siteConfig } from "@/lib/site";
+import { PAGE_PADDING } from "@/lib/ui-constants";
+import { siteConfig } from "@/lib/site-config";
 
 const facts = [
   "No database",

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Capabilities } from "@/components/landing/capabilities";
 import { Hero } from "@/components/landing/hero";
 import { Modes } from "@/components/landing/modes";
-import { siteConfig } from "@/lib/site";
+import { siteConfig } from "@/lib/site-config";
 
 const landingTitle = `${siteConfig.name} - ${siteConfig.tagline}`;
 

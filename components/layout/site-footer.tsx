@@ -5,8 +5,8 @@ import Link from "@mui/material/Link";
 import Typography from "@mui/material/Typography";
 import { usePathname } from "next/navigation";
 import { LogoMark } from "./logo-mark";
-import { PAGE_PADDING } from "@/lib/layout";
-import { siteConfig } from "@/lib/site";
+import { PAGE_PADDING } from "@/lib/ui-constants";
+import { siteConfig } from "@/lib/site-config";
 
 export function SiteFooter() {
   const pathname = usePathname();

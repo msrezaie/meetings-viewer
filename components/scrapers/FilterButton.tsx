@@ -36,6 +36,8 @@ export default function FilterButton({
         bgcolor: open ? "primary.main" : "transparent",
         borderColor: "primary.main",
         boxShadow: open ? 4 : "none",
+        whiteSpace: "nowrap",
+        flexShrink: 0,
         transition: (theme) =>
           theme.transitions.create(
             ["background-color", "color", "box-shadow"],

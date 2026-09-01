@@ -1,8 +1,8 @@
 import { RootProvider } from "fumadocs-ui/provider/next";
 import { DocsLayout } from "fumadocs-ui/layouts/docs";
-import { source } from "@/lib/source";
+import { source } from "@/lib/docs-source";
 import { DarkModeSync } from "@/components/docs/dark-mode-sync";
-import { siteConfig } from "@/lib/site";
+import { siteConfig } from "@/lib/site-config";
 
 export default function DocsLayoutRoot({
   children,

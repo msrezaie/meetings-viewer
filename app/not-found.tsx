@@ -1,7 +1,7 @@
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
-import { PAGE_PADDING } from "@/lib/layout";
+import { PAGE_PADDING } from "@/lib/ui-constants";
 
 /**
  * Root not-found fallback. Catches all unmatched routes (e.g. /a, /foo).

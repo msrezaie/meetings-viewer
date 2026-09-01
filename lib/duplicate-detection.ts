@@ -1,4 +1,4 @@
-import type { MeetingRecord } from "@/lib/scrapers";
+import type { MeetingRecord } from "@/lib/scraper-data";
 
 const GENERIC_WORDS = new Set([
   "the",

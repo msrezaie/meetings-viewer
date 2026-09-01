@@ -7,7 +7,7 @@ import ViewColumnRounded from "@mui/icons-material/ViewColumnRounded";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import type { SvgIconComponent } from "@mui/icons-material";
-import { PAGE_PADDING } from "@/lib/layout";
+import { PAGE_PADDING } from "@/lib/ui-constants";
 
 const capabilities: { icon: SvgIconComponent; title: string; body: string }[] =
   [

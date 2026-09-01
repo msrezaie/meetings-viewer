@@ -5,7 +5,7 @@ import Chip from "@mui/material/Chip";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
 import type { SvgIconComponent } from "@mui/icons-material";
-import { PAGE_PADDING } from "@/lib/layout";
+import { PAGE_PADDING } from "@/lib/ui-constants";
 
 type Mode = {
   icon: SvgIconComponent;

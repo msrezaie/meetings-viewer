@@ -3,10 +3,10 @@
 import type { Ref } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import type { MeetingRecord } from "@/lib/scrapers";
+import type { MeetingRecord } from "@/lib/scraper-data";
 import FilterButton from "@/components/scrapers/FilterButton";
 import MeetingStats from "@/components/scrapers/MeetingStats";
-import { SECTION_GAP } from "@/lib/layout";
+import { SECTION_GAP } from "@/lib/ui-constants";
 
 interface MeetingsToolbarProps {
   records: MeetingRecord[];

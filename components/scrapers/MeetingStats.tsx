@@ -101,7 +101,7 @@ export default function MeetingStats({
       sx={{
         flexWrap: "wrap",
         width: { xs: "100%", sm: "auto" },
-        justifyContent: { xs: "center", sm: "flex-start" },
+        justifyContent: { xs: "center", sm: "center" },
       }}
     >
       {STAT_ITEMS.map((item) => (

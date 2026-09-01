@@ -28,6 +28,7 @@ export default function ScraperWorkspace({
       <MeetingsToolbar
         ref={filterButtonRef}
         records={records}
+        filteredCount={filters.filteredRecords.length}
         filtersOpen={filtersOpen}
         onToggleFilters={() => setFiltersOpen((open) => !open)}
         panelId={FILTERS_PANEL_ID}
@@ -38,7 +39,7 @@ export default function ScraperWorkspace({
           sx={{
             display: "flex",
             flexDirection: { xs: "column", sm: "row" },
-            gap: { xs: SECTION_GAP, sm: filtersOpen ? SECTION_GAP : 0 },
+            gap: filtersOpen ? SECTION_GAP : 0,
             alignItems: { xs: "stretch", sm: "flex-start" },
           }}
         >
@@ -55,7 +56,6 @@ export default function ScraperWorkspace({
           <Box sx={{ flex: 1, minWidth: 0, width: "100%" }}>
             <MeetingsLayout
               records={filters.filteredRecords}
-              totalCount={records.length}
               search={filters.search}
               searchField={filters.searchField}
               duplicateInfoMap={filters.duplicateInfoMap}

@@ -293,15 +293,12 @@ function markFirstInGroup(groupIndices: number[]): boolean[] {
 
 export default function MeetingsTable({
   records,
-  totalCount,
   search,
   searchField,
   duplicateInfoMap,
 }: {
   /** Records to display, already filtered upstream. */
   records: MeetingRecord[];
-  /** Unfiltered record count, for the "Showing X of Y" summary. */
-  totalCount: number;
   /** Current search keyword, to highlight matches in the active search field's column. */
   search: string;
   /** Field the search keyword is being matched against. */
@@ -378,10 +375,6 @@ export default function MeetingsTable({
 
   return (
     <Box sx={{ flex: 1, minWidth: 0 }}>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-        Showing {records.length} of {totalCount} meetings
-      </Typography>
-
       <Paper variant="outlined" sx={{ width: "100%", overflow: "hidden" }}>
         <DataGrid
           rows={enrichedRows}

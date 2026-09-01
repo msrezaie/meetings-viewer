@@ -2,6 +2,7 @@
 
 import type { Ref } from "react";
 import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
 import type { MeetingRecord } from "@/lib/scrapers";
 import FilterButton from "@/components/scrapers/FilterButton";
 import MeetingStats from "@/components/scrapers/MeetingStats";
@@ -9,6 +10,8 @@ import { SECTION_GAP } from "@/lib/layout";
 
 interface MeetingsToolbarProps {
   records: MeetingRecord[];
+  /** Filtered record count, for the "Showing X of Y" summary. */
+  filteredCount: number;
   filtersOpen: boolean;
   onToggleFilters: () => void;
   /** id of the panel this button controls, for aria-controls. */
@@ -19,6 +22,7 @@ interface MeetingsToolbarProps {
 
 export default function MeetingsToolbar({
   records,
+  filteredCount,
   filtersOpen,
   onToggleFilters,
   panelId,
@@ -31,7 +35,6 @@ export default function MeetingsToolbar({
         flexDirection: { xs: "column", sm: "row" },
         gap: SECTION_GAP,
         alignItems: { xs: "stretch", sm: "center" },
-        justifyContent: { sm: "space-between" },
       }}
     >
       <FilterButton
@@ -40,6 +43,17 @@ export default function MeetingsToolbar({
         onToggle={onToggleFilters}
         panelId={panelId}
       />
+      <Typography
+        variant="body2"
+        color="text.secondary"
+        sx={{
+          alignSelf: "center",
+          textAlign: { xs: "center", sm: "left" },
+          mr: { sm: "auto" },
+        }}
+      >
+        Showing {filteredCount} of {records.length} meetings
+      </Typography>
       <MeetingStats records={records} />
     </Box>
   );

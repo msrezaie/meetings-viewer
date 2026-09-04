@@ -3,6 +3,8 @@ name: spider-review
 description: Reviewing spider PRs for City Scrapers, including review mindset, process, reference checklist, output validation, and data quality checks
 ---
 
+<!-- author: Public Data Works (PDW) | last_verified: 2026-08-28 -->
+
 ## Review Mindset
 
 **Goal**: Improve overall code health, not achieve perfection.

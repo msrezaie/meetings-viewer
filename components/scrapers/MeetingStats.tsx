@@ -41,10 +41,11 @@ function StatItem({
       sx={{
         display: "flex",
         alignItems: "center",
-        gap: 0.5,
+        justifyContent: "center",
+        gap: 1,
         // Match the small Button height (~32px) for visual consistency.
         px: 1.5,
-        py: 0.375,
+        py: 1,
         borderRadius: 1,
         bgcolor: "action.hover",
         minHeight: 32,
@@ -101,7 +102,7 @@ export default function MeetingStats({
       sx={{
         flexWrap: "wrap",
         width: { xs: "100%", sm: "auto" },
-        justifyContent: { xs: "center", sm: "center" },
+        justifyContent: "center",
       }}
     >
       {STAT_ITEMS.map((item) => (

@@ -32,23 +32,22 @@ export default function FilterButton({
       startIcon={<FilterList fontSize="small" />}
       aria-expanded={open}
       aria-controls={panelId}
-      sx={{
+      sx={(theme) => ({
         color: open ? "primary.contrastText" : "primary.main",
         bgcolor: open ? "primary.main" : "transparent",
         borderColor: "primary.main",
         boxShadow: open ? 4 : "none",
         whiteSpace: "nowrap",
-        height: COMPACT_CONTROL_HEIGHT,
+        height: theme.spacing(COMPACT_CONTROL_HEIGHT),
         flexShrink: 0,
-        transition: (theme) =>
-          theme.transitions.create(
-            ["background-color", "color", "box-shadow"],
-            { duration: 150 }
-          ),
+        transition: theme.transitions.create(
+          ["background-color", "color", "box-shadow"],
+          { duration: 150 }
+        ),
         "&:hover": {
           bgcolor: open ? "primary.dark" : "action.hover",
         },
-      }}
+      })}
     >
       Filters
     </Button>

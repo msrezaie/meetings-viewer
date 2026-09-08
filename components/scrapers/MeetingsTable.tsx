@@ -32,6 +32,7 @@ import {
   DATAGRID_PAGE_SIZE_OPTIONS,
   DATAGRID_DEFAULT_PAGE_SIZE,
   DATAGRID_DENSITY,
+  DATAGRID_CELL_PADDING,
   dataGridRowSx,
 } from "@/lib/ui-constants";
 
@@ -194,11 +195,7 @@ function getDataGridColumns(
                   minWidth: 0,
                 }}
               >
-                <LinkWithTooltip
-                  href={link.href}
-                  label={link.title}
-                  maxWidth="100%"
-                />
+                <LinkWithTooltip href={link.href} label={link.title} />
               </Box>
             ))}
             {extra > 0 && (
@@ -417,19 +414,16 @@ export default function MeetingsTable({
           }}
           onRowClick={(params) => handleRowClick(params.row as MeetingRecord)}
           aria-label="meetings table"
-          sx={{
+          sx={(theme) => ({
             border: "none",
             ...dataGridRowSx({ cursor: "pointer" }),
             ...duplicateColorStyles,
             "& .MuiDataGrid-cell": {
               display: "flex",
               alignItems: "center",
-              paddingTop: "14px !important",
-              paddingBottom: "14px !important",
-              paddingLeft: "16px",
-              paddingRight: "16px",
+              padding: `${theme.spacing(DATAGRID_CELL_PADDING)} !important`,
             },
-          }}
+          })}
         />
       </Paper>
     </Box>

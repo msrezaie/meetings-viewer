@@ -49,11 +49,11 @@ function StatItem({
         </>
       }
       variant="filled"
-      sx={{
+      sx={(theme) => ({
         bgcolor: "action.hover",
         borderRadius: 1,
-        height: COMPACT_CONTROL_HEIGHT,
-      }}
+        height: theme.spacing(COMPACT_CONTROL_HEIGHT),
+      })}
     />
   );
 }

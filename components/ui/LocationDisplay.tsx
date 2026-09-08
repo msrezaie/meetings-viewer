@@ -4,6 +4,7 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import type { MeetingRecord } from "@/lib/scraper-data";
 import { highlightMatches } from "./HighlightMatches";
+import { LOCATION_MAX_LINES } from "@/lib/ui-constants";
 
 function LocationPart({
   value,
@@ -18,7 +19,7 @@ function LocationPart({
     <Box
       sx={{
         display: "-webkit-box",
-        WebkitLineClamp: 2,
+        WebkitLineClamp: LOCATION_MAX_LINES,
         WebkitBoxOrient: "vertical",
         overflow: "hidden",
       }}
@@ -55,8 +56,6 @@ export function LocationDisplay({
       sx={{
         display: "flex",
         flexDirection: "column",
-        py: 1,
-        px: 1,
         wordBreak: "break-word",
         width: "100%",
         overflow: "hidden",

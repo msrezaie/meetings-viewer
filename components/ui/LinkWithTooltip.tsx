@@ -13,7 +13,7 @@ interface LinkWithTooltipProps {
 export default function LinkWithTooltip({
   href,
   label,
-  maxWidth = 95,
+  maxWidth = "100%",
 }: LinkWithTooltipProps) {
   const displayLabel: ReactNode = label || (
     <Typography

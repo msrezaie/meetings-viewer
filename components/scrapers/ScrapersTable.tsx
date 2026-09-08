@@ -19,6 +19,7 @@ import {
   DATAGRID_PAGE_SIZE_OPTIONS,
   DATAGRID_DEFAULT_PAGE_SIZE,
   DATAGRID_DENSITY,
+  DATAGRID_CELL_PADDING,
   dataGridRowSx,
 } from "@/lib/ui-constants";
 
@@ -91,15 +92,15 @@ export default function ScrapersTable({ spiders }: { spiders: SpiderEntry[] }) {
         }}
         slotProps={dataGridPaginationSlotProps}
         aria-label="scrapers table"
-        sx={{
+        sx={(theme) => ({
           border: "none",
           ...dataGridRowSx(),
           "& .MuiDataGrid-cell": {
             display: "flex",
             alignItems: "center",
-            padding: "14px",
+            padding: `${theme.spacing(DATAGRID_CELL_PADDING)} !important`,
           },
-        }}
+        })}
       />
     </Paper>
   );

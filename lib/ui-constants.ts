@@ -8,14 +8,17 @@ export const PAGE_PADDING = 2;
  */
 export const SECTION_GAP = 2;
 
-/* Height shared by compact toolbar controls. */
-export const COMPACT_CONTROL_HEIGHT = "2rem";
+/* MUI spacing units for the height shared by compact toolbar controls. */
+export const COMPACT_CONTROL_HEIGHT = 4;
 
 /* Hover delay (ms) before tooltips appear on truncated text and links. */
 export const TOOLTIP_ENTER_DELAY = 200;
 
 /* Max lines before a table cell's text is clamped with an ellipsis. */
 export const MAX_TEXT_LINES = 4;
+
+/* Max lines for each location name or address in the meetings table. */
+export const LOCATION_MAX_LINES = 2;
 
 /* --- Panel widths --- */
 
@@ -43,6 +46,9 @@ export const MAX_VISIBLE_LINKS = 3;
 export const DATAGRID_PAGE_SIZE_OPTIONS = [10, 25, 50] as const;
 export const DATAGRID_DEFAULT_PAGE_SIZE = 25;
 export const DATAGRID_DENSITY = "compact" as const;
+
+/* MUI spacing units for uniform DataGrid cell padding on all sides. */
+export const DATAGRID_CELL_PADDING = 2;
 
 /* Row height bounds (px). Cells taller than max trigger truncation. */
 export const DATAGRID_ROW_MIN_HEIGHT = 52;

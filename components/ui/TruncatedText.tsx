@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Box from "@mui/material/Box";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
@@ -14,6 +14,13 @@ interface TruncatedTextProps {
   highlight?: string;
 }
 
+function hasOverflow(element: HTMLElement): boolean {
+  return (
+    element.scrollHeight > element.clientHeight ||
+    element.scrollWidth > element.clientWidth
+  );
+}
+
 export default function TruncatedText({
   text,
   wrap = false,
@@ -21,10 +28,26 @@ export default function TruncatedText({
   highlight,
 }: TruncatedTextProps) {
   const [showTooltip, setShowTooltip] = useState(false);
+  const [isOverflowing, setIsOverflowing] = useState(false);
+  const contentRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const element = contentRef.current;
+    if (!element) return;
+
+    const updateOverflow = () => setIsOverflowing(hasOverflow(element));
+    updateOverflow();
+
+    if (typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(updateOverflow);
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [highlight, maxLines, text, wrap]);
 
   const handleMouseEnter = (e: React.MouseEvent<HTMLElement>) => {
-    const el = e.currentTarget;
-    setShowTooltip(el.scrollHeight > el.clientHeight);
+    const overflow = hasOverflow(e.currentTarget);
+    setIsOverflowing(overflow);
+    setShowTooltip(overflow);
   };
 
   if (!text) return <>—</>;
@@ -49,6 +72,7 @@ export default function TruncatedText({
         slotProps={TOOLTIP_SLOT_PROPS}
       >
         <Box
+          ref={contentRef}
           onMouseEnter={handleMouseEnter}
           sx={{
             whiteSpace: "normal",
@@ -59,6 +83,10 @@ export default function TruncatedText({
               WebkitLineClamp: maxLines,
               WebkitBoxOrient: "vertical",
               overflow: "hidden",
+            }),
+            ...(isOverflowing && {
+              borderBottom: "1px dashed currentColor",
+              textDecorationSkipInk: "none",
             }),
           }}
         >
@@ -79,6 +107,7 @@ export default function TruncatedText({
       slotProps={TOOLTIP_SLOT_PROPS}
     >
       <Box
+        ref={contentRef}
         component="span"
         onMouseEnter={handleMouseEnter}
         sx={{
@@ -86,6 +115,10 @@ export default function TruncatedText({
           overflow: "hidden",
           textOverflow: "ellipsis",
           whiteSpace: "nowrap",
+          ...(isOverflowing && {
+            borderBottom: "1px dashed currentColor",
+            textDecorationSkipInk: "none",
+          }),
         }}
       >
         {renderedText}

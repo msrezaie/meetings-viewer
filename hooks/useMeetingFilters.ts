@@ -3,7 +3,10 @@
 import { useMemo, useState } from "react";
 import type { MeetingRecord } from "@/lib/scraper-data";
 import { locationText, normalizeStatus } from "@/lib/meeting-utils";
-import { buildDuplicateGroups, type DuplicateInfo } from "@/lib/duplicate-detection";
+import {
+  buildDuplicateGroups,
+  type DuplicateInfo,
+} from "@/lib/duplicate-detection";
 
 export const STATUS_OPTIONS = [
   { value: "all", label: "All" },
@@ -12,6 +15,14 @@ export const STATUS_OPTIONS = [
   { value: "tentative", label: "Tentative" },
   { value: "duplicates", label: "Duplicates" },
 ];
+
+export const LINKS_OPTIONS = [
+  { value: "all", label: "All" },
+  { value: "has-links", label: "Has links" },
+  { value: "no-links", label: "No links" },
+] as const;
+
+export type LinksFilter = (typeof LINKS_OPTIONS)[number]["value"];
 
 export const SEARCH_FIELD_OPTIONS = [
   { value: "title", label: "Title" },
@@ -27,11 +38,13 @@ export interface MeetingFiltersState {
   search: string;
   searchField: SearchField;
   statusFilter: string;
+  linksFilter: LinksFilter;
   dateFrom: string;
   dateTo: string;
   setSearch: (value: string) => void;
   setSearchField: (value: SearchField) => void;
   setStatusFilter: (value: string) => void;
+  setLinksFilter: (value: LinksFilter) => void;
   setDateFrom: (value: string) => void;
   setDateTo: (value: string) => void;
   clearDates: () => void;
@@ -94,6 +107,7 @@ export function useMeetingFilters(
   const [search, setSearch] = useState("");
   const [searchField, setSearchField] = useState<SearchField>("title");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [linksFilter, setLinksFilter] = useState<LinksFilter>("all");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
   const duplicateInfoMap = useMemo(() => {
@@ -114,6 +128,14 @@ export function useMeetingFilters(
     } else if (statusFilter !== "all") {
       filtered = filtered.filter(
         (r) => normalizeStatus(r.status) === statusFilter
+      );
+    }
+
+    if (linksFilter !== "all") {
+      filtered = filtered.filter((r) =>
+        linksFilter === "has-links"
+          ? (r.links?.length ?? 0) > 0
+          : (r.links?.length ?? 0) === 0
       );
     }
 
@@ -149,6 +171,7 @@ export function useMeetingFilters(
     search,
     searchField,
     statusFilter,
+    linksFilter,
     dateFrom,
     dateTo,
     duplicateSet,
@@ -158,11 +181,13 @@ export function useMeetingFilters(
     search,
     searchField,
     statusFilter,
+    linksFilter,
     dateFrom,
     dateTo,
     setSearch,
     setSearchField,
     setStatusFilter,
+    setLinksFilter,
     setDateFrom,
     setDateTo,
     clearDates: () => {

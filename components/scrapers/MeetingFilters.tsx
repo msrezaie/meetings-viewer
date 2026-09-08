@@ -9,8 +9,10 @@ import DateRangeFilter from "@/components/scrapers/DateRangeFilter";
 import ColumnVisibilityFilter from "@/components/scrapers/ColumnVisibilityFilter";
 import { FILTERS_TRANSITION_MS } from "@/lib/ui-constants";
 import {
+  LINKS_OPTIONS,
   SEARCH_FIELD_OPTIONS,
   STATUS_OPTIONS,
+  type LinksFilter,
   type MeetingFiltersState,
   type SearchField,
 } from "@/hooks/useMeetingFilters";
@@ -68,7 +70,7 @@ export default function MeetingFilters({
       );
       return () => clearTimeout(timer);
     }
-  }, [open, FILTERS_TRANSITION_MS]);
+  }, [open]);
 
   return (
     <Stack spacing={2.5} sx={{ pt: 0.5 }}>
@@ -144,6 +146,41 @@ export default function MeetingFilters({
           }}
         >
           {STATUS_OPTIONS.map((option) => (
+            <MenuItem key={option.value} value={option.value}>
+              {option.label}
+            </MenuItem>
+          ))}
+        </TextField>
+      </FilterSection>
+
+      <FilterSection label="Links">
+        <TextField
+          size="small"
+          select
+          fullWidth
+          value={filters.linksFilter}
+          onChange={(e) =>
+            filters.setLinksFilter(e.target.value as LinksFilter)
+          }
+          slotProps={{
+            select: { "aria-label": "Links" },
+            input: {
+              endAdornment: filters.linksFilter !== "all" && (
+                <InputAdornment position="end" sx={{ mr: 2 }}>
+                  <IconButton
+                    size="small"
+                    aria-label="Reset links to All"
+                    onClick={() => filters.setLinksFilter("all")}
+                    edge="end"
+                  >
+                    <ClearIcon fontSize="small" />
+                  </IconButton>
+                </InputAdornment>
+              ),
+            },
+          }}
+        >
+          {LINKS_OPTIONS.map((option) => (
             <MenuItem key={option.value} value={option.value}>
               {option.label}
             </MenuItem>

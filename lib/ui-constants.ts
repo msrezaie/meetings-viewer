@@ -8,6 +8,9 @@ export const PAGE_PADDING = 2;
  */
 export const SECTION_GAP = 2;
 
+/* Height shared by compact toolbar controls. */
+export const COMPACT_CONTROL_HEIGHT = "2rem";
+
 /* Hover delay (ms) before tooltips appear on truncated text and links. */
 export const TOOLTIP_ENTER_DELAY = 200;
 

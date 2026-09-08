@@ -3,12 +3,13 @@
 import { useMemo } from "react";
 import Stack from "@mui/material/Stack";
 import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
+import Chip from "@mui/material/Chip";
 import type { MeetingRecord } from "@/lib/scraper-data";
 import { normalizeStatus } from "@/lib/meeting-utils";
 import { buildDuplicateGroups } from "@/lib/duplicate-detection";
+import { COMPACT_CONTROL_HEIGHT } from "@/lib/ui-constants";
 
-// Numbers carry the status color; labels stay high-contrast text.secondary so
+// Numbers use theme status colors and explicit text labels so
 // meaning never depends on color alone (WCAG 1.4.1).
 type ValueColor =
   | "text.primary"
@@ -35,43 +36,25 @@ function StatItem({
   color: ValueColor;
 }) {
   return (
-    <Box
-      role="listitem"
-      aria-label={`${label}: ${value}`}
+    // Match the small Button height (~32px) for visual consistency.
+    <Chip
+      label={
+        <>
+          <Box component="span" sx={{ color, fontWeight: "bold" }}>
+            {value}
+          </Box>{" "}
+          <Box component="span" sx={{ color: "text.secondary" }}>
+            {label}
+          </Box>
+        </>
+      }
+      variant="filled"
       sx={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: 1,
-        // Match the small Button height (~32px) for visual consistency.
-        px: 1.5,
-        py: 1,
-        borderRadius: 1,
         bgcolor: "action.hover",
-        minHeight: 32,
-        boxSizing: "border-box",
+        borderRadius: 1,
+        height: COMPACT_CONTROL_HEIGHT,
       }}
-    >
-      <Typography
-        component="span"
-        sx={{
-          fontWeight: 700,
-          fontSize: "0.875rem",
-          color,
-          lineHeight: 1.2,
-        }}
-        aria-hidden
-      >
-        {value}
-      </Typography>
-      <Typography
-        component="span"
-        sx={{ fontSize: "0.8rem", color: "text.secondary", lineHeight: 1.2 }}
-        aria-hidden
-      >
-        {label}
-      </Typography>
-    </Box>
+    />
   );
 }
 
@@ -94,8 +77,6 @@ export default function MeetingStats({
 
   return (
     <Stack
-      role="list"
-      aria-label="Meeting statistics"
       direction="row"
       useFlexGap
       spacing={1}

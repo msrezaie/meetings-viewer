@@ -49,8 +49,6 @@ export function LocationDisplay({
   const name = record.location?.name?.trim() ?? "";
   const address = record.location?.address?.trim() ?? "";
 
-  if (!name && !address) return <>—</>;
-
   return (
     <Box
       sx={{

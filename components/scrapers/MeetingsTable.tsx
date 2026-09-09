@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import Box from "@mui/material/Box";
 import Chip from "@mui/material/Chip";
 import Typography from "@mui/material/Typography";
-import type { GridColDef } from "@mui/x-data-grid";
+import type { GridColDef, GridRowSelectionModel } from "@mui/x-data-grid";
 import type { MeetingRecord } from "@/lib/scraper-data";
 import { LocationDisplay } from "@/components/ui/LocationDisplay";
 import { locationText, normalizeStatus } from "@/lib/meeting-utils";
@@ -16,7 +16,10 @@ import {
 import AppDataGrid from "@/components/scrapers/AppDataGrid";
 import TruncatedText from "@/components/ui/TruncatedText";
 import LinkWithTooltip from "@/components/ui/LinkWithTooltip";
-import { useSetSelectedMeeting } from "@/contexts/MeetingSelectionContext";
+import {
+  useSelectedMeeting,
+  useSetSelectedMeeting,
+} from "@/contexts/MeetingSelectionContext";
 import { useColumnVisibility } from "@/contexts/ColumnVisibilityContext";
 import type { SearchField } from "@/hooks/useMeetingFilters";
 import { MAX_TEXT_LINES, MAX_VISIBLE_LINKS } from "@/lib/ui-constants";
@@ -300,6 +303,7 @@ export default function MeetingsTable({
   duplicateInfoMap: Map<MeetingRecord, DuplicateInfo>;
 }) {
   const { columnVisibilityModel } = useColumnVisibility();
+  const selectedMeeting = useSelectedMeeting();
   const setSelectedMeeting = useSetSelectedMeeting();
 
   const perRecordInfo = useMemo(() => {
@@ -326,6 +330,17 @@ export default function MeetingsTable({
         _duplicateGroup: perRecordInfo[i].groupIndex,
       })),
     [records, perRecordInfo]
+  );
+
+  const selectedRowId = selectedMeeting
+    ? enrichedRows.find((row) => row.id === selectedMeeting.id)?._idx
+    : undefined;
+  const rowSelectionModel = useMemo<GridRowSelectionModel>(
+    () => ({
+      type: "include",
+      ids: selectedRowId === undefined ? new Set() : new Set([selectedRowId]),
+    }),
+    [selectedRowId]
   );
 
   // Generate CSS rules for each duplicate count that appears in the data
@@ -373,6 +388,8 @@ export default function MeetingsTable({
         getRowId={(row) => row._idx}
         columns={dataGridColumns}
         columnVisibilityModel={columnVisibilityModel}
+        disableRowSelectionOnClick
+        rowSelectionModel={rowSelectionModel}
         initialState={{
           sorting: {
             sortModel: [{ field: "start", sort: "asc" }],

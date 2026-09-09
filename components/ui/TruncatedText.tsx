@@ -85,8 +85,9 @@ export default function TruncatedText({
               overflow: "hidden",
             }),
             ...(isOverflowing && {
-              borderBottom: "1px dashed currentColor",
-              textDecorationSkipInk: "none",
+              textDecoration: "underline dashed",
+              textUnderlineOffset: "4px",
+              textDecorationThickness: "1px",
             }),
           }}
         >
@@ -116,8 +117,9 @@ export default function TruncatedText({
           textOverflow: "ellipsis",
           whiteSpace: "nowrap",
           ...(isOverflowing && {
-            borderBottom: "1px dashed currentColor",
-            textDecorationSkipInk: "none",
+            textDecoration: "underline dashed",
+            textUnderlineOffset: "4px",
+            textDecorationThickness: "1px",
           }),
         }}
       >

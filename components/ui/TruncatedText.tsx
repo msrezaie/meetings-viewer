@@ -4,7 +4,10 @@ import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import { highlightMatches } from "./HighlightMatches";
 import { linkifyText } from "./Linkify";
-import { TOOLTIP_ENTER_DELAY } from "@/lib/ui-constants";
+import {
+  TOOLTIP_ENTER_DELAY,
+  TRUNCATED_TEXT_TOOLTIP_MAX_WIDTH,
+} from "@/lib/ui-constants";
 
 interface TruncatedTextProps {
   text: string | null | undefined;
@@ -13,8 +16,6 @@ interface TruncatedTextProps {
   /** Search keyword to highlight within the rendered text, if any. */
   highlight?: string;
 }
-
-const TOOLTIP_MAX_WIDTH = 320;
 
 function hasOverflow(element: HTMLElement): boolean {
   return (
@@ -61,7 +62,7 @@ export default function TruncatedText({
       variant="body2"
       sx={{
         whiteSpace: "pre-wrap",
-        maxWidth: TOOLTIP_MAX_WIDTH,
+        maxWidth: TRUNCATED_TEXT_TOOLTIP_MAX_WIDTH,
       }}
     >
       {renderedText}

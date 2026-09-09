@@ -22,13 +22,8 @@ export const LOCATION_MAX_LINES = 2;
 
 /* --- Panel widths --- */
 
-/* Width of the filters sidebar (px). */
 export const FILTERS_PANEL_WIDTH = 300;
-
-/* Width of the meeting detail panel (px), desktop sidebar and mobile drawer. */
 export const DETAIL_PANEL_WIDTH = 340;
-
-/* Width of the mobile navigation drawer (px). */
 export const NAV_DRAWER_WIDTH = 280;
 
 /* --- Timing --- */
@@ -41,7 +36,7 @@ export const FILTERS_TRANSITION_MS = 150;
 /* Max links shown in the Links column before collapsing to "+N more". */
 export const MAX_VISIBLE_LINKS = 3;
 
-/* --- DataGrid defaults (shared by meetings and scrapers tables) --- */
+/* --- Shared by meetings and scrapers tables --- */
 
 export const DATAGRID_PAGE_SIZE_OPTIONS = [10, 25, 50] as const;
 export const DATAGRID_DEFAULT_PAGE_SIZE = 25;

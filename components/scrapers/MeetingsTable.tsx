@@ -259,7 +259,7 @@ function EmptyState() {
       <Typography
         variant="body2"
         color="text.secondary"
-        sx={{ textAlign: "center", maxWidth: 320 }}
+        sx={{ textAlign: "center", maxWidth: "20rem" }}
       >
         No meetings match the current filters. Try adjusting your search or
         clearing a filter.

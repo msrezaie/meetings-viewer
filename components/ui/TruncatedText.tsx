@@ -14,6 +14,8 @@ interface TruncatedTextProps {
   highlight?: string;
 }
 
+const TOOLTIP_MAX_WIDTH = 320;
+
 function hasOverflow(element: HTMLElement): boolean {
   return (
     element.scrollHeight > element.clientHeight ||
@@ -55,7 +57,13 @@ export default function TruncatedText({
   const renderedText = highlightMatches(linkifyText(text), highlight ?? "");
 
   const tooltipTitle = (
-    <Typography variant="body2" sx={{ whiteSpace: "pre-wrap", maxWidth: 320 }}>
+    <Typography
+      variant="body2"
+      sx={{
+        whiteSpace: "pre-wrap",
+        maxWidth: TOOLTIP_MAX_WIDTH,
+      }}
+    >
       {renderedText}
     </Typography>
   );
@@ -84,11 +92,7 @@ export default function TruncatedText({
               WebkitBoxOrient: "vertical",
               overflow: "hidden",
             }),
-            ...(isOverflowing && {
-              textDecoration: "underline dashed",
-              textUnderlineOffset: "4px",
-              textDecorationThickness: "1px",
-            }),
+            ...(isOverflowing && OVERFLOW_TEXT_SX),
           }}
         >
           {renderedText}
@@ -116,11 +120,7 @@ export default function TruncatedText({
           overflow: "hidden",
           textOverflow: "ellipsis",
           whiteSpace: "nowrap",
-          ...(isOverflowing && {
-            textDecoration: "underline dashed",
-            textUnderlineOffset: "4px",
-            textDecorationThickness: "1px",
-          }),
+          ...(isOverflowing && OVERFLOW_TEXT_SX),
         }}
       >
         {renderedText}
@@ -128,6 +128,12 @@ export default function TruncatedText({
     </Tooltip>
   );
 }
+
+const OVERFLOW_TEXT_SX = {
+  textDecoration: "underline dashed",
+  textUnderlineOffset: "0.25rem",
+  textDecorationThickness: "1px",
+};
 
 const TOOLTIP_SLOT_PROPS = {
   tooltip: {

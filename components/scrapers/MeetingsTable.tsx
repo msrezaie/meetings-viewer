@@ -3,15 +3,8 @@
 import { useMemo } from "react";
 import Box from "@mui/material/Box";
 import Chip from "@mui/material/Chip";
-import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
-import dynamic from "next/dynamic";
 import type { GridColDef } from "@mui/x-data-grid";
-
-const DataGrid = dynamic(
-  () => import("@mui/x-data-grid").then((mod) => mod.DataGrid),
-  { ssr: false }
-);
 import type { MeetingRecord } from "@/lib/scraper-data";
 import { LocationDisplay } from "@/components/ui/LocationDisplay";
 import { locationText, normalizeStatus } from "@/lib/meeting-utils";
@@ -20,21 +13,13 @@ import {
   colorForDuplicateCount,
   type DuplicateInfo,
 } from "@/lib/duplicate-detection";
-import { dataGridPaginationSlotProps } from "@/components/scrapers/DataGridPagination";
+import AppDataGrid from "@/components/scrapers/AppDataGrid";
 import TruncatedText from "@/components/ui/TruncatedText";
 import LinkWithTooltip from "@/components/ui/LinkWithTooltip";
 import { useSetSelectedMeeting } from "@/contexts/MeetingSelectionContext";
 import { useColumnVisibility } from "@/contexts/ColumnVisibilityContext";
 import type { SearchField } from "@/hooks/useMeetingFilters";
-import {
-  MAX_TEXT_LINES,
-  MAX_VISIBLE_LINKS,
-  DATAGRID_PAGE_SIZE_OPTIONS,
-  DATAGRID_DEFAULT_PAGE_SIZE,
-  DATAGRID_DENSITY,
-  DATAGRID_CELL_PADDING,
-  dataGridRowSx,
-} from "@/lib/ui-constants";
+import { MAX_TEXT_LINES, MAX_VISIBLE_LINKS } from "@/lib/ui-constants";
 
 export type SortKey =
   | "title"
@@ -383,49 +368,32 @@ export default function MeetingsTable({
 
   return (
     <Box sx={{ flex: 1, minWidth: 0 }}>
-      <Paper variant="outlined" sx={{ width: "100%", overflow: "hidden" }}>
-        <DataGrid
-          rows={enrichedRows}
-          getRowId={(row) => row._idx}
-          columns={dataGridColumns}
-          columnVisibilityModel={columnVisibilityModel}
-          disableColumnMenu
-          autoHeight
-          getRowHeight={() => "auto"}
-          density={DATAGRID_DENSITY}
-          pageSizeOptions={DATAGRID_PAGE_SIZE_OPTIONS}
-          initialState={{
-            pagination: {
-              paginationModel: { pageSize: DATAGRID_DEFAULT_PAGE_SIZE },
-            },
-            sorting: {
-              sortModel: [{ field: "start", sort: "asc" }],
-            },
-          }}
-          slots={{
-            noRowsOverlay: EmptyState,
-            noColumnsOverlay: NoColumnsOverlay,
-          }}
-          slotProps={dataGridPaginationSlotProps}
-          getRowClassName={(params) => {
-            const g = params.row._duplicateGroup;
-            if (typeof g !== "number" || g < 0) return "";
-            return `duplicate-count-${params.row._duplicateCount}`;
-          }}
-          onRowClick={(params) => handleRowClick(params.row as MeetingRecord)}
-          aria-label="meetings table"
-          sx={(theme) => ({
-            border: "none",
-            ...dataGridRowSx({ cursor: "pointer" }),
-            ...duplicateColorStyles,
-            "& .MuiDataGrid-cell": {
-              display: "flex",
-              alignItems: "center",
-              padding: `${theme.spacing(DATAGRID_CELL_PADDING)} !important`,
-            },
-          })}
-        />
-      </Paper>
+      <AppDataGrid
+        rows={enrichedRows}
+        getRowId={(row) => row._idx}
+        columns={dataGridColumns}
+        columnVisibilityModel={columnVisibilityModel}
+        initialState={{
+          sorting: {
+            sortModel: [{ field: "start", sort: "asc" }],
+          },
+        }}
+        slots={{
+          noRowsOverlay: EmptyState,
+          noColumnsOverlay: NoColumnsOverlay,
+        }}
+        getRowClassName={(params) => {
+          const g = params.row._duplicateGroup;
+          if (typeof g !== "number" || g < 0) return "";
+          return `duplicate-count-${params.row._duplicateCount}`;
+        }}
+        onRowClick={(params) => handleRowClick(params.row as MeetingRecord)}
+        aria-label="meetings table"
+        sx={{
+          "& .MuiDataGrid-row": { cursor: "pointer" },
+          ...duplicateColorStyles,
+        }}
+      />
     </Box>
   );
 }

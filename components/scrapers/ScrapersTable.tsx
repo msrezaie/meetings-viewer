@@ -1,11 +1,11 @@
 "use client";
 
 import type { GridColDef } from "@mui/x-data-grid";
-import Box from "@mui/material/Box";
 import MuiLink from "@mui/material/Link";
 import NextLink from "@/components/ui/NextLink";
 import type { SpiderEntry } from "@/lib/scraper-data";
 import AppDataGrid from "@/components/scrapers/AppDataGrid";
+import OverflowTooltip from "@/components/ui/OverflowTooltip";
 import TruncatedText from "@/components/ui/TruncatedText";
 import { MAX_TEXT_LINES } from "@/lib/ui-constants";
 
@@ -15,25 +15,41 @@ function placeholderValue(value?: string) {
   return value && value.length > 0 ? value : PLACEHOLDER;
 }
 
+function TableText({ value }: { value?: string }) {
+  const displayValue = placeholderValue(value);
+
+  return (
+    <OverflowTooltip title={displayValue} contentKey={displayValue}>
+      {displayValue}
+    </OverflowTooltip>
+  );
+}
+
 const columns: GridColDef[] = [
   {
     field: "slug",
     headerName: "Slug / Spider Name",
     flex: 1.5,
     minWidth: 160,
-    renderCell: ({ value }) => (
-      <Box
-        sx={{ whiteSpace: "normal", wordBreak: "break-word", width: "100%" }}
-      >
-        <MuiLink
-          component={NextLink}
-          href={`/scrapers/${value}`}
-          underline="hover"
+    renderCell: ({ value }) => {
+      const displayValue = String(value ?? PLACEHOLDER);
+      return (
+        <OverflowTooltip
+          title={displayValue}
+          wrap
+          maxLines={MAX_TEXT_LINES}
+          contentKey={displayValue}
         >
-          {value}
-        </MuiLink>
-      </Box>
-    ),
+          <MuiLink
+            component={NextLink}
+            href={`/scrapers/${value}`}
+            underline="hover"
+          >
+            {displayValue}
+          </MuiLink>
+        </OverflowTooltip>
+      );
+    },
   },
   {
     field: "agency",
@@ -49,12 +65,14 @@ const columns: GridColDef[] = [
     headerName: "Status",
     width: 110,
     valueFormatter: (value?: string) => placeholderValue(value),
+    renderCell: ({ value }) => <TableText value={value} />,
   },
   {
     field: "last_run",
     headerName: "Last Run",
     width: 170,
     valueFormatter: (value?: string) => placeholderValue(value),
+    renderCell: ({ value }) => <TableText value={value} />,
   },
 ];
 

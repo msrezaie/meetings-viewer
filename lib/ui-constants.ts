@@ -21,14 +21,17 @@ export const DATAGRID_CELL_PADDING = 2;
 /* Hover delay (ms) before tooltips appear on truncated text and links. */
 export const TOOLTIP_ENTER_DELAY = 200;
 
-/* Max width for the full text shown in truncated-text tooltips. */
-export const TRUNCATED_TEXT_TOOLTIP_MAX_WIDTH = 320;
+/* Max width for the full text shown in content tooltips. */
+export const TOOLTIP_CONTENT_MAX_WIDTH = 320;
 
 /* Max lines before a table cell's text is clamped with an ellipsis. */
 export const MAX_TEXT_LINES = 4;
 
 /* Max lines for each location name or address in the meetings table. */
 export const LOCATION_MAX_LINES = 2;
+
+/* Max lines for meeting date and time cells. */
+export const DATE_TIME_MAX_LINES = 2;
 
 /* --- Shared panel dimensions --- */
 
@@ -55,15 +58,3 @@ export const DATAGRID_DENSITY = "compact" as const;
 /* Row height bounds (px). Cells taller than max trigger truncation. */
 export const DATAGRID_ROW_MIN_HEIGHT = 52;
 export const DATAGRID_ROW_MAX_HEIGHT = 96;
-
-/* Shared sx for DataGrid row height enforcement. Pass extra row
- * properties (e.g. { cursor: "pointer" }) to extend without losing defaults. */
-export function dataGridRowSx(extra: Record<string, unknown> = {}) {
-  return {
-    "& .MuiDataGrid-row": {
-      minHeight: `${DATAGRID_ROW_MIN_HEIGHT}px !important` as const,
-      maxHeight: `${DATAGRID_ROW_MAX_HEIGHT}px !important` as const,
-      ...extra,
-    },
-  };
-}

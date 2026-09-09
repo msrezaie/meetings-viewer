@@ -14,6 +14,7 @@ import {
   type DuplicateInfo,
 } from "@/lib/duplicate-detection";
 import AppDataGrid from "@/components/scrapers/AppDataGrid";
+import OverflowTooltip from "@/components/ui/OverflowTooltip";
 import TruncatedText from "@/components/ui/TruncatedText";
 import LinkWithTooltip from "@/components/ui/LinkWithTooltip";
 import {
@@ -22,7 +23,34 @@ import {
 } from "@/contexts/MeetingSelectionContext";
 import { useColumnVisibility } from "@/contexts/ColumnVisibilityContext";
 import type { SearchField } from "@/hooks/useMeetingFilters";
-import { MAX_TEXT_LINES, MAX_VISIBLE_LINKS } from "@/lib/ui-constants";
+import {
+  DATE_TIME_MAX_LINES,
+  MAX_TEXT_LINES,
+  MAX_VISIBLE_LINKS,
+} from "@/lib/ui-constants";
+
+function TableText({
+  value,
+  wrap = false,
+  maxLines,
+}: {
+  value: string | null | undefined;
+  wrap?: boolean;
+  maxLines?: number;
+}) {
+  const displayValue = value || "—";
+
+  return (
+    <OverflowTooltip
+      title={displayValue}
+      wrap={wrap}
+      maxLines={maxLines}
+      contentKey={displayValue}
+    >
+      {displayValue}
+    </OverflowTooltip>
+  );
+}
 
 export type SortKey =
   | "title"
@@ -113,25 +141,29 @@ function getDataGridColumns(
       headerName: "Classification",
       flex: 1,
       minWidth: 115,
-      renderCell: ({ row }) => row.classification || "—",
+      renderCell: ({ row }) => <TableText value={row.classification} />,
     },
     {
       field: "start",
       headerName: "Start",
       width: 105,
-      renderCell: ({ row }) => row.start || "—",
+      renderCell: ({ row }) => (
+        <TableText value={row.start} wrap maxLines={DATE_TIME_MAX_LINES} />
+      ),
     },
     {
       field: "end",
       headerName: "End",
       width: 105,
-      renderCell: ({ row }) => row.end || "—",
+      renderCell: ({ row }) => (
+        <TableText value={row.end} wrap maxLines={DATE_TIME_MAX_LINES} />
+      ),
     },
     {
       field: "all_day",
       headerName: "All Day",
       width: 80,
-      renderCell: ({ row }) => (row.all_day ? "Yes" : "No"),
+      renderCell: ({ row }) => <TableText value={row.all_day ? "Yes" : "No"} />,
     },
     {
       field: "time_notes",

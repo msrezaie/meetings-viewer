@@ -3,6 +3,7 @@
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import type { MeetingRecord } from "@/lib/scraper-data";
+import OverflowTooltip from "./OverflowTooltip";
 import { highlightMatches } from "./HighlightMatches";
 import { LOCATION_MAX_LINES } from "@/lib/ui-constants";
 
@@ -15,26 +16,26 @@ function LocationPart({
   fallback: string;
   highlight?: string;
 }) {
-  return (
-    <Box
-      sx={{
-        display: "-webkit-box",
-        WebkitLineClamp: LOCATION_MAX_LINES,
-        WebkitBoxOrient: "vertical",
-        overflow: "hidden",
-      }}
+  const content = value ? (
+    highlightMatches([value], highlight ?? "")
+  ) : (
+    <Typography
+      component="span"
+      sx={{ color: "error.main", fontSize: "inherit" }}
     >
-      {value ? (
-        highlightMatches([value], highlight ?? "")
-      ) : (
-        <Typography
-          component="span"
-          sx={{ color: "error.main", fontSize: "inherit" }}
-        >
-          {fallback}
-        </Typography>
-      )}
-    </Box>
+      {fallback}
+    </Typography>
+  );
+
+  return (
+    <OverflowTooltip
+      title={value || fallback}
+      wrap
+      maxLines={LOCATION_MAX_LINES}
+      contentKey={`${value}:${highlight ?? ""}`}
+    >
+      {content}
+    </OverflowTooltip>
   );
 }
 

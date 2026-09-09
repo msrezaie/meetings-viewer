@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
+import Tooltip, { type TooltipProps } from "@mui/material/Tooltip";
 import type { DataGridProps } from "@mui/x-data-grid";
 import { dataGridPaginationSlotProps } from "@/components/scrapers/DataGridPagination";
 import {
@@ -10,7 +11,8 @@ import {
   DATAGRID_DEFAULT_PAGE_SIZE,
   DATAGRID_DENSITY,
   DATAGRID_PAGE_SIZE_OPTIONS,
-  dataGridRowSx,
+  DATAGRID_ROW_MAX_HEIGHT,
+  DATAGRID_ROW_MIN_HEIGHT,
 } from "@/lib/ui-constants";
 
 const DataGrid = dynamic(
@@ -41,6 +43,17 @@ function mergeInitialState(
   };
 }
 
+function TopTooltip(props: TooltipProps) {
+  return <Tooltip {...props} placement="top" />;
+}
+
+const DATA_GRID_ROW_SX = {
+  "& .MuiDataGrid-row": {
+    minHeight: `${DATAGRID_ROW_MIN_HEIGHT}px !important` as const,
+    maxHeight: `${DATAGRID_ROW_MAX_HEIGHT}px !important` as const,
+  },
+};
+
 export default function AppDataGrid({
   autoHeight = true,
   disableColumnMenu = true,
@@ -51,6 +64,7 @@ export default function AppDataGrid({
   minHeight,
   pageSizeOptions = DATAGRID_PAGE_SIZE_OPTIONS,
   slotProps,
+  slots,
   sx,
   ...props
 }: DataGridProps & {
@@ -60,6 +74,7 @@ export default function AppDataGrid({
   const grid = (
     <DataGrid
       {...props}
+      slots={{ ...slots, baseTooltip: TopTooltip }}
       autoHeight={autoHeight}
       disableColumnMenu={disableColumnMenu}
       density={density}
@@ -73,7 +88,7 @@ export default function AppDataGrid({
       sx={[
         (theme) => ({
           border: "none",
-          ...dataGridRowSx(),
+          ...DATA_GRID_ROW_SX,
           "& .MuiDataGrid-cell": {
             display: "flex",
             alignItems: "center",

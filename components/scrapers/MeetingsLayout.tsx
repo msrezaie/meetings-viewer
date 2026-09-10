@@ -6,20 +6,20 @@ import type { DuplicateInfo } from "@/lib/duplicate-detection";
 import { MeetingSelectionProvider } from "@/contexts/MeetingSelectionContext";
 import MeetingsTable from "@/components/scrapers/MeetingsTable";
 import MeetingDetailPanel from "@/components/scrapers/MeetingDetailPanel";
-import type { SearchField } from "@/lib/meeting-columns";
+import type { SearchScope } from "@/lib/meeting-columns";
 import { SECTION_GAP } from "@/lib/ui-constants";
 
 export default function MeetingsLayout({
   records,
   search,
-  searchField,
+  searchScope,
   duplicateInfoMap,
 }: {
   records: MeetingRecord[];
   /** Current search keyword, to highlight matches in the table. */
   search: string;
-  /** Field the search keyword is being matched against. */
-  searchField: SearchField;
+  /** Search scope used to highlight matches in the table. */
+  searchScope: SearchScope;
   /** Per-record duplicate info computed from the full, unfiltered dataset. */
   duplicateInfoMap: Map<MeetingRecord, DuplicateInfo>;
 }) {
@@ -36,7 +36,7 @@ export default function MeetingsLayout({
         <MeetingsTable
           records={records}
           search={search}
-          searchField={searchField}
+          searchScope={searchScope}
           duplicateInfoMap={duplicateInfoMap}
         />
         <MeetingDetailPanel />

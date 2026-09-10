@@ -5,16 +5,16 @@ import type { MeetingRecord } from "@/lib/scraper-data";
 import { normalizeStatus } from "@/lib/meeting-utils";
 import {
   SEARCHABLE_COLUMNS,
-  type SearchableField,
-  type SearchField,
+  type SearchableColumnKey,
+  type SearchScope,
 } from "@/lib/meeting-columns";
 import {
   buildDuplicateGroups,
   type DuplicateInfo,
 } from "@/lib/duplicate-detection";
 
-export { SEARCH_FIELD_OPTIONS } from "@/lib/meeting-columns";
-export type { SearchableField, SearchField } from "@/lib/meeting-columns";
+export { SEARCH_SCOPE_OPTIONS } from "@/lib/meeting-columns";
+export type { SearchableColumnKey, SearchScope } from "@/lib/meeting-columns";
 
 export const STATUS_OPTIONS = [
   { value: "all", label: "All" },
@@ -32,17 +32,17 @@ export const LINKS_OPTIONS = [
 
 export type LinksFilter = (typeof LINKS_OPTIONS)[number]["value"];
 
-type SearchIndex = Record<SearchableField, string>;
+type SearchIndex = Record<SearchableColumnKey, string>;
 
 export interface MeetingFiltersState {
   search: string;
-  searchField: SearchField;
+  searchScope: SearchScope;
   statusFilter: string;
   linksFilter: LinksFilter;
   dateFrom: string;
   dateTo: string;
   setSearch: (value: string) => void;
-  setSearchField: (value: SearchField) => void;
+  setSearchScope: (value: SearchScope) => void;
   setStatusFilter: (value: string) => void;
   setLinksFilter: (value: LinksFilter) => void;
   setDateFrom: (value: string) => void;
@@ -50,7 +50,7 @@ export interface MeetingFiltersState {
   clearDates: () => void;
   filteredRecords: MeetingRecord[];
   textMatchCount: number;
-  matchingSearchFields: SearchableField[];
+  matchingSearchColumns: SearchableColumnKey[];
   duplicateInfoMap: Map<MeetingRecord, DuplicateInfo>;
 }
 
@@ -97,17 +97,17 @@ function countOccurrences(text: string, query: string): number {
 
 function countSearchMatches(
   values: SearchIndex,
-  field: SearchField,
+  scope: SearchScope,
   query: string
 ): number {
-  if (field === "all") {
+  if (scope === "all") {
     return SEARCHABLE_COLUMNS.reduce(
       (count, { key }) => count + countOccurrences(values[key], query),
       0
     );
   }
 
-  return countOccurrences(values[field], query);
+  return countOccurrences(values[scope], query);
 }
 
 // "no name" / "no address" to find records missing that part, in addition to
@@ -132,7 +132,7 @@ export function useMeetingFilters(
   records: MeetingRecord[]
 ): MeetingFiltersState {
   const [search, setSearch] = useState("");
-  const [searchField, setSearchField] = useState<SearchField>("all");
+  const [searchScope, setSearchScope] = useState<SearchScope>("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [linksFilter, setLinksFilter] = useState<LinksFilter>("all");
   const [dateFrom, setDateFrom] = useState("");
@@ -150,12 +150,12 @@ export function useMeetingFilters(
     [records]
   );
 
-  const { filteredRecords, textMatchCount, matchingSearchFields } =
+  const { filteredRecords, textMatchCount, matchingSearchColumns } =
     useMemo(() => {
       const query = search.trim().toLowerCase();
       let filtered = indexedRecords;
       let textMatchCount = 0;
-      let matchingSearchFields: SearchableField[] = [];
+      let matchingSearchColumns: SearchableColumnKey[] = [];
 
       if (statusFilter === "duplicates") {
         filtered = filtered.filter(({ record }) => duplicateSet.has(record));
@@ -195,24 +195,24 @@ export function useMeetingFilters(
 
       if (query) {
         filtered = filtered.filter(({ record, values }) => {
-          if (searchField === "all") {
+          if (searchScope === "all") {
             return SEARCHABLE_COLUMNS.some(({ key }) =>
               values[key].includes(query)
             );
           }
 
-          if (searchField === "location") {
+          if (searchScope === "location") {
             return matchesLocationQuery(record, query);
           }
 
-          return values[searchField].includes(query);
+          return values[searchScope].includes(query);
         });
         textMatchCount = filtered.reduce(
           (count, { values }) =>
-            count + countSearchMatches(values, searchField, query),
+            count + countSearchMatches(values, searchScope, query),
           0
         );
-        matchingSearchFields = SEARCHABLE_COLUMNS.filter(({ key }) =>
+        matchingSearchColumns = SEARCHABLE_COLUMNS.filter(({ key }) =>
           filtered.some(({ values }) => values[key].includes(query))
         ).map(({ key }) => key);
       }
@@ -220,12 +220,12 @@ export function useMeetingFilters(
       return {
         filteredRecords: filtered.map(({ record }) => record),
         textMatchCount,
-        matchingSearchFields,
+        matchingSearchColumns,
       };
     }, [
       indexedRecords,
       search,
-      searchField,
+      searchScope,
       statusFilter,
       linksFilter,
       dateFrom,
@@ -235,13 +235,13 @@ export function useMeetingFilters(
 
   return {
     search,
-    searchField,
+    searchScope,
     statusFilter,
     linksFilter,
     dateFrom,
     dateTo,
     setSearch,
-    setSearchField,
+    setSearchScope,
     setStatusFilter,
     setLinksFilter,
     setDateFrom,
@@ -252,7 +252,7 @@ export function useMeetingFilters(
     },
     filteredRecords,
     textMatchCount,
-    matchingSearchFields,
+    matchingSearchColumns,
     duplicateInfoMap,
   };
 }

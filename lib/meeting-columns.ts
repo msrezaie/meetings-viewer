@@ -5,7 +5,7 @@ type MeetingColumnDefinition = {
   key: string;
   label: string;
   searchable: boolean;
-  searchField?: boolean;
+  searchScope?: boolean;
   getSearchValue: (record: MeetingRecord) => string;
   defaultVisible: boolean;
 };
@@ -28,7 +28,7 @@ export const MEETING_COLUMNS = [
     key: "title",
     label: "Title",
     searchable: true,
-    searchField: true,
+    searchScope: true,
     getSearchValue: (record) => record.title ?? "",
     defaultVisible: true,
   },
@@ -36,7 +36,7 @@ export const MEETING_COLUMNS = [
     key: "description",
     label: "Description",
     searchable: true,
-    searchField: true,
+    searchScope: true,
     getSearchValue: (record) => record.description ?? "",
     defaultVisible: true,
   },
@@ -72,7 +72,7 @@ export const MEETING_COLUMNS = [
     key: "time_notes",
     label: "Time Notes",
     searchable: true,
-    searchField: true,
+    searchScope: true,
     getSearchValue: (record) => record.time_notes ?? "",
     defaultVisible: false,
   },
@@ -80,7 +80,7 @@ export const MEETING_COLUMNS = [
     key: "location",
     label: "Location",
     searchable: true,
-    searchField: true,
+    searchScope: true,
     getSearchValue: getLocationSearchValue,
     defaultVisible: true,
   },
@@ -99,7 +99,7 @@ export const MEETING_COLUMNS = [
     key: "source",
     label: "Source",
     searchable: true,
-    searchField: true,
+    searchScope: true,
     getSearchValue: (record) => record.source ?? "",
     defaultVisible: false,
   },
@@ -121,22 +121,22 @@ export const MEETING_COLUMNS = [
 
 type MeetingColumn = (typeof MEETING_COLUMNS)[number];
 type SearchableColumn = Extract<MeetingColumn, { searchable: true }>;
-type SearchFieldColumn = Extract<MeetingColumn, { searchField: true }>;
+type SearchScopeColumn = Extract<MeetingColumn, { searchScope: true }>;
 
 export type MeetingColumnKey = MeetingColumn["key"];
-export type SearchableField = SearchableColumn["key"];
-export type SearchField = "all" | SearchFieldColumn["key"];
+export type SearchableColumnKey = SearchableColumn["key"];
+export type SearchScope = "all" | SearchScopeColumn["key"];
 
 export const SEARCHABLE_COLUMNS = MEETING_COLUMNS.filter(
   (column): column is SearchableColumn => column.searchable
 );
 
-const SEARCH_FIELD_COLUMNS = MEETING_COLUMNS.filter(
-  (column): column is SearchFieldColumn =>
-    "searchField" in column && column.searchField === true
+const SEARCH_SCOPE_COLUMNS = MEETING_COLUMNS.filter(
+  (column): column is SearchScopeColumn =>
+    "searchScope" in column && column.searchScope === true
 );
 
-export const SEARCH_FIELD_OPTIONS = [
+export const SEARCH_SCOPE_OPTIONS = [
   { value: "all", label: "All" },
-  ...SEARCH_FIELD_COLUMNS.map(({ key, label }) => ({ value: key, label })),
+  ...SEARCH_SCOPE_COLUMNS.map(({ key, label }) => ({ value: key, label })),
 ] as const;

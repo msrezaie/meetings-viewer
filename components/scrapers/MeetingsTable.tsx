@@ -31,8 +31,8 @@ import { useColumnVisibility } from "@/contexts/ColumnVisibilityContext";
 import {
   MEETING_COLUMNS,
   type MeetingColumnKey,
-  type SearchableField,
-  type SearchField,
+  type SearchableColumnKey,
+  type SearchScope,
 } from "@/lib/meeting-columns";
 import {
   DATE_TIME_MAX_LINES,
@@ -87,13 +87,13 @@ function MeetingRow(props: GridRowProps) {
 }
 
 export type SortKey = MeetingColumnKey;
-type HighlightField = SearchableField;
+type HighlightColumnKey = SearchableColumnKey;
 
 type DataGridColumnConfig = Omit<GridColDef, "field" | "headerName">;
 
-/** Returns the search text to highlight in a column, only when that column's field is the active search field. */
+/** Returns the search text to highlight in a column when it is in the active search scope. */
 function getDataGridColumns(
-  highlightFor: (field: HighlightField) => string | undefined
+  highlightFor: (columnKey: HighlightColumnKey) => string | undefined
 ): GridColDef[] {
   const columnConfigs = {
     title: {
@@ -338,15 +338,15 @@ function markFirstInGroup(groupIndices: number[]): boolean[] {
 export default function MeetingsTable({
   records,
   search,
-  searchField,
+  searchScope,
   duplicateInfoMap,
 }: {
   /** Records to display, already filtered upstream. */
   records: MeetingRecord[];
-  /** Current search keyword, to highlight matches in the active search field's column. */
+  /** Current search keyword, to highlight matches in the active search scope. */
   search: string;
-  /** Field the search keyword is being matched against. */
-  searchField: SearchField;
+  /** Search scope the keyword is being matched against. */
+  searchScope: SearchScope;
   /** Per-record duplicate info computed from the full, unfiltered dataset. */
   duplicateInfoMap: Map<MeetingRecord, DuplicateInfo>;
 }) {
@@ -416,15 +416,15 @@ export default function MeetingsTable({
   }, [enrichedRows]);
 
   const trimmedSearch = search.trim();
-  const highlightFor = (field: HighlightField) =>
-    trimmedSearch && (searchField === "all" || searchField === field)
+  const highlightFor = (columnKey: HighlightColumnKey) =>
+    trimmedSearch && (searchScope === "all" || searchScope === columnKey)
       ? trimmedSearch
       : undefined;
 
   const dataGridColumns = useMemo(
     () => getDataGridColumns(highlightFor),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [trimmedSearch, searchField]
+    [trimmedSearch, searchScope]
   );
 
   const handleRowClick = (row: MeetingRecord) => {

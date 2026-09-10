@@ -57,7 +57,7 @@ export default function ScraperWorkspace({
             <MeetingsLayout
               records={filters.filteredRecords}
               search={filters.search}
-              searchField={filters.searchField}
+              searchScope={filters.searchScope}
               duplicateInfoMap={filters.duplicateInfoMap}
             />
           </Box>

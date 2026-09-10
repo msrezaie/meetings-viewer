@@ -16,7 +16,7 @@ import {
   type LinksFilter,
   type MeetingFiltersState,
 } from "@/hooks/useMeetingFilters";
-import { SEARCH_FIELD_OPTIONS, type SearchField } from "@/lib/meeting-columns";
+import { SEARCH_SCOPE_OPTIONS, type SearchScope } from "@/lib/meeting-columns";
 import { useColumnVisibility } from "@/contexts/ColumnVisibilityContext";
 import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
@@ -61,7 +61,7 @@ export default function MeetingFilters({
   open: boolean;
 }) {
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const autoRevealedFieldsRef = useRef(new Set<string>());
+  const autoRevealedColumnsRef = useRef(new Set<string>());
   const [revealSearchKey, setRevealSearchKey] = useState("");
   const [revealEnabled, setRevealEnabled] = useState(false);
   const { columnVisibilityModel, applyVisibilityModel } = useColumnVisibility();
@@ -80,24 +80,24 @@ export default function MeetingFilters({
 
   const searchQuery = filters.search.trim().toLowerCase();
   const hasSearch = searchQuery.length > 0;
-  const searchKey = `${filters.searchField}:${searchQuery}`;
+  const searchKey = `${filters.searchScope}:${searchQuery}`;
   const hasRevealStateForSearch = hasSearch && revealSearchKey === searchKey;
   const revealMatchingColumns = hasRevealStateForSearch && revealEnabled;
-  const hasHiddenMatchingColumns = filters.matchingSearchFields.some(
-    (field) => columnVisibilityModel[field] === false
+  const hasHiddenMatchingColumns = filters.matchingSearchColumns.some(
+    (columnKey) => columnVisibilityModel[columnKey] === false
   );
   const showRevealMatchingColumns =
     hasSearch && (hasHiddenMatchingColumns || hasRevealStateForSearch);
 
   useEffect(() => {
-    const fieldsToReveal = new Set<string>();
+    const columnsToReveal = new Set<string>();
     if (revealMatchingColumns) {
-      for (const field of filters.matchingSearchFields) {
+      for (const columnKey of filters.matchingSearchColumns) {
         if (
-          columnVisibilityModel[field] === false ||
-          autoRevealedFieldsRef.current.has(field)
+          columnVisibilityModel[columnKey] === false ||
+          autoRevealedColumnsRef.current.has(columnKey)
         ) {
-          fieldsToReveal.add(field);
+          columnsToReveal.add(columnKey);
         }
       }
     }
@@ -105,26 +105,26 @@ export default function MeetingFilters({
     const nextModel = { ...columnVisibilityModel };
     let changed = false;
 
-    for (const field of autoRevealedFieldsRef.current) {
-      if (!fieldsToReveal.has(field) && nextModel[field] !== false) {
-        nextModel[field] = false;
+    for (const columnKey of autoRevealedColumnsRef.current) {
+      if (!columnsToReveal.has(columnKey) && nextModel[columnKey] !== false) {
+        nextModel[columnKey] = false;
         changed = true;
       }
     }
 
-    for (const field of fieldsToReveal) {
-      if (nextModel[field] === false) {
-        nextModel[field] = true;
+    for (const columnKey of columnsToReveal) {
+      if (nextModel[columnKey] === false) {
+        nextModel[columnKey] = true;
         changed = true;
       }
     }
 
-    autoRevealedFieldsRef.current = fieldsToReveal;
+    autoRevealedColumnsRef.current = columnsToReveal;
     if (changed) applyVisibilityModel(nextModel);
   }, [
     applyVisibilityModel,
     columnVisibilityModel,
-    filters.matchingSearchFields,
+    filters.matchingSearchColumns,
     revealMatchingColumns,
   ]);
 
@@ -207,12 +207,12 @@ export default function MeetingFilters({
           label="By"
           select
           fullWidth
-          value={filters.searchField}
+          value={filters.searchScope}
           onChange={(e) =>
-            filters.setSearchField(e.target.value as SearchField)
+            filters.setSearchScope(e.target.value as SearchScope)
           }
         >
-          {SEARCH_FIELD_OPTIONS.map((option) => (
+          {SEARCH_SCOPE_OPTIONS.map((option) => (
             <MenuItem key={option.value} value={option.value}>
               {option.label}
             </MenuItem>

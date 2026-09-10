@@ -254,6 +254,7 @@ function getDataGridColumns(
     },
     status: {
       width: 105,
+      minWidth: 105,
       valueGetter: (_value: unknown, row: unknown) =>
         normalizeStatus((row as MeetingRecord).status),
       renderCell: ({ value }) => (

@@ -432,8 +432,17 @@ export default function MeetingsTable({
   };
 
   return (
-    <Box sx={{ flex: 1, minWidth: 0 }}>
+    <Box
+      sx={{
+        flex: 1,
+        minWidth: 0,
+        minHeight: { sm: 0 },
+        height: { sm: "100%" },
+      }}
+    >
       <AppDataGrid
+        autoHeight={false}
+        height="100%"
         rows={enrichedRows}
         getRowId={(row) => row._idx}
         columns={dataGridColumns}

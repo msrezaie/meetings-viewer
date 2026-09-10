@@ -9,6 +9,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         flexDirection: "column",
         gap: SECTION_GAP,
         flex: 1,
+        minHeight: 0,
+        height: { sm: "100%" },
+        overflow: { sm: "hidden" },
         p: PAGE_PADDING,
       }}
     >

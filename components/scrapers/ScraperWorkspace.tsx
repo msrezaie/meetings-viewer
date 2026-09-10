@@ -24,7 +24,17 @@ export default function ScraperWorkspace({
   const openFiltersPanel = useCallback(() => setFiltersOpen(true), []);
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: SECTION_GAP }}>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        gap: SECTION_GAP,
+        flex: { sm: 1 },
+        minHeight: { sm: 0 },
+        height: { sm: "100%" },
+        overflow: { sm: "hidden" },
+      }}
+    >
       <MeetingsToolbar
         ref={filterButtonRef}
         records={records}
@@ -40,7 +50,10 @@ export default function ScraperWorkspace({
             display: "flex",
             flexDirection: { xs: "column", sm: "row" },
             gap: filtersOpen ? SECTION_GAP : 0,
-            alignItems: { xs: "stretch", sm: "flex-start" },
+            alignItems: { xs: "stretch", sm: "stretch" },
+            flex: { sm: 1 },
+            minHeight: { sm: 0 },
+            overflow: { sm: "hidden" },
           }}
         >
           <FiltersPanel
@@ -53,7 +66,17 @@ export default function ScraperWorkspace({
           </FiltersPanel>
 
           {/* Only this region is pushed when the panel opens. */}
-          <Box sx={{ flex: 1, minWidth: 0, width: "100%" }}>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              flex: 1,
+              minWidth: 0,
+              minHeight: { sm: 0 },
+              width: "100%",
+              overflow: { sm: "hidden" },
+            }}
+          >
             <MeetingsLayout
               records={filters.filteredRecords}
               search={filters.search}

@@ -58,12 +58,19 @@ export default function RootLayout({
                 display: "flex",
                 flexDirection: "column",
                 minHeight: "100vh",
+                height: "100dvh",
               }}
             >
               <SiteHeader />
               <Box
                 component="main"
-                sx={{ display: "flex", flexDirection: "column", flex: 1 }}
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  flex: 1,
+                  minHeight: 0,
+                  height: "100%",
+                }}
               >
                 {children}
               </Box>

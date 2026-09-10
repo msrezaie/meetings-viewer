@@ -93,7 +93,16 @@ function PanelContent({
         <Divider />
       </Box>
 
-      <Box sx={{ flex: 1, overflowY: "auto", p: 2.5, pt: 2.5 }}>
+      <Box
+        sx={{
+          flex: 1,
+          minHeight: 0,
+          overflowY: "auto",
+          overscrollBehavior: "contain",
+          p: 2.5,
+          pt: 2.5,
+        }}
+      >
         <Section label="Status">
           <StatusChip status={normalizeStatus(record.status)} />
         </Section>
@@ -219,6 +228,8 @@ export default function MeetingDetailPanel() {
             position: "sticky",
             top: 16,
             width: DETAIL_PANEL_WIDTH,
+            height: "100%",
+            minHeight: 0,
             flexShrink: 0,
             border: "1px solid",
             borderColor: "divider",
@@ -243,6 +254,7 @@ export default function MeetingDetailPanel() {
             width: { xs: "100%", sm: DETAIL_PANEL_WIDTH },
             display: "flex",
             flexDirection: "column",
+            minHeight: 0,
           },
         }}
       >

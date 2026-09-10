@@ -67,8 +67,10 @@ export default function FiltersPanel({
         // `auto` (stretched by the column layout) rather than `100%` on xs:
         // an explicit percentage animates down to 0 when crossing into the
         // row layout, briefly starving the content column of all its width.
+        height: { xs: "auto", sm: open ? "100%" : 0 },
         width: { xs: "auto", sm: open ? FILTERS_PANEL_WIDTH : 0 },
-        maxHeight: { xs: open ? "none" : 0 },
+        maxHeight: { xs: open ? "none" : 0, sm: "100%" },
+        minHeight: { sm: 0 },
         opacity: open ? 1 : 0,
         transform: open ? "translateX(0)" : "translateX(-6px)",
         pointerEvents: open ? "auto" : "none",
@@ -134,6 +136,7 @@ export default function FiltersPanel({
         sx={{
           flex: 1,
           overflowY: "auto",
+          overscrollBehavior: "contain",
           px: 2,
           pb: 2,
           width: { sm: FILTERS_PANEL_WIDTH },

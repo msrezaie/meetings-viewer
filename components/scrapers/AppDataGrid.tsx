@@ -88,7 +88,12 @@ export default function AppDataGrid({
       sx={[
         (theme) => ({
           border: "none",
+          minHeight: "0 !important",
           ...DATA_GRID_ROW_SX,
+          "& .MuiDataGrid-main": {
+            height: "100%",
+            minHeight: "0 !important",
+          },
           "& .MuiDataGrid-cell:not(.MuiDataGrid-cellEmpty)": {
             display: "flex",
             alignItems: "center",
@@ -96,6 +101,10 @@ export default function AppDataGrid({
           },
           "& .MuiDataGrid-selectedRowCount": {
             whiteSpace: "nowrap",
+          },
+          "& .MuiDataGrid-virtualScroller": {
+            minHeight: 0,
+            overscrollBehavior: "contain",
           },
           "& .MuiTablePagination-toolbar": {
             containerType: "inline-size",
@@ -122,12 +131,20 @@ export default function AppDataGrid({
   );
 
   return (
-    <Paper variant="outlined" sx={{ width: "100%", overflow: "hidden" }}>
+    <Paper
+      variant="outlined"
+      sx={{
+        width: "100%",
+        height: height !== undefined ? "100%" : undefined,
+        minHeight: 0,
+        overflow: "hidden",
+      }}
+    >
       {height !== undefined || minHeight !== undefined ? (
         <Box
           sx={{
             height,
-            minHeight,
+            minHeight: minHeight ?? 0,
             display: "flex",
             flexDirection: "column",
           }}

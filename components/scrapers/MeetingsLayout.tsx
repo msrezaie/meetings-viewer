@@ -30,7 +30,10 @@ export default function MeetingsLayout({
           display: "flex",
           flexDirection: "row",
           gap: SECTION_GAP,
-          alignItems: "flex-start",
+          alignItems: "stretch",
+          flex: 1,
+          minHeight: { sm: 0 },
+          overflow: { sm: "hidden" },
         }}
       >
         <MeetingsTable

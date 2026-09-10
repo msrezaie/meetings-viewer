@@ -44,7 +44,7 @@ function mergeInitialState(
 }
 
 function TopTooltip(props: TooltipProps) {
-  return <Tooltip {...props} placement="top" />;
+  return <Tooltip {...props} placement="top" disableInteractive />;
 }
 
 const DATA_GRID_ROW_SX = {

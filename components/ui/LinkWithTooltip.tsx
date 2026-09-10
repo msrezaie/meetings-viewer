@@ -40,6 +40,7 @@ export default function LinkWithTooltip({
         </Typography>
       }
       placement="right"
+      disableInteractive
       enterDelay={TOOLTIP_ENTER_DELAY}
       slotProps={{
         popper: {

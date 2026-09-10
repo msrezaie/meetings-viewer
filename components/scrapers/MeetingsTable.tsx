@@ -4,7 +4,12 @@ import { useMemo } from "react";
 import Box from "@mui/material/Box";
 import Chip from "@mui/material/Chip";
 import Typography from "@mui/material/Typography";
-import type { GridColDef, GridRowSelectionModel } from "@mui/x-data-grid";
+import {
+  GridRow,
+  type GridColDef,
+  type GridRowProps,
+  type GridRowSelectionModel,
+} from "@mui/x-data-grid";
 import type { MeetingRecord } from "@/lib/scraper-data";
 import { LocationDisplay } from "@/components/ui/LocationDisplay";
 import { locationText, normalizeStatus } from "@/lib/meeting-utils";
@@ -59,6 +64,26 @@ function TableText({
       {renderedValue}
     </OverflowTooltip>
   );
+}
+
+function MeetingRow(props: GridRowProps) {
+  const setSelectedMeeting = useSetSelectedMeeting();
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    props.onKeyDown?.(event);
+    if (event.defaultPrevented || event.key !== "Enter") return;
+    if (
+      event.target instanceof Element &&
+      event.target.closest("a,button,input,textarea,select")
+    )
+      return;
+
+    event.preventDefault();
+    const row = props.row as MeetingRecord;
+    setSelectedMeeting((prev) => (prev?.id === row.id ? null : row));
+  };
+
+  return <GridRow {...props} tabIndex={0} onKeyDown={handleKeyDown} />;
 }
 
 export type SortKey = MeetingColumnKey;
@@ -422,6 +447,7 @@ export default function MeetingsTable({
         slots={{
           noRowsOverlay: EmptyState,
           noColumnsOverlay: NoColumnsOverlay,
+          row: MeetingRow,
         }}
         getRowClassName={(params) => {
           const g = params.row._duplicateGroup;

@@ -23,7 +23,7 @@ function LocationPart({
       component="span"
       sx={{ color: "error.main", fontSize: "inherit" }}
     >
-      {fallback}
+      {highlightMatches([fallback], highlight ?? "")}
     </Typography>
   );
 

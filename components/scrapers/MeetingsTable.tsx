@@ -15,6 +15,7 @@ import {
 } from "@/lib/duplicate-detection";
 import AppDataGrid from "@/components/scrapers/AppDataGrid";
 import OverflowTooltip from "@/components/ui/OverflowTooltip";
+import { highlightMatches } from "@/components/ui/HighlightMatches";
 import TruncatedText from "@/components/ui/TruncatedText";
 import LinkWithTooltip from "@/components/ui/LinkWithTooltip";
 import {
@@ -33,21 +34,24 @@ function TableText({
   value,
   wrap = false,
   maxLines,
+  highlight,
 }: {
   value: string | null | undefined;
   wrap?: boolean;
   maxLines?: number;
+  highlight?: string;
 }) {
   const displayValue = value || "—";
+  const renderedValue = highlightMatches([displayValue], highlight ?? "");
 
   return (
     <OverflowTooltip
-      title={displayValue}
+      title={renderedValue}
       wrap={wrap}
       maxLines={maxLines}
-      contentKey={displayValue}
+      contentKey={`${displayValue}:${highlight ?? ""}`}
     >
-      {displayValue}
+      {renderedValue}
     </OverflowTooltip>
   );
 }
@@ -65,6 +69,8 @@ export type SortKey =
   | "source"
   | "status"
   | "id";
+type HighlightField = Exclude<SortKey, "start" | "end">;
+
 export const COLUMNS: { key: SortKey; label: string }[] = [
   { key: "title", label: "Title" },
   { key: "description", label: "Description" },
@@ -82,7 +88,7 @@ export const COLUMNS: { key: SortKey; label: string }[] = [
 
 /** Returns the search text to highlight in a column, only when that column's field is the active search field. */
 function getDataGridColumns(
-  highlightFor: (field: SearchField) => string | undefined
+  highlightFor: (field: HighlightField) => string | undefined
 ): GridColDef[] {
   return [
     {
@@ -141,7 +147,12 @@ function getDataGridColumns(
       headerName: "Classification",
       flex: 1,
       minWidth: 115,
-      renderCell: ({ row }) => <TableText value={row.classification} />,
+      renderCell: ({ row }) => (
+        <TableText
+          value={row.classification}
+          highlight={highlightFor("classification")}
+        />
+      ),
     },
     {
       field: "start",
@@ -163,7 +174,12 @@ function getDataGridColumns(
       field: "all_day",
       headerName: "All Day",
       width: 80,
-      renderCell: ({ row }) => <TableText value={row.all_day ? "Yes" : "No"} />,
+      renderCell: ({ row }) => (
+        <TableText
+          value={row.all_day ? "Yes" : "No"}
+          highlight={highlightFor("all_day")}
+        />
+      ),
     },
     {
       field: "time_notes",
@@ -215,7 +231,11 @@ function getDataGridColumns(
                   minWidth: 0,
                 }}
               >
-                <LinkWithTooltip href={link.href} label={link.title} />
+                <LinkWithTooltip
+                  href={link.href}
+                  label={link.title}
+                  highlight={highlightFor("links")}
+                />
               </Box>
             ))}
             {extra > 0 && (
@@ -238,7 +258,11 @@ function getDataGridColumns(
       minWidth: 130,
       renderCell: ({ row }) =>
         row.source ? (
-          <LinkWithTooltip href={row.source} label="Source Link" />
+          <LinkWithTooltip
+            href={row.source}
+            label="Source Link"
+            highlight={highlightFor("source")}
+          />
         ) : (
           "—"
         ),
@@ -249,14 +273,18 @@ function getDataGridColumns(
       width: 105,
       valueGetter: (_value: unknown, row: unknown) =>
         normalizeStatus((row as MeetingRecord).status),
-      renderCell: ({ value }) => <StatusChip status={value} />,
+      renderCell: ({ value }) => (
+        <StatusChip status={value} highlight={highlightFor("status")} />
+      ),
     },
     {
       field: "id",
       headerName: "ID",
       flex: 1,
       minWidth: 120,
-      renderCell: ({ row }) => <TruncatedText text={row.id} />,
+      renderCell: ({ row }) => (
+        <TruncatedText text={row.id} highlight={highlightFor("id")} />
+      ),
     },
   ];
 }
@@ -400,8 +428,10 @@ export default function MeetingsTable({
   }, [enrichedRows]);
 
   const trimmedSearch = search.trim();
-  const highlightFor = (field: SearchField) =>
-    trimmedSearch && searchField === field ? trimmedSearch : undefined;
+  const highlightFor = (field: HighlightField) =>
+    trimmedSearch && (searchField === "all" || searchField === field)
+      ? trimmedSearch
+      : undefined;
 
   const dataGridColumns = useMemo(
     () => getDataGridColumns(highlightFor),

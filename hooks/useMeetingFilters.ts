@@ -25,6 +25,7 @@ export const LINKS_OPTIONS = [
 export type LinksFilter = (typeof LINKS_OPTIONS)[number]["value"];
 
 export const SEARCH_FIELD_OPTIONS = [
+  { value: "all", label: "All" },
   { value: "title", label: "Title" },
   { value: "description", label: "Description" },
   { value: "time_notes", label: "Time Notes" },
@@ -33,6 +34,22 @@ export const SEARCH_FIELD_OPTIONS = [
 ] as const;
 
 export type SearchField = (typeof SEARCH_FIELD_OPTIONS)[number]["value"];
+
+const SEARCHABLE_FIELDS = [
+  "title",
+  "description",
+  "classification",
+  "all_day",
+  "time_notes",
+  "location",
+  "links",
+  "source",
+  "status",
+  "id",
+] as const;
+
+type SearchableField = (typeof SEARCHABLE_FIELDS)[number];
+type SearchIndex = Record<SearchableField, string>;
 
 export interface MeetingFiltersState {
   search: string;
@@ -66,21 +83,62 @@ function parseLocalDate(s: string): Date | null {
  * the FiltersPanel while the table only receives the filtered result.
  */
 
-function getFieldValue(record: MeetingRecord, field: SearchField): string {
+function getLocationSearchValue(record: MeetingRecord): string {
+  const name = record.location?.name?.trim() ?? "";
+  const address = record.location?.address?.trim() ?? "";
+
+  return [
+    locationText(record),
+    name ? "" : "No name",
+    address ? "" : "No address",
+  ]
+    .filter(Boolean)
+    .join(", ");
+}
+
+function getSearchValue(record: MeetingRecord, field: SearchableField): string {
   switch (field) {
     case "title":
       return record.title ?? "";
     case "description":
       return record.description ?? "";
+    case "classification":
+      return record.classification ?? "";
+    case "all_day":
+      return record.all_day ? "yes true" : "no false";
     case "time_notes":
       return record.time_notes ?? "";
     case "location":
-      return locationText(record) ?? "";
+      return getLocationSearchValue(record);
+    case "links":
+      return (record.links ?? [])
+        .flatMap((link) => [link.title, link.href])
+        .filter(Boolean)
+        .join(" ");
     case "source":
       return record.source ?? "";
+    case "status":
+      return normalizeStatus(record.status);
+    case "id":
+      return record.id ?? "";
     default:
       return "";
   }
+}
+
+interface IndexedMeeting {
+  record: MeetingRecord;
+  values: SearchIndex;
+}
+
+function buildSearchIndex(record: MeetingRecord): IndexedMeeting {
+  const values = {} as SearchIndex;
+
+  for (const field of SEARCHABLE_FIELDS) {
+    values[field] = getSearchValue(record, field).toLowerCase();
+  }
+
+  return { record, values };
 }
 
 // "no name" / "no address" to find records missing that part, in addition to
@@ -105,7 +163,7 @@ export function useMeetingFilters(
   records: MeetingRecord[]
 ): MeetingFiltersState {
   const [search, setSearch] = useState("");
-  const [searchField, setSearchField] = useState<SearchField>("title");
+  const [searchField, setSearchField] = useState<SearchField>("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [linksFilter, setLinksFilter] = useState<LinksFilter>("all");
   const [dateFrom, setDateFrom] = useState("");
@@ -118,24 +176,28 @@ export function useMeetingFilters(
     () => new Set(records.filter((r) => duplicateInfoMap.get(r)!.isDuplicate)),
     [records, duplicateInfoMap]
   );
+  const indexedRecords = useMemo(
+    () => records.map(buildSearchIndex),
+    [records]
+  );
 
   const filteredRecords = useMemo(() => {
     const query = search.trim().toLowerCase();
-    let filtered = records;
+    let filtered = indexedRecords;
 
     if (statusFilter === "duplicates") {
-      filtered = filtered.filter((r) => duplicateSet.has(r));
+      filtered = filtered.filter(({ record }) => duplicateSet.has(record));
     } else if (statusFilter !== "all") {
       filtered = filtered.filter(
-        (r) => normalizeStatus(r.status) === statusFilter
+        ({ record }) => normalizeStatus(record.status) === statusFilter
       );
     }
 
     if (linksFilter !== "all") {
-      filtered = filtered.filter((r) =>
+      filtered = filtered.filter(({ record }) =>
         linksFilter === "has-links"
-          ? (r.links?.length ?? 0) > 0
-          : (r.links?.length ?? 0) === 0
+          ? (record.links?.length ?? 0) > 0
+          : (record.links?.length ?? 0) === 0
       );
     }
 
@@ -144,7 +206,7 @@ export function useMeetingFilters(
       const toDate = parseLocalDate(dateTo) ?? (from ? new Date(from) : null);
       if (toDate) toDate.setHours(23, 59, 59, 999);
 
-      filtered = filtered.filter((r) => {
+      filtered = filtered.filter(({ record }) => {
         const isWithinDateRange = (dateStr: string | undefined) => {
           if (!dateStr) return false;
           const meetingDate = new Date(dateStr);
@@ -153,21 +215,29 @@ export function useMeetingFilters(
           if (toDate && meetingDate > toDate) return false;
           return true;
         };
-        return isWithinDateRange(r.start) || isWithinDateRange(r.end);
+        return isWithinDateRange(record.start) || isWithinDateRange(record.end);
       });
     }
 
     if (query) {
-      filtered = filtered.filter((r) =>
-        searchField === "location"
-          ? matchesLocationQuery(r, query)
-          : getFieldValue(r, searchField).toLowerCase().includes(query)
-      );
+      filtered = filtered.filter(({ record, values }) => {
+        if (searchField === "all") {
+          return SEARCHABLE_FIELDS.some((field) =>
+            values[field].includes(query)
+          );
+        }
+
+        if (searchField === "location") {
+          return matchesLocationQuery(record, query);
+        }
+
+        return values[searchField].includes(query);
+      });
     }
 
-    return filtered;
+    return filtered.map(({ record }) => record);
   }, [
-    records,
+    indexedRecords,
     search,
     searchField,
     statusFilter,

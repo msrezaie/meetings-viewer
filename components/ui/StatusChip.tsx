@@ -1,6 +1,7 @@
 "use client";
 
 import Chip from "@mui/material/Chip";
+import { highlightMatches } from "@/components/ui/HighlightMatches";
 
 export const STATUS_CHIP_COLOR: Record<
   string,
@@ -11,11 +12,20 @@ export const STATUS_CHIP_COLOR: Record<
   tentative: "warning",
 };
 
-export function StatusChip({ status }: { status: string }) {
+export function StatusChip({
+  status,
+  highlight,
+}: {
+  status: string;
+  highlight?: string;
+}) {
+  const label = status || "—";
+  const renderedLabel = highlightMatches([label], highlight ?? "");
+
   return (
     <Chip
       component="span"
-      label={status || "—"}
+      label={renderedLabel}
       size="small"
       color={STATUS_CHIP_COLOR[status] ?? "default"}
       variant="outlined"

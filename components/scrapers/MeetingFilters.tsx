@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Button from "@mui/material/Button";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import MenuItem from "@mui/material/MenuItem";
 import Stack from "@mui/material/Stack";
@@ -18,6 +19,7 @@ import {
   type MeetingFiltersState,
   type SearchField,
 } from "@/hooks/useMeetingFilters";
+import type { MeetingLinkStatusState } from "@/hooks/useMeetingLinkStatus";
 import { useColumnVisibility } from "@/contexts/ColumnVisibilityContext";
 import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
@@ -55,10 +57,11 @@ function FilterSection({
  */
 export default function MeetingFilters({
   filters,
+  linkStatus,
   open,
 }: {
   filters: MeetingFiltersState;
-
+  linkStatus: MeetingLinkStatusState;
   open: boolean;
 }) {
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -287,6 +290,24 @@ export default function MeetingFilters({
             </MenuItem>
           ))}
         </TextField>
+        {linkStatus.totalLinks > 0 && (
+          <>
+            <Button
+              size="small"
+              variant="outlined"
+              onClick={() => void linkStatus.checkAllLinks()}
+              disabled={linkStatus.isChecking}
+            >
+              {linkStatus.isChecking ? "Checking links..." : "Check all links"}
+            </Button>
+            {linkStatus.checkedCount > 0 && (
+              <Typography variant="caption" color="text.secondary">
+                {linkStatus.checkedCount} of {linkStatus.totalLinks} links
+                checked
+              </Typography>
+            )}
+          </>
+        )}
       </FilterSection>
 
       <FilterSection label="Date range">

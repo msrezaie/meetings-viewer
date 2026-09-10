@@ -7,6 +7,7 @@ import { MeetingSelectionProvider } from "@/contexts/MeetingSelectionContext";
 import MeetingsTable from "@/components/scrapers/MeetingsTable";
 import MeetingDetailPanel from "@/components/scrapers/MeetingDetailPanel";
 import type { SearchField } from "@/hooks/useMeetingFilters";
+import type { MeetingLinkStatusState } from "@/hooks/useMeetingLinkStatus";
 import { SECTION_GAP } from "@/lib/ui-constants";
 
 export default function MeetingsLayout({
@@ -14,6 +15,7 @@ export default function MeetingsLayout({
   search,
   searchField,
   duplicateInfoMap,
+  linkStatus,
 }: {
   records: MeetingRecord[];
   /** Current search keyword, to highlight matches in the table. */
@@ -22,6 +24,7 @@ export default function MeetingsLayout({
   searchField: SearchField;
   /** Per-record duplicate info computed from the full, unfiltered dataset. */
   duplicateInfoMap: Map<MeetingRecord, DuplicateInfo>;
+  linkStatus: MeetingLinkStatusState;
 }) {
   return (
     <MeetingSelectionProvider>
@@ -38,6 +41,7 @@ export default function MeetingsLayout({
           search={search}
           searchField={searchField}
           duplicateInfoMap={duplicateInfoMap}
+          linkStatus={linkStatus}
         />
         <MeetingDetailPanel />
       </Box>

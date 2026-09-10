@@ -24,6 +24,7 @@ import {
 } from "@/contexts/MeetingSelectionContext";
 import { useColumnVisibility } from "@/contexts/ColumnVisibilityContext";
 import type { SearchField } from "@/hooks/useMeetingFilters";
+import type { MeetingLinkStatusState } from "@/hooks/useMeetingLinkStatus";
 import {
   DATE_TIME_MAX_LINES,
   MAX_TEXT_LINES,
@@ -88,7 +89,8 @@ export const COLUMNS: { key: SortKey; label: string }[] = [
 
 /** Returns the search text to highlight in a column, only when that column's field is the active search field. */
 function getDataGridColumns(
-  highlightFor: (field: HighlightField) => string | undefined
+  highlightFor: (field: HighlightField) => string | undefined,
+  linkStatus: MeetingLinkStatusState
 ): GridColDef[] {
   return [
     {
@@ -235,6 +237,8 @@ function getDataGridColumns(
                   href={link.href}
                   label={link.title}
                   highlight={highlightFor("links")}
+                  linkStatus={linkStatus.statusByUrl[link.href]}
+                  onCheck={() => linkStatus.checkLink(link.href)}
                 />
               </Box>
             ))}
@@ -352,6 +356,7 @@ export default function MeetingsTable({
   search,
   searchField,
   duplicateInfoMap,
+  linkStatus,
 }: {
   /** Records to display, already filtered upstream. */
   records: MeetingRecord[];
@@ -361,6 +366,7 @@ export default function MeetingsTable({
   searchField: SearchField;
   /** Per-record duplicate info computed from the full, unfiltered dataset. */
   duplicateInfoMap: Map<MeetingRecord, DuplicateInfo>;
+  linkStatus: MeetingLinkStatusState;
 }) {
   const { columnVisibilityModel } = useColumnVisibility();
   const selectedMeeting = useSelectedMeeting();
@@ -434,9 +440,9 @@ export default function MeetingsTable({
       : undefined;
 
   const dataGridColumns = useMemo(
-    () => getDataGridColumns(highlightFor),
+    () => getDataGridColumns(highlightFor, linkStatus),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [trimmedSearch, searchField]
+    [trimmedSearch, searchField, linkStatus.statusByUrl, linkStatus.checkLink]
   );
 
   const handleRowClick = (row: MeetingRecord) => {

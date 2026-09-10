@@ -8,6 +8,7 @@ import FiltersPanel from "@/components/scrapers/FiltersPanel";
 import MeetingFilters from "@/components/scrapers/MeetingFilters";
 import MeetingsLayout from "@/components/scrapers/MeetingsLayout";
 import { useMeetingFilters } from "@/hooks/useMeetingFilters";
+import { useMeetingLinkStatus } from "@/hooks/useMeetingLinkStatus";
 import { SECTION_GAP } from "@/lib/ui-constants";
 import { ColumnVisibilityProvider } from "@/contexts/ColumnVisibilityContext";
 
@@ -21,6 +22,7 @@ export default function ScraperWorkspace({
   const [filtersOpen, setFiltersOpen] = useState(false);
   const filterButtonRef = useRef<HTMLButtonElement>(null);
   const filters = useMeetingFilters(records);
+  const linkStatus = useMeetingLinkStatus(records);
   const openFiltersPanel = useCallback(() => setFiltersOpen(true), []);
 
   return (
@@ -49,7 +51,11 @@ export default function ScraperWorkspace({
             onClose={() => setFiltersOpen(false)}
             triggerRef={filterButtonRef}
           >
-            <MeetingFilters filters={filters} open={filtersOpen} />
+            <MeetingFilters
+              filters={filters}
+              linkStatus={linkStatus}
+              open={filtersOpen}
+            />
           </FiltersPanel>
 
           {/* Only this region is pushed when the panel opens. */}
@@ -59,6 +65,7 @@ export default function ScraperWorkspace({
               search={filters.search}
               searchField={filters.searchField}
               duplicateInfoMap={filters.duplicateInfoMap}
+              linkStatus={linkStatus}
             />
           </Box>
         </Box>

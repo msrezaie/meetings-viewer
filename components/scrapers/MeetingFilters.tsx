@@ -12,12 +12,11 @@ import ColumnVisibilityFilter from "@/components/scrapers/ColumnVisibilityFilter
 import { FILTERS_TRANSITION_MS } from "@/lib/ui-constants";
 import {
   LINKS_OPTIONS,
-  SEARCH_FIELD_OPTIONS,
   STATUS_OPTIONS,
   type LinksFilter,
   type MeetingFiltersState,
-  type SearchField,
 } from "@/hooks/useMeetingFilters";
+import { SEARCH_FIELD_OPTIONS, type SearchField } from "@/lib/meeting-columns";
 import { useColumnVisibility } from "@/contexts/ColumnVisibilityContext";
 import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";

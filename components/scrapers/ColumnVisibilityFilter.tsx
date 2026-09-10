@@ -6,7 +6,7 @@ import Divider from "@mui/material/Divider";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import { COLUMNS } from "@/components/scrapers/MeetingsTable";
+import { MEETING_COLUMNS } from "@/lib/meeting-columns";
 import {
   DEFAULT_COLUMN_VISIBILITY,
   useColumnVisibility,
@@ -16,7 +16,7 @@ export default function ColumnVisibilityFilter() {
   const { columnVisibilityModel, toggleColumn, applyVisibilityModel } =
     useColumnVisibility();
 
-  const allVisible = COLUMNS.every(
+  const allVisible = MEETING_COLUMNS.every(
     (col) => columnVisibilityModel[col.key] !== false
   );
 
@@ -29,7 +29,9 @@ export default function ColumnVisibilityFilter() {
           onClick={() =>
             applyVisibilityModel(
               allVisible
-                ? Object.fromEntries(COLUMNS.map((col) => [col.key, false]))
+                ? Object.fromEntries(
+                    MEETING_COLUMNS.map((col) => [col.key, false])
+                  )
                 : {}
             )
           }
@@ -48,7 +50,7 @@ export default function ColumnVisibilityFilter() {
       <Divider />
 
       <Stack spacing={0}>
-        {COLUMNS.map((col) => (
+        {MEETING_COLUMNS.map((col) => (
           <FormControlLabel
             key={col.key}
             label={<Typography variant="body2">{col.label}</Typography>}

@@ -2,11 +2,19 @@
 
 import { useMemo, useState } from "react";
 import type { MeetingRecord } from "@/lib/scraper-data";
-import { locationText, normalizeStatus } from "@/lib/meeting-utils";
+import { normalizeStatus } from "@/lib/meeting-utils";
+import {
+  SEARCHABLE_COLUMNS,
+  type SearchableField,
+  type SearchField,
+} from "@/lib/meeting-columns";
 import {
   buildDuplicateGroups,
   type DuplicateInfo,
 } from "@/lib/duplicate-detection";
+
+export { SEARCH_FIELD_OPTIONS } from "@/lib/meeting-columns";
+export type { SearchableField, SearchField } from "@/lib/meeting-columns";
 
 export const STATUS_OPTIONS = [
   { value: "all", label: "All" },
@@ -24,31 +32,6 @@ export const LINKS_OPTIONS = [
 
 export type LinksFilter = (typeof LINKS_OPTIONS)[number]["value"];
 
-export const SEARCH_FIELD_OPTIONS = [
-  { value: "all", label: "All" },
-  { value: "title", label: "Title" },
-  { value: "description", label: "Description" },
-  { value: "time_notes", label: "Time Notes" },
-  { value: "location", label: "Location" },
-  { value: "source", label: "Source" },
-] as const;
-
-export type SearchField = (typeof SEARCH_FIELD_OPTIONS)[number]["value"];
-
-const SEARCHABLE_FIELDS = [
-  "title",
-  "description",
-  "classification",
-  "all_day",
-  "time_notes",
-  "location",
-  "links",
-  "source",
-  "status",
-  "id",
-] as const;
-
-type SearchableField = (typeof SEARCHABLE_FIELDS)[number];
 type SearchIndex = Record<SearchableField, string>;
 
 export interface MeetingFiltersState {
@@ -85,49 +68,6 @@ function parseLocalDate(s: string): Date | null {
  * the FiltersPanel while the table only receives the filtered result.
  */
 
-function getLocationSearchValue(record: MeetingRecord): string {
-  const name = record.location?.name?.trim() ?? "";
-  const address = record.location?.address?.trim() ?? "";
-
-  return [
-    locationText(record),
-    name ? "" : "No name",
-    address ? "" : "No address",
-  ]
-    .filter(Boolean)
-    .join(", ");
-}
-
-function getSearchValue(record: MeetingRecord, field: SearchableField): string {
-  switch (field) {
-    case "title":
-      return record.title ?? "";
-    case "description":
-      return record.description ?? "";
-    case "classification":
-      return record.classification ?? "";
-    case "all_day":
-      return record.all_day ? "yes true" : "no false";
-    case "time_notes":
-      return record.time_notes ?? "";
-    case "location":
-      return getLocationSearchValue(record);
-    case "links":
-      return (record.links ?? [])
-        .flatMap((link) => [link.title, link.href])
-        .filter(Boolean)
-        .join(" ");
-    case "source":
-      return record.source ?? "";
-    case "status":
-      return normalizeStatus(record.status);
-    case "id":
-      return record.id ?? "";
-    default:
-      return "";
-  }
-}
-
 interface IndexedMeeting {
   record: MeetingRecord;
   values: SearchIndex;
@@ -136,8 +76,8 @@ interface IndexedMeeting {
 function buildSearchIndex(record: MeetingRecord): IndexedMeeting {
   const values = {} as SearchIndex;
 
-  for (const field of SEARCHABLE_FIELDS) {
-    values[field] = getSearchValue(record, field).toLowerCase();
+  for (const column of SEARCHABLE_COLUMNS) {
+    values[column.key] = column.getSearchValue(record).toLowerCase();
   }
 
   return { record, values };
@@ -161,9 +101,8 @@ function countSearchMatches(
   query: string
 ): number {
   if (field === "all") {
-    return SEARCHABLE_FIELDS.reduce(
-      (count, searchableField) =>
-        count + countOccurrences(values[searchableField], query),
+    return SEARCHABLE_COLUMNS.reduce(
+      (count, { key }) => count + countOccurrences(values[key], query),
       0
     );
   }
@@ -257,8 +196,8 @@ export function useMeetingFilters(
       if (query) {
         filtered = filtered.filter(({ record, values }) => {
           if (searchField === "all") {
-            return SEARCHABLE_FIELDS.some((field) =>
-              values[field].includes(query)
+            return SEARCHABLE_COLUMNS.some(({ key }) =>
+              values[key].includes(query)
             );
           }
 
@@ -273,9 +212,9 @@ export function useMeetingFilters(
             count + countSearchMatches(values, searchField, query),
           0
         );
-        matchingSearchFields = SEARCHABLE_FIELDS.filter((field) =>
-          filtered.some(({ values }) => values[field].includes(query))
-        );
+        matchingSearchFields = SEARCHABLE_COLUMNS.filter(({ key }) =>
+          filtered.some(({ values }) => values[key].includes(query))
+        ).map(({ key }) => key);
       }
 
       return {

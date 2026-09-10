@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import FormControlLabel from "@mui/material/FormControlLabel";
 import MenuItem from "@mui/material/MenuItem";
 import Stack from "@mui/material/Stack";
+import Switch from "@mui/material/Switch";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import DateRangeFilter from "@/components/scrapers/DateRangeFilter";
@@ -16,6 +18,7 @@ import {
   type MeetingFiltersState,
   type SearchField,
 } from "@/hooks/useMeetingFilters";
+import { useColumnVisibility } from "@/contexts/ColumnVisibilityContext";
 import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
 import { ClearIcon } from "@mui/x-date-pickers/icons";
@@ -59,6 +62,10 @@ export default function MeetingFilters({
   open: boolean;
 }) {
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const autoRevealedFieldsRef = useRef(new Set<string>());
+  const [revealSearchKey, setRevealSearchKey] = useState("");
+  const [revealEnabled, setRevealEnabled] = useState(false);
+  const { columnVisibilityModel, applyVisibilityModel } = useColumnVisibility();
 
   useEffect(() => {
     if (open) {
@@ -72,7 +79,55 @@ export default function MeetingFilters({
     }
   }, [open]);
 
-  const hasSearch = filters.search.trim().length > 0;
+  const searchQuery = filters.search.trim().toLowerCase();
+  const hasSearch = searchQuery.length > 0;
+  const searchKey = `${filters.searchField}:${searchQuery}`;
+  const hasRevealStateForSearch = hasSearch && revealSearchKey === searchKey;
+  const revealMatchingColumns = hasRevealStateForSearch && revealEnabled;
+  const hasHiddenMatchingColumns = filters.matchingSearchFields.some(
+    (field) => columnVisibilityModel[field] === false
+  );
+  const showRevealMatchingColumns =
+    hasSearch && (hasHiddenMatchingColumns || hasRevealStateForSearch);
+
+  useEffect(() => {
+    const fieldsToReveal = new Set<string>();
+    if (revealMatchingColumns) {
+      for (const field of filters.matchingSearchFields) {
+        if (
+          columnVisibilityModel[field] === false ||
+          autoRevealedFieldsRef.current.has(field)
+        ) {
+          fieldsToReveal.add(field);
+        }
+      }
+    }
+
+    const nextModel = { ...columnVisibilityModel };
+    let changed = false;
+
+    for (const field of autoRevealedFieldsRef.current) {
+      if (!fieldsToReveal.has(field) && nextModel[field] !== false) {
+        nextModel[field] = false;
+        changed = true;
+      }
+    }
+
+    for (const field of fieldsToReveal) {
+      if (nextModel[field] === false) {
+        nextModel[field] = true;
+        changed = true;
+      }
+    }
+
+    autoRevealedFieldsRef.current = fieldsToReveal;
+    if (changed) applyVisibilityModel(nextModel);
+  }, [
+    applyVisibilityModel,
+    columnVisibilityModel,
+    filters.matchingSearchFields,
+    revealMatchingColumns,
+  ]);
 
   return (
     <Stack spacing={2.5} sx={{ pt: 0.5 }}>
@@ -83,7 +138,14 @@ export default function MeetingFilters({
             size="small"
             fullWidth
             value={filters.search}
-            onChange={(e) => filters.setSearch(e.target.value)}
+            onChange={(event) => {
+              const value = event.target.value;
+              if (!value.trim()) {
+                setRevealSearchKey("");
+                setRevealEnabled(false);
+              }
+              filters.setSearch(value);
+            }}
             inputRef={searchInputRef}
             slotProps={{
               input: {
@@ -92,7 +154,11 @@ export default function MeetingFilters({
                     <IconButton
                       size="small"
                       aria-label="Clear search"
-                      onClick={() => filters.setSearch("")}
+                      onClick={() => {
+                        setRevealSearchKey("");
+                        setRevealEnabled(false);
+                        filters.setSearch("");
+                      }}
                       edge="end"
                     >
                       <ClearIcon fontSize="small" />
@@ -108,11 +174,32 @@ export default function MeetingFilters({
               color="text.secondary"
               aria-live="polite"
             >
-              {filters.highlightMatchCount}{" "}
-              {filters.highlightMatchCount === 1
-                ? "text match"
-                : "text matches"}
+              {filters.textMatchCount}{" "}
+              {filters.textMatchCount === 1 ? "text match" : "text matches"}
             </Typography>
+          )}
+          {showRevealMatchingColumns && (
+            <FormControlLabel
+              control={
+                <Switch
+                  size="small"
+                  checked={revealMatchingColumns}
+                  onChange={(event) => {
+                    if (event.target.checked) {
+                      setRevealSearchKey(searchKey);
+                      setRevealEnabled(true);
+                    } else {
+                      setRevealEnabled(false);
+                    }
+                  }}
+                />
+              }
+              label={
+                <Typography variant="caption">
+                  Reveal matching columns
+                </Typography>
+              }
+            />
           )}
         </FilterSection>
 

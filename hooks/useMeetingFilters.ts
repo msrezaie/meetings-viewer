@@ -66,7 +66,8 @@ export interface MeetingFiltersState {
   setDateTo: (value: string) => void;
   clearDates: () => void;
   filteredRecords: MeetingRecord[];
-  highlightMatchCount: number;
+  textMatchCount: number;
+  matchingSearchFields: SearchableField[];
   duplicateInfoMap: Map<MeetingRecord, DuplicateInfo>;
 }
 
@@ -210,80 +211,88 @@ export function useMeetingFilters(
     [records]
   );
 
-  const { filteredRecords, highlightMatchCount } = useMemo(() => {
-    const query = search.trim().toLowerCase();
-    let filtered = indexedRecords;
-    let highlightMatchCount = 0;
+  const { filteredRecords, textMatchCount, matchingSearchFields } =
+    useMemo(() => {
+      const query = search.trim().toLowerCase();
+      let filtered = indexedRecords;
+      let textMatchCount = 0;
+      let matchingSearchFields: SearchableField[] = [];
 
-    if (statusFilter === "duplicates") {
-      filtered = filtered.filter(({ record }) => duplicateSet.has(record));
-    } else if (statusFilter !== "all") {
-      filtered = filtered.filter(
-        ({ record }) => normalizeStatus(record.status) === statusFilter
-      );
-    }
+      if (statusFilter === "duplicates") {
+        filtered = filtered.filter(({ record }) => duplicateSet.has(record));
+      } else if (statusFilter !== "all") {
+        filtered = filtered.filter(
+          ({ record }) => normalizeStatus(record.status) === statusFilter
+        );
+      }
 
-    if (linksFilter !== "all") {
-      filtered = filtered.filter(({ record }) =>
-        linksFilter === "has-links"
-          ? (record.links?.length ?? 0) > 0
-          : (record.links?.length ?? 0) === 0
-      );
-    }
+      if (linksFilter !== "all") {
+        filtered = filtered.filter(({ record }) =>
+          linksFilter === "has-links"
+            ? (record.links?.length ?? 0) > 0
+            : (record.links?.length ?? 0) === 0
+        );
+      }
 
-    if (dateFrom || dateTo) {
-      const from = parseLocalDate(dateFrom);
-      const toDate = parseLocalDate(dateTo) ?? (from ? new Date(from) : null);
-      if (toDate) toDate.setHours(23, 59, 59, 999);
+      if (dateFrom || dateTo) {
+        const from = parseLocalDate(dateFrom);
+        const toDate = parseLocalDate(dateTo) ?? (from ? new Date(from) : null);
+        if (toDate) toDate.setHours(23, 59, 59, 999);
 
-      filtered = filtered.filter(({ record }) => {
-        const isWithinDateRange = (dateStr: string | undefined) => {
-          if (!dateStr) return false;
-          const meetingDate = new Date(dateStr);
-          if (isNaN(meetingDate.getTime())) return false;
-          if (from && meetingDate < from) return false;
-          if (toDate && meetingDate > toDate) return false;
-          return true;
-        };
-        return isWithinDateRange(record.start) || isWithinDateRange(record.end);
-      });
-    }
-
-    if (query) {
-      filtered = filtered.filter(({ record, values }) => {
-        if (searchField === "all") {
-          return SEARCHABLE_FIELDS.some((field) =>
-            values[field].includes(query)
+        filtered = filtered.filter(({ record }) => {
+          const isWithinDateRange = (dateStr: string | undefined) => {
+            if (!dateStr) return false;
+            const meetingDate = new Date(dateStr);
+            if (isNaN(meetingDate.getTime())) return false;
+            if (from && meetingDate < from) return false;
+            if (toDate && meetingDate > toDate) return false;
+            return true;
+          };
+          return (
+            isWithinDateRange(record.start) || isWithinDateRange(record.end)
           );
-        }
+        });
+      }
 
-        if (searchField === "location") {
-          return matchesLocationQuery(record, query);
-        }
+      if (query) {
+        filtered = filtered.filter(({ record, values }) => {
+          if (searchField === "all") {
+            return SEARCHABLE_FIELDS.some((field) =>
+              values[field].includes(query)
+            );
+          }
 
-        return values[searchField].includes(query);
-      });
-      highlightMatchCount = filtered.reduce(
-        (count, { values }) =>
-          count + countSearchMatches(values, searchField, query),
-        0
-      );
-    }
+          if (searchField === "location") {
+            return matchesLocationQuery(record, query);
+          }
 
-    return {
-      filteredRecords: filtered.map(({ record }) => record),
-      highlightMatchCount,
-    };
-  }, [
-    indexedRecords,
-    search,
-    searchField,
-    statusFilter,
-    linksFilter,
-    dateFrom,
-    dateTo,
-    duplicateSet,
-  ]);
+          return values[searchField].includes(query);
+        });
+        textMatchCount = filtered.reduce(
+          (count, { values }) =>
+            count + countSearchMatches(values, searchField, query),
+          0
+        );
+        matchingSearchFields = SEARCHABLE_FIELDS.filter((field) =>
+          filtered.some(({ values }) => values[field].includes(query))
+        );
+      }
+
+      return {
+        filteredRecords: filtered.map(({ record }) => record),
+        textMatchCount,
+        matchingSearchFields,
+      };
+    }, [
+      indexedRecords,
+      search,
+      searchField,
+      statusFilter,
+      linksFilter,
+      dateFrom,
+      dateTo,
+      duplicateSet,
+    ]);
 
   return {
     search,
@@ -303,7 +312,8 @@ export function useMeetingFilters(
       setDateTo("");
     },
     filteredRecords,
-    highlightMatchCount,
+    textMatchCount,
+    matchingSearchFields,
     duplicateInfoMap,
   };
 }

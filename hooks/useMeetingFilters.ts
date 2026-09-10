@@ -66,6 +66,7 @@ export interface MeetingFiltersState {
   setDateTo: (value: string) => void;
   clearDates: () => void;
   filteredRecords: MeetingRecord[];
+  highlightMatchCount: number;
   duplicateInfoMap: Map<MeetingRecord, DuplicateInfo>;
 }
 
@@ -141,6 +142,34 @@ function buildSearchIndex(record: MeetingRecord): IndexedMeeting {
   return { record, values };
 }
 
+function countOccurrences(text: string, query: string): number {
+  if (!query) return 0;
+
+  let count = 0;
+  let index = text.indexOf(query);
+  while (index !== -1) {
+    count += 1;
+    index = text.indexOf(query, index + query.length);
+  }
+  return count;
+}
+
+function countSearchMatches(
+  values: SearchIndex,
+  field: SearchField,
+  query: string
+): number {
+  if (field === "all") {
+    return SEARCHABLE_FIELDS.reduce(
+      (count, searchableField) =>
+        count + countOccurrences(values[searchableField], query),
+      0
+    );
+  }
+
+  return countOccurrences(values[field], query);
+}
+
 // "no name" / "no address" to find records missing that part, in addition to
 // normal substring matching against the actual name/address text.
 function matchesLocationQuery(record: MeetingRecord, query: string): boolean {
@@ -181,9 +210,10 @@ export function useMeetingFilters(
     [records]
   );
 
-  const filteredRecords = useMemo(() => {
+  const { filteredRecords, highlightMatchCount } = useMemo(() => {
     const query = search.trim().toLowerCase();
     let filtered = indexedRecords;
+    let highlightMatchCount = 0;
 
     if (statusFilter === "duplicates") {
       filtered = filtered.filter(({ record }) => duplicateSet.has(record));
@@ -233,9 +263,17 @@ export function useMeetingFilters(
 
         return values[searchField].includes(query);
       });
+      highlightMatchCount = filtered.reduce(
+        (count, { values }) =>
+          count + countSearchMatches(values, searchField, query),
+        0
+      );
     }
 
-    return filtered.map(({ record }) => record);
+    return {
+      filteredRecords: filtered.map(({ record }) => record),
+      highlightMatchCount,
+    };
   }, [
     indexedRecords,
     search,
@@ -265,6 +303,7 @@ export function useMeetingFilters(
       setDateTo("");
     },
     filteredRecords,
+    highlightMatchCount,
     duplicateInfoMap,
   };
 }

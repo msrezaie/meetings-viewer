@@ -72,6 +72,8 @@ export default function MeetingFilters({
     }
   }, [open]);
 
+  const hasSearch = filters.search.trim().length > 0;
+
   return (
     <Stack spacing={2.5} sx={{ pt: 0.5 }}>
       <Stack spacing={1.5}>
@@ -100,6 +102,18 @@ export default function MeetingFilters({
               },
             }}
           />
+          {hasSearch && (
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              aria-live="polite"
+            >
+              {filters.highlightMatchCount}{" "}
+              {filters.highlightMatchCount === 1
+                ? "text match"
+                : "text matches"}
+            </Typography>
+          )}
         </FilterSection>
 
         <TextField

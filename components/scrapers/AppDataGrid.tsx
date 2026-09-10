@@ -44,7 +44,7 @@ function mergeInitialState(
 }
 
 function TopTooltip(props: TooltipProps) {
-  return <Tooltip {...props} placement="top" />;
+  return <Tooltip {...props} placement="top" disableInteractive />;
 }
 
 const DATA_GRID_ROW_SX = {
@@ -89,7 +89,7 @@ export default function AppDataGrid({
         (theme) => ({
           border: "none",
           ...DATA_GRID_ROW_SX,
-          "& .MuiDataGrid-cell": {
+          "& .MuiDataGrid-cell:not(.MuiDataGrid-cellEmpty)": {
             display: "flex",
             alignItems: "center",
             padding: `${theme.spacing(DATAGRID_CELL_PADDING)} !important`,

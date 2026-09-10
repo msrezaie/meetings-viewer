@@ -47,6 +47,11 @@ export default function FilterButton({
         "&:hover": {
           bgcolor: open ? "primary.dark" : "action.hover",
         },
+        "&:focus-visible": {
+          outline: "2px solid",
+          outlineColor: "primary.dark",
+          outlineOffset: 2,
+        },
       })}
     >
       Filters

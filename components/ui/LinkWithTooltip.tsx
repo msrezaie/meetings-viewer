@@ -95,6 +95,7 @@ export default function LinkWithTooltip({
           </Typography>
         }
         placement="right"
+        disableInteractive
         enterDelay={TOOLTIP_ENTER_DELAY}
         slotProps={{
           popper: {
@@ -142,7 +143,7 @@ export default function LinkWithTooltip({
         </Box>
       </Tooltip>
       {statusBadge && (
-        <Tooltip title={statusBadge.title} placement="top">
+        <Tooltip title={statusBadge.title} placement="top" disableInteractive>
           <Chip
             clickable
             label={statusBadge.label}

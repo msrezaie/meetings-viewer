@@ -8,14 +8,10 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { MEETING_COLUMNS } from "@/lib/meeting-columns";
 
-export const DEFAULT_COLUMN_VISIBILITY: Record<string, boolean> = {
-  classification: false,
-  all_day: false,
-  time_notes: false,
-  source: false,
-  id: false,
-};
+export const DEFAULT_COLUMN_VISIBILITY: Record<string, boolean> =
+  Object.fromEntries(MEETING_COLUMNS.map((c) => [c.key, c.defaultVisible]));
 
 interface ColumnVisibilityContextValue {
   columnVisibilityModel: Record<string, boolean>;

@@ -4,7 +4,12 @@ import { useMemo } from "react";
 import Box from "@mui/material/Box";
 import Chip from "@mui/material/Chip";
 import Typography from "@mui/material/Typography";
-import type { GridColDef, GridRowSelectionModel } from "@mui/x-data-grid";
+import {
+  GridRow,
+  type GridColDef,
+  type GridRowProps,
+  type GridRowSelectionModel,
+} from "@mui/x-data-grid";
 import type { MeetingRecord } from "@/lib/scraper-data";
 import { LocationDisplay } from "@/components/ui/LocationDisplay";
 import { locationText, normalizeStatus } from "@/lib/meeting-utils";
@@ -23,8 +28,13 @@ import {
   useSetSelectedMeeting,
 } from "@/contexts/MeetingSelectionContext";
 import { useColumnVisibility } from "@/contexts/ColumnVisibilityContext";
-import type { SearchField } from "@/hooks/useMeetingFilters";
 import type { MeetingLinkStatusState } from "@/hooks/useMeetingLinkStatus";
+import {
+  MEETING_COLUMNS,
+  type MeetingColumnKey,
+  type SearchableField,
+  type SearchField,
+} from "@/lib/meeting-columns";
 import {
   DATE_TIME_MAX_LINES,
   MAX_TEXT_LINES,
@@ -57,45 +67,38 @@ function TableText({
   );
 }
 
-export type SortKey =
-  | "title"
-  | "description"
-  | "classification"
-  | "start"
-  | "end"
-  | "all_day"
-  | "time_notes"
-  | "location"
-  | "links"
-  | "source"
-  | "status"
-  | "id";
-type HighlightField = Exclude<SortKey, "start" | "end">;
+function MeetingRow(props: GridRowProps) {
+  const setSelectedMeeting = useSetSelectedMeeting();
 
-export const COLUMNS: { key: SortKey; label: string }[] = [
-  { key: "title", label: "Title" },
-  { key: "description", label: "Description" },
-  { key: "classification", label: "Classification" },
-  { key: "start", label: "Start" },
-  { key: "end", label: "End" },
-  { key: "all_day", label: "All Day" },
-  { key: "time_notes", label: "Time Notes" },
-  { key: "location", label: "Location" },
-  { key: "links", label: "Links" },
-  { key: "source", label: "Source" },
-  { key: "status", label: "Status" },
-  { key: "id", label: "ID" },
-];
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    props.onKeyDown?.(event);
+    if (event.defaultPrevented || event.key !== "Enter") return;
+    if (
+      event.target instanceof Element &&
+      event.target.closest("a,button,input,textarea,select")
+    )
+      return;
+
+    event.preventDefault();
+    const row = props.row as MeetingRecord;
+    setSelectedMeeting((prev) => (prev?.id === row.id ? null : row));
+  };
+
+  return <GridRow {...props} tabIndex={0} onKeyDown={handleKeyDown} />;
+}
+
+export type SortKey = MeetingColumnKey;
+type HighlightField = SearchableField;
+
+type DataGridColumnConfig = Omit<GridColDef, "field" | "headerName">;
 
 /** Returns the search text to highlight in a column, only when that column's field is the active search field. */
 function getDataGridColumns(
   highlightFor: (field: HighlightField) => string | undefined,
   linkStatus: MeetingLinkStatusState
 ): GridColDef[] {
-  return [
-    {
-      field: "title",
-      headerName: "Title",
+  const columnConfigs = {
+    title: {
       flex: 2,
       minWidth: 140,
       renderCell: ({ row }) => (
@@ -130,9 +133,7 @@ function getDataGridColumns(
         </Box>
       ),
     },
-    {
-      field: "description",
-      headerName: "Description",
+    description: {
       flex: 2.5,
       minWidth: 160,
       renderCell: ({ row }) => (
@@ -144,9 +145,7 @@ function getDataGridColumns(
         />
       ),
     },
-    {
-      field: "classification",
-      headerName: "Classification",
+    classification: {
       flex: 1,
       minWidth: 115,
       renderCell: ({ row }) => (
@@ -156,25 +155,19 @@ function getDataGridColumns(
         />
       ),
     },
-    {
-      field: "start",
-      headerName: "Start",
+    start: {
       width: 105,
       renderCell: ({ row }) => (
         <TableText value={row.start} wrap maxLines={DATE_TIME_MAX_LINES} />
       ),
     },
-    {
-      field: "end",
-      headerName: "End",
+    end: {
       width: 105,
       renderCell: ({ row }) => (
         <TableText value={row.end} wrap maxLines={DATE_TIME_MAX_LINES} />
       ),
     },
-    {
-      field: "all_day",
-      headerName: "All Day",
+    all_day: {
       width: 80,
       renderCell: ({ row }) => (
         <TableText
@@ -183,9 +176,7 @@ function getDataGridColumns(
         />
       ),
     },
-    {
-      field: "time_notes",
-      headerName: "Time Notes",
+    time_notes: {
       flex: 1.5,
       minWidth: 120,
       renderCell: ({ row }) => (
@@ -197,9 +188,7 @@ function getDataGridColumns(
         />
       ),
     },
-    {
-      field: "location",
-      headerName: "Location",
+    location: {
       width: 200,
       minWidth: 99,
       valueGetter: (_value: unknown, row: unknown) =>
@@ -211,9 +200,7 @@ function getDataGridColumns(
         />
       ),
     },
-    {
-      field: "links",
-      headerName: "Links",
+    links: {
       flex: 1.5,
       minWidth: 120,
       sortable: false,
@@ -255,9 +242,7 @@ function getDataGridColumns(
         );
       },
     },
-    {
-      field: "source",
-      headerName: "Source",
+    source: {
       flex: 1.5,
       minWidth: 130,
       renderCell: ({ row }) =>
@@ -271,26 +256,29 @@ function getDataGridColumns(
           "—"
         ),
     },
-    {
-      field: "status",
-      headerName: "Status",
+    status: {
       width: 105,
+      minWidth: 105,
       valueGetter: (_value: unknown, row: unknown) =>
         normalizeStatus((row as MeetingRecord).status),
       renderCell: ({ value }) => (
         <StatusChip status={value} highlight={highlightFor("status")} />
       ),
     },
-    {
-      field: "id",
-      headerName: "ID",
+    id: {
       flex: 1,
       minWidth: 120,
       renderCell: ({ row }) => (
         <TruncatedText text={row.id} highlight={highlightFor("id")} />
       ),
     },
-  ];
+  } satisfies Record<MeetingColumnKey, DataGridColumnConfig>;
+
+  return MEETING_COLUMNS.map(({ key, label }) => ({
+    field: key,
+    headerName: label,
+    ...columnConfigs[key],
+  }));
 }
 
 function EmptyState() {
@@ -466,6 +454,7 @@ export default function MeetingsTable({
         slots={{
           noRowsOverlay: EmptyState,
           noColumnsOverlay: NoColumnsOverlay,
+          row: MeetingRow,
         }}
         getRowClassName={(params) => {
           const g = params.row._duplicateGroup;

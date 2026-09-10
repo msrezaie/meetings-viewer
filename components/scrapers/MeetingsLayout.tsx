@@ -6,8 +6,8 @@ import type { DuplicateInfo } from "@/lib/duplicate-detection";
 import { MeetingSelectionProvider } from "@/contexts/MeetingSelectionContext";
 import MeetingsTable from "@/components/scrapers/MeetingsTable";
 import MeetingDetailPanel from "@/components/scrapers/MeetingDetailPanel";
-import type { SearchField } from "@/hooks/useMeetingFilters";
 import type { MeetingLinkStatusState } from "@/hooks/useMeetingLinkStatus";
+import type { SearchField } from "@/lib/meeting-columns";
 import { SECTION_GAP } from "@/lib/ui-constants";
 
 export default function MeetingsLayout({

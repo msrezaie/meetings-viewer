@@ -78,6 +78,7 @@ export default function OverflowTooltip({
       title={tooltipTitle}
       placement="top"
       arrow
+      disableInteractive
       enterDelay={TOOLTIP_ENTER_DELAY}
       open={showTooltip}
       onClose={() => setShowTooltip(false)}

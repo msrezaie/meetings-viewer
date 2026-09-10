@@ -7,6 +7,7 @@ type MeetingColumnDefinition = {
   searchable: boolean;
   searchField?: boolean;
   getSearchValue: (record: MeetingRecord) => string;
+  defaultVisible: boolean;
 };
 
 function getLocationSearchValue(record: MeetingRecord): string {
@@ -29,6 +30,7 @@ export const MEETING_COLUMNS = [
     searchable: true,
     searchField: true,
     getSearchValue: (record) => record.title ?? "",
+    defaultVisible: true,
   },
   {
     key: "description",
@@ -36,30 +38,35 @@ export const MEETING_COLUMNS = [
     searchable: true,
     searchField: true,
     getSearchValue: (record) => record.description ?? "",
+    defaultVisible: true,
   },
   {
     key: "classification",
     label: "Classification",
     searchable: true,
     getSearchValue: (record) => record.classification ?? "",
+    defaultVisible: false,
   },
   {
     key: "start",
     label: "Start",
     searchable: false,
     getSearchValue: (record) => record.start ?? "",
+    defaultVisible: true,
   },
   {
     key: "end",
     label: "End",
     searchable: false,
     getSearchValue: (record) => record.end ?? "",
+    defaultVisible: true,
   },
   {
     key: "all_day",
     label: "All Day",
     searchable: true,
     getSearchValue: (record) => (record.all_day ? "yes true" : "no false"),
+    defaultVisible: false,
   },
   {
     key: "time_notes",
@@ -67,6 +74,7 @@ export const MEETING_COLUMNS = [
     searchable: true,
     searchField: true,
     getSearchValue: (record) => record.time_notes ?? "",
+    defaultVisible: false,
   },
   {
     key: "location",
@@ -74,6 +82,7 @@ export const MEETING_COLUMNS = [
     searchable: true,
     searchField: true,
     getSearchValue: getLocationSearchValue,
+    defaultVisible: true,
   },
   {
     key: "links",
@@ -84,6 +93,7 @@ export const MEETING_COLUMNS = [
         .flatMap((link) => [link.title, link.href])
         .filter(Boolean)
         .join(" "),
+    defaultVisible: true,
   },
   {
     key: "source",
@@ -91,18 +101,21 @@ export const MEETING_COLUMNS = [
     searchable: true,
     searchField: true,
     getSearchValue: (record) => record.source ?? "",
+    defaultVisible: false,
   },
   {
     key: "status",
     label: "Status",
     searchable: true,
     getSearchValue: (record) => normalizeStatus(record.status),
+    defaultVisible: true,
   },
   {
     key: "id",
     label: "ID",
     searchable: true,
     getSearchValue: (record) => record.id ?? "",
+    defaultVisible: false,
   },
 ] as const satisfies readonly MeetingColumnDefinition[];
 

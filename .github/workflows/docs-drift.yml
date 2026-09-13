@@ -1,0 +1,93 @@
+name: docs-drift
+
+# Detects where docs platform pages and mirrored sources disagree with the
+# artifacts they describe. Findings are posted as a PR comment and written to
+# drift/findings.json (uploaded as an artifact for agents). Blocking findings
+# (confidence: certain) fail the check.
+
+on:
+  pull_request:
+    paths:
+      - "content/**"
+      - "drift/**"
+      - "scripts/drift/**"
+      - "lib/**"
+      - "data/**"
+      - "components/docs/temp/**"
+      - ".github/CODEOWNERS"
+  push:
+    branches: [main]
+    paths:
+      - "content/**"
+      - "drift/**"
+      - "scripts/drift/**"
+      - "lib/**"
+      - "data/**"
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  drift:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Run drift check
+        id: drift
+        run: node scripts/drift/check.ts --fail
+        continue-on-error: true
+
+      - name: Upload findings artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: drift-findings
+          path: |
+            drift/findings.json
+            drift/report.md
+          if-no-files-found: ignore
+
+      - name: Comment on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require("fs");
+            let body;
+            try {
+              body = fs.readFileSync("drift/report.md", "utf8");
+            } catch {
+              body = "Drift check ran but produced no report.";
+            }
+            const marker = "<!-- docs-drift-report -->";
+            const full = `${marker}\n${body}`;
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const existing = comments.find((c) => c.body?.includes(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body: full,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: full,
+              });
+            }
+
+      - name: Fail on blocking findings
+        if: steps.drift.outcome == 'failure'
+        run: exit 1

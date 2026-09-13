@@ -1,0 +1,27 @@
+# Codeowners for the docs platform + drift routing.
+#
+# TODO: replace every @placeholder-* handle with real GitHub usernames or
+# teams before relying on routing in PRs. The drift checker resolves a
+# finding's owner by matching the disagreeing source's path against these
+# patterns; last match wins.
+
+# Default: everything falls through to the docs platform maintainer.
+*                                    @placeholder-ctd-docs
+
+# Docs platform content - the people who can edit pages.
+content/docs/**                      @placeholder-ctd-docs
+
+# Drift engine, claim registry, and mirrored sources.
+drift/**                             @placeholder-ctd-docs
+scripts/drift/**                     @placeholder-ctd-docs
+
+# Mirrored upstream documents (temp/ source docs, PDW-owned material).
+# Findings on these are routed here and reported upstream as messages -
+# CTD still decides what the platform publishes.
+components/docs/temp/**              @placeholder-ctd-docs
+
+# App code that docs pages assert facts about.
+lib/**                               @placeholder-ctd-app
+app/**                               @placeholder-ctd-app
+components/**                        @placeholder-ctd-app
+data/**                              @placeholder-ctd-app

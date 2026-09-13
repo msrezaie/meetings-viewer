@@ -43,5 +43,9 @@ next-env.d.ts
 # fumadocs generated source
 /.source/
 
+# drift check artifacts
+/drift/findings.json
+/drift/report.md
+
 # Local mode data directory
 /data

@@ -11,7 +11,9 @@
     "start": "next start",
     "lint": "eslint",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "docs:drift": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/drift/check.ts",
+    "docs:drift:check": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/drift/check.ts --fail"
   },
   "dependencies": {
     "@emotion/cache": "^11.14.0",

@@ -1,0 +1,13 @@
+{
+  "$comment": "Provenance for sources mirrored into drift/sources/. A mirrored file is a byte-faithful snapshot of an upstream artifact; when synced_at + ttl_days has passed, the drift check emits a `prompt`-confidence finding instead of silently trusting a stale copy.",
+  "sources": [
+    {
+      "ref": "drift/sources/city-scrapers-core/constants.py",
+      "origin": "https://github.com/City-Bureau/city-scrapers-core/blob/main/city_scrapers_core/constants.py",
+      "synced_at": "2026-09-12",
+      "ttl_days": 90,
+      "class": "executable",
+      "owner_role": "CTD docs maintainer re-syncs; City-Bureau owns upstream"
+    }
+  ]
+}

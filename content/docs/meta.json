@@ -1,4 +1,15 @@
 {
   "title": "City Scrapers Docs",
-  "pages": ["index", "viewer", "scrapers", "qa", "contributing"]
+  "pages": [
+    "index",
+    "viewer",
+    "scrapers",
+    "qa",
+    "pipeline",
+    "analytics",
+    "agents",
+    "reference",
+    "contributing",
+    "conflicts"
+  ]
 }

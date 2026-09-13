@@ -1,0 +1,111 @@
+---
+title: Review Issues
+description: The recurring review findings PDW catalogued across 23 real scraper PRs - and the pre-submission checklist that prevents them.
+---
+
+<RepoScope repo="scrapers" />
+
+# Review issues
+
+<Callout type="info">
+  This page summarizes an external source: Public Data Works' "Overview of code
+  review/QA issues for city-scrapers"
+  ([docs.pdw.co](https://docs.pdw.co/city-scrapers-overview-of-reviews)), last
+  verified 2026-08-28. The byte-faithful mirror lives at
+  `docs-platform/sources/pdw-code-review-issues.mdx`; when the summary below and
+  the mirror disagree, the mirror wins.
+</Callout>
+
+PDW reviewed 23 pull requests across three repos - `city-scrapers-tulsa`
+(12), `city-scrapers-colgo` (7), `city-scrapers-kancit` (4) - and catalogued
+the comments. Ranked by data-quality impact:
+
+## 1. Parsing and data-extraction bugs (~10 of 23 PRs)
+
+Regex patterns and CSS selectors written against small fixtures work on the
+clean cases and fail silently on edge cases: a title formatting variant, a
+field that sometimes holds the wrong type, a location name that differs from
+the authoritative display. **The countermeasure**: run the spider against the
+live site and inspect 10-20 real items _before_ writing parsing logic.
+
+## 2. Silent error handling (~5-8 of 23)
+
+`try/except` is right; a bare `pass` or silent `return` inside it is wrong.
+The spider exits cleanly, produces nothing, and nothing records why. The
+standard: every `except` block logs at least a `logger.warning(...)` with
+diagnosing context.
+
+## 3. Scrapy compatibility (2 of 23 - critical when it happens)
+
+`async def start()` is Scrapy 2.13+ syntax. Our repos pin Scrapy 2.11.2, which
+does not error - it just skips `start()` entirely and produces zero items.
+Check the `Pipfile` pin; use `start_requests()`.
+
+## 4. Test quality (~6 of 23)
+
+Two patterns: loose assertions (`assert len(items) >= 5` against a static
+fixture, where exact counts are free) and untested primary paths (the new
+feature goes untested because the fallback is easier to trigger). Exact
+assertions, and test the new logic.
+
+## 5. Date and time handling (~5 of 23)
+
+`datetime.utcnow()` is deprecated; `datetime.now()` without a timezone
+diverges between a developer's machine (local time) and CI runners (UTC);
+hardcoded year ranges break at rollover. Standards:
+
+- Comparisons against meeting times: `datetime.now(tz=ZoneInfo(self.timezone))`.
+- General timestamps: `datetime.now(timezone.utc)`.
+- Dynamic date ranges only.
+
+## 6. Code quality and style (~12 of 23 - high count, low data risk)
+
+Duplicate blocks, redundant calls, misleading names, unused imports,
+commented-out code. Almost always _suggestions_, not blockers - unless they
+indicate a structural problem.
+
+## 7. Performance (~2 of 23)
+
+Regex compiled inside per-item methods gets recompiled on every call. Compile
+at class level. Flagged in review, not a blocker absent evidence of real
+impact.
+
+## 8. Lint and CI failures (~4 of 23 - pure friction)
+
+Environment setup, not knowledge: the local `isort`/`black`/`flake8` config
+did not match the repo. Running them locally before every PR eliminates the
+category.
+
+## The pre-submission checklist
+
+Run through this before every PR:
+
+**Before writing code**
+
+- Run the spider against the live site and inspect raw output (10-20 items
+  minimum).
+- Check the pinned Scrapy version in `Pipfile` - `start_requests()`, not
+  `async def start()`.
+
+**While writing code**
+
+- Null-check before calling methods on CSS selector results.
+- Log warnings instead of swallowing exceptions.
+- `datetime.now(timezone.utc)`, not `datetime.utcnow()`.
+- Compile regex at class level, not inside per-item methods.
+- `errback=self.handle_error` on all `scrapy.Request` calls.
+- Handle spelling variants ("cancelled" and "canceled").
+- Dynamic date ranges - never hardcode years.
+- Explicit keys for deduplication, not array position.
+
+**Writing tests**
+
+- Test new logic, not just fallbacks.
+- Exact assertions: `== 42`, not `>= 5`.
+- Edge cases for new filtering/dedup logic.
+
+**Before submitting**
+
+- One more live run - check titles, dates, locations, links.
+- Remove commented-out code, unused imports, empty `__init__` methods.
+- `isort`, `black`, `flake8`, `pytest` all green locally.

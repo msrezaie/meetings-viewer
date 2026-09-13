@@ -1,0 +1,125 @@
+---
+title: Testing
+description: The pytest pattern for spiders - saved fixtures, freeze_time, and the two-phase test layout.
+---
+
+<RepoScope repo="scrapers" />
+
+# Testing
+
+Tests are functional verification: they confirm the spider parses a saved
+response without errors and produces records matching expected values for key
+fields. They are also how CI detects that a scraper broke when the source site
+changes.
+
+## File structure
+
+```
+tests/
+  files/
+    example_agency.html          # saved HTML or JSON from the listing page
+    example_agency_detail.html   # saved response from the detail page (if used)
+  test_example_agency.py
+```
+
+Capture test fixtures from the live source when the spider is known to produce
+correct output, then commit them - they are the stable fixture every future
+test run checks against.
+
+## Standard test pattern
+
+```python
+from os.path import dirname, join
+from datetime import datetime
+
+import pytest
+from city_scrapers_core.utils import file_response
+from freezegun import freeze_time
+
+from city_scrapers.spiders.example_agency import ExampleAgencySpider
+
+test_response = file_response(
+    join(dirname(__file__), "files", "example_agency.html"),
+    url="https://example.gov/meetings",
+)
+
+@pytest.fixture
+def spider():
+    return ExampleAgencySpider()
+
+@pytest.fixture
+def parsed_items(spider):
+    with freeze_time("2026-04-08"):
+        return list(spider.parse(test_response))
+
+def test_count(parsed_items):
+    assert len(parsed_items) == 12
+
+def test_title(parsed_items):
+    assert parsed_items[0]["title"] == "Board of Education"
+
+def test_start(parsed_items):
+    assert parsed_items[0]["start"] == datetime(2026, 3, 10, 18, 0)
+
+def test_status(parsed_items):
+    assert parsed_items[0]["status"] == "passed"
+
+def test_location(parsed_items):
+    assert parsed_items[0]["location"] == {
+        "name": "District Office",
+        "address": "1234 Main St, Chicago, IL 60601",
+    }
+```
+
+Use `freeze_time` whenever status assertions are involved - it makes
+`passed`/`tentative` results deterministic by pinning "now" relative to the
+fixture's meeting dates.
+
+<Callout type="warn">
+  Assert exact values against fixtures. `assert len(items) == 42`, never
+  `assert len(items) >= 5` - a fixture is static, so an exact count is both
+  reliable and meaningful. Loose assertions are one of the most common review
+  findings.
+</Callout>
+
+## Two-phase tests
+
+When `parse` yields `Request` objects instead of Meeting items, the fixtures
+separate the two phases. Phase one asserts on the `cb_kwargs` each request
+carries; phase two feeds a saved detail response to the detail parser:
+
+```python
+test_response = file_response(
+    join(dirname(__file__), "files", "fortx_boards_listing.json"),
+    url="https://example.gov/meetings/list",
+)
+test_detail = file_response(
+    join(dirname(__file__), "files", "fortx_boards_detail.json"),
+    url="https://example.gov/meetings/detail",
+)
+
+@pytest.fixture
+def get_items(spider):
+    with freeze_time("2026-03-09"):
+        return [req.cb_kwargs["item"] for req in spider.parse(test_response)]
+
+@pytest.fixture
+def parsed_items(spider, get_items):
+    return list(spider.parse_meeting(test_detail, item=get_items[0]))
+
+def test_request_count(get_items):
+    assert len(get_items) == 27
+
+def test_title(parsed_items):
+    assert parsed_items[0]["title"] == "Fort Worth Boards"
+```
+
+## Coverage expectations
+
+Tests cover a representative couple of meeting records, not every field of
+every record. Prioritize:
+
+- Key fields: `title`, `start`, `status`, `location`.
+- The **primary logic path** of any new feature - if a PR adds a new parsing
+  strategy, test it, not just the fallback.
+- Edge cases for new filtering or dedup logic.

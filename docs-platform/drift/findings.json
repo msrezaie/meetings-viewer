@@ -1,0 +1,316 @@
+{
+  "generated_at": "2026-09-13T04:19:33.087Z",
+  "findings": [
+    {
+      "id": "status-vocabulary::docs-platform/sources/city-scraper-project-tech-guide.md",
+      "claim": "status-vocabulary",
+      "subject": "meeting.status vocabulary",
+      "confidence": "certain",
+      "blocking": false,
+      "owner": "@msrezaie",
+      "action": "Do not edit the mirror. Check whether upstream docs-platform/sources/city-scrapers-core/constants.py changed; if the mirror is stale, re-sync it and update sources.json.",
+      "master": {
+        "ref": "docs-platform/sources/city-scrapers-core/constants.py",
+        "value": [
+          "cancelled",
+          "tentative",
+          "confirmed",
+          "passed"
+        ]
+      },
+      "evidence": [
+        {
+          "ref": "docs-platform/sources/city-scraper-project-tech-guide.md",
+          "value": [
+            "TENTATIVE",
+            "PASSED",
+            "CANCELED"
+          ],
+          "extra": [
+            "CANCELED"
+          ]
+        }
+      ],
+      "fingerprint": "f820fd38c779b57a"
+    },
+    {
+      "id": "status-vocabulary::docs-platform/sources/city-scrapers-development-guide.md",
+      "claim": "status-vocabulary",
+      "subject": "meeting.status vocabulary",
+      "confidence": "certain",
+      "blocking": false,
+      "owner": "@msrezaie",
+      "action": "Do not edit the mirror. Check whether upstream docs-platform/sources/city-scrapers-core/constants.py changed; if the mirror is stale, re-sync it and update sources.json.",
+      "master": {
+        "ref": "docs-platform/sources/city-scrapers-core/constants.py",
+        "value": [
+          "cancelled",
+          "tentative",
+          "confirmed",
+          "passed"
+        ]
+      },
+      "evidence": [
+        {
+          "ref": "docs-platform/sources/city-scrapers-development-guide.md",
+          "value": [
+            "passed",
+            "tentative",
+            "cancelled"
+          ],
+          "missing": [
+            "confirmed"
+          ]
+        }
+      ],
+      "fingerprint": "830d425dea6f0715"
+    },
+    {
+      "id": "status-vocabulary::docs-platform/sources/skills/spider-review/SKILL.md",
+      "claim": "status-vocabulary",
+      "subject": "meeting.status vocabulary",
+      "confidence": "certain",
+      "blocking": false,
+      "owner": "@msrezaie",
+      "action": "Do not edit the mirror. Check whether upstream docs-platform/sources/city-scrapers-core/constants.py changed; if the mirror is stale, re-sync it and update sources.json.",
+      "master": {
+        "ref": "docs-platform/sources/city-scrapers-core/constants.py",
+        "value": [
+          "cancelled",
+          "tentative",
+          "confirmed",
+          "passed"
+        ]
+      },
+      "evidence": [
+        {
+          "ref": "docs-platform/sources/skills/spider-review/SKILL.md",
+          "value": [
+            "tentative",
+            "passed",
+            "cancelled"
+          ],
+          "missing": [
+            "confirmed"
+          ]
+        }
+      ],
+      "fingerprint": "e2c9f2505e27c7e0"
+    },
+    {
+      "id": "classification-vocabulary::docs-platform/sources/city-scraper-project-tech-guide.md",
+      "claim": "classification-vocabulary",
+      "subject": "meeting.classification vocabulary",
+      "confidence": "certain",
+      "blocking": false,
+      "owner": "@msrezaie",
+      "action": "Do not edit the mirror. Check whether upstream docs-platform/sources/city-scrapers-core/constants.py changed; if the mirror is stale, re-sync it and update sources.json.",
+      "master": {
+        "ref": "docs-platform/sources/city-scrapers-core/constants.py",
+        "value": [
+          "Advisory Committee",
+          "Board",
+          "City Council",
+          "Commission",
+          "Committee",
+          "Forum",
+          "Police Beat",
+          "Not classified"
+        ]
+      },
+      "evidence": [
+        {
+          "ref": "docs-platform/sources/city-scraper-project-tech-guide.md",
+          "value": [
+            "COUNCIL",
+            "UNCLASSIFIED"
+          ],
+          "extra": [
+            "COUNCIL",
+            "UNCLASSIFIED"
+          ]
+        }
+      ],
+      "fingerprint": "dcc71a2b070b5c50"
+    },
+    {
+      "id": "classification-vocabulary::data/scrapers/test_spider2.json",
+      "claim": "classification-vocabulary",
+      "subject": "meeting.classification vocabulary",
+      "confidence": "certain",
+      "blocking": false,
+      "owner": "@msrezaie",
+      "action": "Review data/scrapers/test_spider2.json against docs-platform/sources/city-scrapers-core/constants.py.",
+      "master": {
+        "ref": "docs-platform/sources/city-scrapers-core/constants.py",
+        "value": [
+          "Advisory Committee",
+          "Board",
+          "City Council",
+          "Commission",
+          "Committee",
+          "Forum",
+          "Police Beat",
+          "Not classified"
+        ]
+      },
+      "evidence": [
+        {
+          "ref": "data/scrapers/test_spider2.json",
+          "value": [
+            "Co",
+            "Board"
+          ],
+          "extra": [
+            "co"
+          ]
+        }
+      ],
+      "fingerprint": "a70d62cb8c74d6c7"
+    }
+  ],
+  "overlap": [
+    {
+      "subject": "meeting.status vocabulary",
+      "claim": "status-vocabulary",
+      "restated": [
+        {
+          "ref": "docs-platform/sources/city-scrapers-core/constants.py",
+          "status": "master"
+        },
+        {
+          "ref": "content/docs/qa/schema.mdx",
+          "page": "/docs/qa/schema",
+          "status": "agrees"
+        },
+        {
+          "ref": "content/docs/scrapers/writing-a-spider.mdx",
+          "page": "/docs/scrapers/writing-a-spider",
+          "status": "agrees"
+        },
+        {
+          "ref": "content/docs/qa/rubric.mdx",
+          "page": "/docs/qa/rubric",
+          "status": "agrees"
+        },
+        {
+          "ref": "content/docs/viewer/index.mdx",
+          "page": "/docs/viewer",
+          "status": "agrees"
+        },
+        {
+          "ref": "docs-platform/sources/city-scraper-project-tech-guide.md",
+          "status": "conflicts"
+        },
+        {
+          "ref": "docs-platform/sources/city-scrapers-development-guide.md",
+          "status": "conflicts"
+        },
+        {
+          "ref": "docs-platform/sources/skills/spider-review/SKILL.md",
+          "status": "conflicts"
+        },
+        {
+          "ref": "data/scrapers/test_spider1.json",
+          "status": "agrees"
+        },
+        {
+          "ref": "data/scrapers/test_spider2.json",
+          "status": "agrees"
+        },
+        {
+          "ref": "data/scrapers/test_spider3_duplicates.json",
+          "status": "agrees"
+        }
+      ]
+    },
+    {
+      "subject": "meeting.classification vocabulary",
+      "claim": "classification-vocabulary",
+      "restated": [
+        {
+          "ref": "docs-platform/sources/city-scrapers-core/constants.py",
+          "status": "master"
+        },
+        {
+          "ref": "content/docs/qa/schema.mdx",
+          "page": "/docs/qa/schema",
+          "status": "agrees"
+        },
+        {
+          "ref": "docs-platform/sources/city-scraper-project-tech-guide.md",
+          "status": "conflicts"
+        },
+        {
+          "ref": "docs-platform/sources/city-scrapers-development-guide.md",
+          "status": "agrees"
+        },
+        {
+          "ref": "docs-platform/sources/skills/spider-review/SKILL.md",
+          "status": "agrees"
+        },
+        {
+          "ref": "data/scrapers/test_spider1.json",
+          "status": "agrees"
+        },
+        {
+          "ref": "data/scrapers/test_spider2.json",
+          "status": "conflicts"
+        },
+        {
+          "ref": "data/scrapers/test_spider3_duplicates.json",
+          "status": "agrees"
+        }
+      ]
+    },
+    {
+      "subject": "meeting.start / meeting.end timezone convention",
+      "claim": "start-timezone",
+      "restated": [
+        {
+          "ref": "docs-platform/sources/city-scrapers-development-guide.md",
+          "status": "master"
+        },
+        {
+          "ref": "content/docs/qa/schema.mdx",
+          "page": "/docs/qa/schema",
+          "status": "agrees"
+        },
+        {
+          "ref": "docs-platform/sources/city-scraper-project-tech-guide.md",
+          "status": "agrees"
+        },
+        {
+          "ref": "data/scrapers/test_spider1.json",
+          "status": "agrees"
+        }
+      ]
+    },
+    {
+      "subject": "meeting.links priority order",
+      "claim": "links-priority",
+      "restated": [
+        {
+          "ref": "docs-platform/sources/city-scrapers-development-guide.md",
+          "status": "master"
+        },
+        {
+          "ref": "content/docs/qa/schema.mdx",
+          "page": "/docs/qa/schema",
+          "status": "agrees"
+        }
+      ]
+    },
+    {
+      "subject": "qa/schema.mdx generation claim",
+      "claim": "schema-page-generated",
+      "restated": [
+        {
+          "ref": "content/docs/qa/schema.mdx",
+          "page": "/docs/qa/schema",
+          "status": "agrees"
+        }
+      ]
+    }
+  ]
+}

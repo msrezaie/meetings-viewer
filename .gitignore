@@ -43,9 +43,9 @@ next-env.d.ts
 # fumadocs generated source
 /.source/
 
-# drift check artifacts
-/drift/findings.json
-/drift/report.md
-
 # Local mode data directory
 /data
+# lighthouse CI local artifacts
+/.lighthouseci/
+# playwright MCP snapshots
+/.playwright-mcp/

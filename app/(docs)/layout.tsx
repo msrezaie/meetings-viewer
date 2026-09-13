@@ -12,7 +12,10 @@ export default function DocsLayoutRoot({
   return (
     <>
       <DarkModeSync />
-      <RootProvider theme={{ enabled: false, hotKey: false }}>
+      <RootProvider
+        theme={{ enabled: false, hotKey: false }}
+        search={{ enabled: false }}
+      >
         <DocsLayout
           tree={source.pageTree}
           nav={{ title: siteConfig.docsNavTitle, enabled: false }}
@@ -23,7 +26,7 @@ export default function DocsLayoutRoot({
           containerProps={{
             style: {
               "--fd-layout-width": "100vw",
-              "--fd-docs-row-1": "69px",
+              "--fd-docs-row-1": "70px",
             } as React.CSSProperties,
           }}
         >

@@ -1,0 +1,74 @@
+---
+title: Scraper Types
+description: The taxonomy of agency meeting sites, with a real spider for each type.
+---
+
+<RepoScope repo="scrapers" />
+
+# Scraper types
+
+Spiders share a structure, but how they parse varies with how the agency
+renders meeting information. Meeting websites range from modern to ancient;
+these are the types that recur, each with a live example.
+
+<Accordions>
+<Accordion title="Static HTML" id="static-html">
+
+All relevant data on one page, minimal or no JavaScript. Parse with CSS
+selectors; the simplest and most brittle category.
+
+Example:
+[Development Authority of Fulton County](https://github.com/City-Bureau/city-scrapers-atl/blob/28497d16c99ca2bff24119391baffbb54a96c737/city_scrapers/spiders/atl_dafc.py)
+
+</Accordion>
+<Accordion title="Multi-page" id="multi-page">
+
+Meeting data is spread across pages - a listing page plus a detail page per
+meeting. `parse` yields `Request` objects; `cb_kwargs` carries listing context
+into the detail parser.
+
+Examples:
+[Cleveland Community Police Commission](https://github.com/City-Bureau/city-scrapers-cle/blob/45b7f57a1dcaa019db8233aff5ac4bac77e78b5c/city_scrapers/spiders/cle_cpc.py),
+[Pace Suburban Bus Services](https://github.com/City-Bureau/city-scrapers/blob/a144119dd6c85a34ef7f18ffc01aa910274f2cd6/city_scrapers/spiders/cook_pace_board.py)
+
+</Accordion>
+<Accordion title="API-driven (JSON, XML)" id="api-driven">
+
+The agency's frontend populates meeting info from a REST endpoint, so the
+spider requests JSON or XML directly. The common pattern on JavaScript-heavy
+sites - find the endpoint in DevTools' network tab.
+
+Examples:
+[Chicago City Council](https://github.com/City-Bureau/city-scrapers/blob/3066a5f227e78fb08aa028a855e355c2f5c460c8/city_scrapers/spiders/chi_citycouncil.py),
+[Philadelphia Board of Education](https://github.com/City-Bureau/city-scrapers-philly/blob/d2aa1e9f222c375c041135cc7f4676cb777fd79d/city_scrapers/spiders/phipa_boe.py)
+
+</Accordion>
+<Accordion title="iCalendar" id="icalendar">
+
+The agency publishes an RFC 5545 calendar feed. Nicely structured and usually
+easy to parse.
+
+Examples:
+[Wichita Independent Neighborhoods](https://github.com/City-Bureau/city-scrapers-wichita/pull/12),
+[Detroit Public Schools Community District](https://github.com/City-Bureau/city-scrapers-det/blob/1491c90d64de1940ec74aeceafbb1bca0297734f/city_scrapers/spiders/det_board_of_education.py)
+
+</Accordion>
+<Accordion title="Dynamic website" id="dynamic">
+
+Content is rendered by JavaScript. Check for an underlying API first - that
+makes it API-driven, not dynamic. When the rendered DOM itself is required,
+use scrapy-playwright (see [Bot detection](/docs/scrapers/bot-detection)).
+
+</Accordion>
+<Accordion title="PDF or image-based" id="pdf">
+
+Meeting details live in PDFs or images, requiring OCR tooling like pdfminer
+alongside Scrapy. Often not worth building - see
+[Scoping a target](/docs/scrapers/scoping-a-target) for when to recommend
+against it.
+
+</Accordion>
+</Accordions>
+
+More worked examples - including GET+POST hybrids, authenticated requests, and
+Legistar - are in the [link index](/docs/reference/links#spider-examples).

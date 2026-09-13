@@ -1,0 +1,72 @@
+---
+title: Viewer Architecture
+description: The two data modes, the meeting record shape, and the invariants both modes share.
+---
+
+<RepoScope repo="meetings-viewer" />
+
+# Viewer architecture
+
+<Callout type="info">
+  This page summarizes `meetings-viewer-technical-specification.md`, mirrored at
+  `docs-platform/sources/meetings-viewer-technical-specification.md`. It
+  reflects the spec, not necessarily the current implementation - where the code
+  and the spec disagree, the code wins.
+</Callout>
+
+## Two modes, one data shape
+
+The viewer was designed to operate in two modes:
+
+- **Static/local mode** - reads scraper output files from `data/scrapers/` in
+  the repo. This is the QA tool mode: run a spider, open the viewer, review.
+- **SaaS mode** - the same UI backed by a database, deployed as part of the
+  Documenters platform.
+
+Both modes share the same invariants: the meeting record schema, the status
+and classification vocabularies, and the link priority order. A scraper that
+produces correct output in static mode produces correct output in SaaS mode
+
+- the [schema](/docs/qa/schema) is the contract.
+
+## The data layer
+
+`lib/scraper-data.ts` defines the `MeetingRecord` type - 12 fields, 4
+statuses, 8 classifications. The generated table of record is
+`docs-platform/generated/meeting-schema.json` (regenerate with
+`npm run docs:schema`); the human-readable view is the
+[schema page](/docs/qa/schema).
+
+Supporting modules:
+
+- `lib/duplicate-detection.ts` - groups records by start time, then compares
+  titles by significant-word overlap. Generic words ("the", "meeting",
+  "regular") are ignored so "City Council Meeting" and "City Council Regular
+  Meeting" collide.
+- `lib/scraper-loader.ts` - reads `data/scrapers/*.json` at request time and
+  normalizes records into `MeetingRecord`.
+
+## Why a table
+
+The spec documents why the table is the primary surface rather than a
+calendar or card list:
+
+- **Field coverage** - every record field is visible at once, which is what
+  QA needs.
+- **Sorting and filtering** - the grid handles classification, status, and
+  date-range filters without bespoke UI.
+- **Duplicate detection** - same-start records appear adjacent when sorted by
+  start time.
+- **Density** - hundreds of records are reviewable without pagination tricks.
+
+## Open questions the spec leaves open
+
+- How SaaS mode authenticates and scopes data per city.
+- Whether static mode and SaaS mode share a deployment or ship separately.
+- How link status checking (CS-127) surfaces results in the UI.
+
+## Source
+
+The full spec, including the original data-model discussion and UI
+requirements, is mirrored at
+`docs-platform/sources/meetings-viewer-technical-specification.md`.

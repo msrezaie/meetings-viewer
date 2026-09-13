@@ -1,27 +1,19 @@
-# Codeowners for the docs platform + drift routing.
+# Paths are routing addresses, not access controls. When a drift finding
+# touches a path, the LAST matching pattern names who gets told first.
+# Owners must hold write access or GitHub silently skips them.
 #
-# TODO: replace every @placeholder-* handle with real GitHub usernames or
-# teams before relying on routing in PRs. The drift checker resolves a
-# finding's owner by matching the disagreeing source's path against these
-# patterns; last match wins.
+# If more maintainers join, split these by path rather than adding parallel
+# registries - this file is the single ownership map for the repo.
 
-# Default: everything falls through to the docs platform maintainer.
-*                                    @placeholder-ctd-docs
+# Default: everything routes to the repo maintainer.
+*                                    @msrezaie
 
-# Docs platform content - the people who can edit pages.
-content/docs/**                      @placeholder-ctd-docs
-
-# Drift engine, claim registry, and mirrored sources.
-drift/**                             @placeholder-ctd-docs
-scripts/drift/**                     @placeholder-ctd-docs
-
-# Mirrored upstream documents (temp/ source docs, PDW-owned material).
-# Findings on these are routed here and reported upstream as messages -
-# CTD still decides what the platform publishes.
-components/docs/temp/**              @placeholder-ctd-docs
+# Docs platform: content, engine, claim registry, mirrored sources.
+content/docs/**                      @msrezaie
+docs-platform/**                     @msrezaie
 
 # App code that docs pages assert facts about.
-lib/**                               @placeholder-ctd-app
-app/**                               @placeholder-ctd-app
-components/**                        @placeholder-ctd-app
-data/**                              @placeholder-ctd-app
+lib/**                               @msrezaie
+app/**                               @msrezaie
+components/**                        @msrezaie
+data/**                              @msrezaie

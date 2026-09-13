@@ -1,0 +1,93 @@
+name: docs-quality
+
+# Quality gate (playbook P5, W-5): axe-core accessibility is deterministic and
+# is the one quality gate that blocks. Lighthouse CI runs alongside it for
+# performance and SEO as a warning only, on the median of three runs - shared
+# CI runners are too noisy to gate on. On pushes to main, the median
+# performance score is appended to docs-platform/lighthouse/history.json and
+# rendered by /docs/analytics.
+
+on:
+  pull_request:
+    paths:
+      - "content/**"
+      - "app/**"
+      - "components/**"
+      - "lib/**"
+      - "docs-platform/**"
+  push:
+    branches: [main]
+
+permissions:
+  contents: write # to commit the lighthouse history append on main
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Start the app
+        run: |
+          nohup npm run start -- -p 3000 > /tmp/next-server.log 2>&1 &
+          for i in $(seq 1 60); do
+            curl -sf http://localhost:3000/docs > /dev/null && break
+            sleep 2
+          done
+          curl -sf http://localhost:3000/docs > /dev/null
+
+      - name: axe-core accessibility (blocking)
+        run: |
+          for route in / /docs /docs/scrapers /docs/qa/schema /docs/conflicts /docs/analytics /scrapers; do
+            npx -y @axe-core/cli@4.13.0 --exit "http://localhost:3000${route}"
+          done
+
+      - name: Lighthouse CI (warning only, median of 3)
+        id: lighthouse
+        continue-on-error: true
+        run: |
+          npx -y @lhci/cli@0.15.1 collect \
+            --url=http://localhost:3000/docs \
+            --numberOfRuns=3 \
+            --settings.chromeFlags="--no-sandbox"
+
+      - name: Warn on Lighthouse results
+        if: always() && steps.lighthouse.outcome == 'failure'
+        run: |
+          echo "::warning::Lighthouse run reported issues - see step output. Warning-only gate; not blocking this PR."
+
+      - name: Append Lighthouse score to history (main only)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && always()
+        run: |
+          node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON -e "
+            const fs = await import('node:fs');
+            const manifest = JSON.parse(fs.readFileSync('.lighthouseci/manifest.json', 'utf8'));
+            const doc = manifest.find(r => (r.url || '').endsWith('/docs'));
+            if (!doc) { console.log('no /docs run in manifest'); process.exit(0); }
+            const score = Math.round((doc.summary?.performance ?? doc.performance ?? 0) * 100);
+            const hist = JSON.parse(fs.readFileSync('docs-platform/lighthouse/history.json', 'utf8'));
+            hist.points.push({
+              build: process.env.GITHUB_SHA.slice(0, 7),
+              date: new Date().toISOString().slice(0, 10),
+              performance: score,
+            });
+            fs.writeFileSync('docs-platform/lighthouse/history.json', JSON.stringify(hist, null, 2) + '\n');
+            console.log('appended score', score);
+          "
+          if ! git diff --quiet -- docs-platform/lighthouse/history.json; then
+            git -c user.name="github-actions[bot]" \
+                -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+                commit -am "docs: append lighthouse score for ${GITHUB_SHA:0:7}"
+            git push
+          fi

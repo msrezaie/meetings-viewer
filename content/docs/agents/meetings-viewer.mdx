@@ -1,0 +1,46 @@
+---
+title: Meetings Viewer
+description: This repo's agent setup - one real memory rule today, and the candidate material for what to add next.
+---
+
+<RepoScope repo="meetings-viewer" />
+
+# Meetings viewer - agent setup
+
+**Owner**: the frontend team that maintains this app.
+
+## What exists today
+
+One file: [`AGENTS.md`](https://github.com/msrezaie/meetings-viewer/blob/CS-121-docs-platform-implementation-phase-2/AGENTS.md)
+at the repo root, carrying a single rule:
+
+> This version of Next.js has breaking changes - APIs, conventions, and file
+> structure may all differ from a model's training data. Read the relevant
+> guide in `node_modules/next/dist/docs/` before writing any code.
+
+That is the whole setup. No skills, no subagents, no hooks - and that's fine.
+One true rule, loaded automatically into every session, beats a speculative
+library of conventions nobody has tested.
+
+## Why that rule earns its place
+
+It is the ideal memory entry: something every session must always know, that
+is cheap to load (one line), and that prevents a concrete, repeated failure
+mode - an agent confidently writing Next.js 14 patterns into a Next.js 16
+app.
+
+## What to add next
+
+The candidate material for this repo's first skill already exists - the
+docs-platform standing rules that govern contributions to this site:
+
+- Every page declares its [`RepoScope`](/docs/scrapers) callout.
+- Commands are copy-pasteable as written - no placeholder flags without an
+  explanation of what to substitute.
+- Dark-mode parity checked before merge.
+
+That is a real skill's worth of material - a packaged "contributing to these
+docs" checklist - sitting unpackaged in the playbook. When someone packages
+it as a `SKILL.md` in this repo, this page links to it and summarizes intent
+in two sentences, per
+[the method](/docs/agents/how-to-add-a-section).

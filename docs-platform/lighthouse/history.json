@@ -1,0 +1,4 @@
+{
+  "$comment": "One record per CI build that runs the Lighthouse gate on /docs. Appended by .github/workflows/docs-quality.yml; rendered by /docs/analytics via LighthouseTrend. Do not hand-edit except to seed.",
+  "points": []
+}

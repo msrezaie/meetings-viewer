@@ -15,6 +15,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { usePathname } from "next/navigation";
 import { LogoMark } from "./logo-mark";
+import { SearchTrigger } from "./docs-search";
 import { siteConfig } from "@/lib/site-config";
 import { PAGE_PADDING, NAV_DRAWER_WIDTH } from "@/lib/ui-constants";
 import { Toolbar } from "@mui/material";
@@ -166,10 +167,11 @@ export function SiteHeader() {
             sx={{
               display: { xs: "none", sm: "flex" },
               flexDirection: "row",
-              // gap: 1.5,
+              gap: 1.5,
               alignItems: "center",
             }}
           >
+            <SearchTrigger />
             {navItems.map((item) => (
               <Button
                 key={item.href}

@@ -1,0 +1,21 @@
+# Project vocabulary the Vale prose gate accepts. Add terms here as they
+# appear in docs rather than disabling rules. One regex per line; matched
+# case-insensitively by Vale's built-in vocab mechanism.
+[Ss]crapy
+[Ff]umadocs
+[Kk]eystatic
+[Aa]irtable
+[Ll]egistar
+[Cc]ivic[Cc]lerk
+[Dd]ocumenters
+[Cc]ity[- ][Ss]crapers
+[Ww]ayback
+[Pp]y[Aa]irtable
+[Mm][Dd][Xx]
+[Ss]crapers?
+[Ss]piders?
+[Zz]one[Ii]nfo
+[Ss]entry
+[Gg]it[Hh]ub
+[Aa]zure
+[Ss]crapers[- ][Ss]tability

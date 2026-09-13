@@ -1,62 +1,84 @@
 ---
 title: QA Rubric
-description: Field-by-field checks to apply against scraper output during review.
+description: Field-by-field checks to apply against real scraper output.
 ---
+
+<RepoScope repo="meetings-viewer" />
 
 # QA rubric
 
-Apply these checks field by field against the scraper's JSON output. Each check
-has a pass/fail criteria and a link to the relevant schema section.
+Apply these checks field by field against the scraper's JSON output. Each
+check has a pass/fail criteria and links to the relevant
+[schema](/docs/qa/schema) section.
 
-## id
+## Rubric report
 
-- **Check**: Unique within the spider's output.
-- **Pass**: No two records share the same `id`.
-- **Fail**: Duplicate IDs found. The viewer highlights duplicates with a colored
-  badge.
+Paste a spider's JSON output below to run the mechanical half of the rubric -
+required fields, datetime format, vocabularies, link order, duplicates. The
+checks reuse the same generated schema and duplicate detection the app uses.
+
+<RubricReport />
 
 ## title
 
-- **Check**: Contains the body name, not just a date or generic label.
-- **Pass**: "City Council Regular Meeting" or similar.
-- **Fail**: "Regular Meeting" or "January 15, 2026".
+- **Check**: Official meeting name including the body name; no embedded date
+  or time.
+- **Pass**: `"City Council Regular Meeting"`.
+- **Fail**: `"Regular Meeting"` or `"Board Meeting - January 15, 2026 at 6:00
+PM"`.
+
+## description
+
+- **Check**: Present; usually empty unless the source provides one.
+- **Pass**: `""` or a real source-provided description.
+- **Fail**: Missing field, or a synthesized copy of the title.
+
+## classification
+
+- **Check**: One of the city-scrapers-core classification constants - Advisory
+  Committee, Board, City Council, Commission, Committee, Forum, Police Beat,
+  Not classified.
+- **Pass**: `"City Council"` for a council meeting.
+- **Fail**: An invented type outside the vocabulary.
 
 ## start
 
-- **Check**: Timezone-aware ISO 8601 datetime.
-- **Pass**: `"2026-01-15T10:00:00-08:00"`.
-- **Fail**: `"2026-01-15T10:00:00"` (no timezone).
+- **Check**: Naive datetime string `"YYYY-MM-DD HH:mm:ss"` - no timezone
+  suffix.
+- **Pass**: `"2026-01-15 10:00:00"`.
+- **Fail**: `"2026-01-15T10:00:00-08:00"` (timezone-aware) or a missing field.
 
 ## end
 
-- **Check**: Timezone-aware, and after `start`.
-- **Pass**: `"2026-01-15T12:00:00-08:00"` (2 hours after start).
-- **Fail**: Before `start`, or missing timezone.
+- **Check**: Naive datetime, and after `start` when present.
+- **Pass**: `"2026-01-15 12:00:00"` (two hours after start).
+- **Fail**: Before `start`, or carrying a timezone suffix.
 
 <Callout type="warn">
-  If `end` is not explicitly set, it defaults to `start + 2 hours`. This is
-  usually correct but check it against the source - some meetings have different
-  durations.
+  If `end` is not explicitly set by the spider, it defaults to `start + 2
+  hours`. Usually correct - but check it against the source, some meetings have
+  different durations.
 </Callout>
 
 ## status
 
-- **Check**: Consistent with `start` time.
-- **Pass**: `passed` for past meetings, `tentative` for future meetings,
-  `cancelled` for meetings that were cancelled.
-- **Fail**: `passed` for a future meeting, or `tentative` for a past meeting.
+- **Check**: One of `passed`, `tentative`, `confirmed`, `cancelled`, and
+  consistent with `start`.
+- **Pass**: `passed` for past meetings, `tentative` or `confirmed` for
+  upcoming ones, `cancelled` only when the source confirms cancellation.
+- **Fail**: `passed` for a future meeting, or a value outside the vocabulary.
 
 ## location
 
 - **Check**: Not empty unless `time_notes` explains why.
 - **Pass**: `{ "name": "City Hall", "address": "202 C St, San Diego, CA" }`.
-- **Fail**: Empty `name` and `address` with empty `time_notes`.
+- **Fail**: Empty `name` and `address` with an empty `time_notes`.
 
 ## links
 
-- **Check**: In priority order (agenda, video, minutes, other).
-- **Pass**: Agenda link first, then video, then minutes.
-- **Fail**: Video link before agenda, or minutes before agenda.
+- **Check**: In priority order - agenda, minutes, video, other.
+- **Pass**: Agenda first, then minutes, then a recording link.
+- **Fail**: Video before minutes, or minutes before agenda.
 
 ## all_day
 
@@ -66,14 +88,15 @@ has a pass/fail criteria and a link to the relevant schema section.
 
 ## duplicates
 
-- **Check**: No records with the same start time and similar title.
+- **Check**: No records with the same start time and a similar title.
 - **Pass**: All records are distinct.
 - **Fail**: Two records with the same start and titles like "City Council
-  Meeting" and "City Council Regular Meeting" (the viewer's duplicate detection
-  uses significant-word overlap, not exact match).
+  Meeting" and "City Council Regular Meeting" - the viewer's duplicate
+  detection uses significant-word overlap, not exact match.
 
 <Callout type="tip">
-  The viewer's duplicate detection is in `lib/duplicates.ts`. It groups records
-  by start time and then checks significant-word overlap in titles. Generic
-  words like "the", "meeting", "regular" are ignored.
+  The viewer's duplicate detection lives in `lib/duplicate-detection.ts`. It
+  groups records by start time and then checks significant-word overlap in
+  titles - generic words like "the", "meeting", "regular" are ignored. The
+  rubric report above runs the same algorithm.
 </Callout>

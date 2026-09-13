@@ -3,111 +3,110 @@ title: Schema Reference
 description: The twelve fields every meeting record must have, with types, examples, and edge cases.
 ---
 
+<RepoScope repo="meetings-viewer" />
+
 # Schema reference
 
-Every meeting record is a JSON object with these fields. The TypeScript types
-live in `lib/scrapers.ts` in the Meetings Viewer repo - this page is generated
-from them.
+Every meeting record is a JSON object with the fields below. The table is
+generated from the `MeetingRecord` type in `lib/scraper-data.ts` plus the
+vocabularies mirrored from `city-scrapers-core` - regenerate with
+`npm run docs:schema`, and never hand-edit the field list.
 
 ## Fields
 
+<SchemaTable />
+
 ### id
 
-- **Type**: `string`
-- **Required**: yes
-- **Description**: A unique identifier for the meeting within this spider's
-  output. Conventionally a slug derived from the agency, date, and title.
+A unique identifier for the meeting within this spider's output.
+Conventionally a slug derived from the agency, date, and title.
 
 ### title
 
-- **Type**: `string`
-- **Required**: yes
-- **Description**: The official name of the meeting. Should include the body
-  name, not just a generic label like "Regular Meeting".
+The official name of the meeting, including the body name - "City Council
+Regular Meeting", not "Regular Meeting". Strip embedded dates and times from
+the source string.
 
 ### description
 
-- **Type**: `string`
-- **Required**: yes (can be empty string)
-- **Description**: A brief description of the meeting. Should be useful context,
-  not just a copy of the title.
+Usually an empty string. Populate only when the source provides one; do not
+synthesize.
 
 ### classification
 
-- **Type**: `string`
-- **Required**: yes
-- **Description**: The meeting type, e.g. "City Council", "Committee",
-  "Board", "Commission".
+The meeting type, e.g. "Board", "Commission", "City Council". Derive it from
+keywords in the title or hardcode it when the title cannot determine it. The
+full vocabulary from `city-scrapers-core` constants, rendered live from the
+generated schema:
+
+<ClassificationVocabulary />
 
 ### start
 
-- **Type**: `string` (ISO 8601 datetime)
-- **Required**: yes
-- **Description**: The meeting start time, timezone-aware. Use the spider's
-  `timezone` property and the `city_scrapers_core.utils.timezone` helpers.
+- **Type**: `string`, naive datetime `"YYYY-MM-DD HH:mm:ss"`.
+- **Required**: yes.
+
+Always produce a timezone-**naive** datetime - never embed `tzinfo`. The
+spider's `timezone` class attribute declares the local timezone for the
+framework. If the source has a date but no time, default to midnight and
+explain in `time_notes`.
 
 ### end
 
-- **Type**: `string` (ISO 8601 datetime)
-- **Required**: yes
-- **Description**: The meeting end time, timezone-aware. Defaults to
-  `start + 2 hours` if not specified.
+- **Type**: `string`, naive datetime `"YYYY-MM-DD HH:mm:ss"`.
+- **Required**: yes.
+
+`None`/empty in most cases - the framework defaults `end` to `start + 2
+hours`. Set it explicitly only when the source provides a confirmed end time.
 
 <Callout type="warn">
-  The `end` default of `start + 2 hours` is defined in the base spider class. If
-  this changes, this page should be updated. This is a prime candidate for drift
-  detection.
+  The `end` default is defined in the base spider class upstream. If it changes,
+  this page should be updated - the drift check watches for it.
 </Callout>
 
 ### all_day
 
-- **Type**: `boolean`
-- **Required**: yes
-- **Description**: Whether the meeting is an all-day event. If `true`, `start`
-  should be midnight in the local timezone and `end` should be midnight the
-  next day.
+`false` in nearly all cases. Set `true` only when the source explicitly
+designates the event as all-day.
 
 ### time_notes
 
-- **Type**: `string`
-- **Required**: yes (can be empty string)
-- **Description**: Notes about the meeting time, e.g. "Doors open at 6:30 PM" or
-  "Time to be determined". If `location` is empty, explain why here.
+Empty string, or a descriptive note. When `start` defaults to midnight, write
+a note pointing readers at the agenda attachment for the actual time. Also
+use it to explain an empty `location`.
 
 ### location
 
-- **Type**: `{ name: string, address: string }`
-- **Required**: yes
-- **Description**: The meeting location. If unknown, set both fields to empty
-  strings and explain in `time_notes`.
+`{ name: string, address: string }` - `name` is the room/floor/building,
+`address` the full street address. Empty strings when unknown, with a note in
+`time_notes`.
 
 ### links
 
-- **Type**: `{ href: string, title: string }[]`
-- **Required**: yes (can be empty array)
-- **Description**: Links related to the meeting, in priority order:
-  1. Agenda
-  2. Video / livestream
-  3. Minutes
-  4. Other supporting documents
+`{ href: string, title: string }[]`. `title` describes the document type
+("Agenda", "Minutes", "Video"). Prefer PDF format; include HTML or other
+formats when no PDF exists. Records list links in priority order:
+
+1. Agenda PDF
+2. Minutes PDF
+3. Video / recording
+4. Other attachments
 
 ### source
 
-- **Type**: `string`
-- **Required**: yes
-- **Description**: The URL of the page where the meeting information was found.
+The URL of the page the meeting was scraped from. Prefer the meeting's detail
+page; the listing page is acceptable when no detail page exists.
 
 ### status
 
-- **Type**: `string`
-- **Required**: yes
-- **Description**: One of `passed`, `cancelled`, or `tentative`. Use `passed`
-  for meetings that have occurred or are confirmed, `cancelled` for meetings
-  that were cancelled, and `tentative` for meetings that are planned but not
-  yet confirmed.
+One of `cancelled`, `tentative`, `confirmed`, `passed`.
 
-<Callout type="info">
-  The status values above are rendered with the real `StatusChip` component on
-  the [Meetings Viewer](/docs/viewer) page. If the component or its colours
-  change, that page updates automatically.
-</Callout>
+Rendered live from the generated schema:
+
+<StatusVocabulary />
+
+The usual derivation is `self._get_status(meeting)`: `passed` when `start` is
+before now, `tentative` when `start` is after now, `cancelled` only when the
+source explicitly confirms a cancellation - a missing meeting is not
+evidence. `confirmed` is a newer vocabulary member; see
+[the viewer docs](/docs/viewer#status-values) for how the app renders it.

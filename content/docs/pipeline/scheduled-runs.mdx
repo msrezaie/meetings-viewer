@@ -1,0 +1,49 @@
+---
+title: Scheduled Runs
+description: The daily cron workflows that run every spider, push output to Azure, report errors to Sentry, and archive source pages.
+---
+
+<RepoScope repo="scrapers" />
+
+# Scheduled runs
+
+Each city-scrapers repository contains GitHub Actions workflows that run every
+spider in the repo on a scheduled cron trigger - typically once per day.
+
+## The workflows
+
+| Workflow                     | Trigger    | What it does                                                                                                           |
+| ---------------------------- | ---------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `cron.yml` (or `scrape.yml`) | Daily cron | Iterates over every spider, runs `scrapy crawl`, uploads JSON output to Azure Blob Storage. Errors reported to Sentry. |
+| `archive.yml`                | Daily cron | Runs all scrapers and submits scraped URLs to the Wayback Machine.                                                     |
+
+<Callout type="info">
+  New spiders added to `city_scrapers/spiders/` are automatically picked up by
+  the scheduled workflow - no changes to the workflow file are required.
+</Callout>
+
+## What this means for a new spider
+
+Your only obligations as a spider author:
+
+- The spider must run without arguments - the cron workflow calls
+  `scrapy crawl <name>` with no flags.
+- Failures should be loud: raise or log, never silently return. The workflow
+  reports errors to Sentry, but a spider that exits cleanly with zero items
+  looks successful.
+- One agency per spider name - each agency must be runnable as a distinct
+  spider with its own cron job, output file, and status tracking. For spider
+  factories, each `spider_configs` entry is a distinct slug.
+
+## Where the output goes
+
+JSON output lands in Azure Blob Storage containers. The Documenters platform
+consumes it from there - the meetings viewer's local mode mirrors this shape
+by reading `data/scrapers/<spider>.json` files produced by
+`scrapy crawl <spider> -O`.
+
+## Wayback archival
+
+The archive workflow exists so a disputed record can be checked against the
+source page _as it looked at scrape time_. If a meeting record is ever
+questioned, the Wayback Machine snapshot of the source URL is the evidence.

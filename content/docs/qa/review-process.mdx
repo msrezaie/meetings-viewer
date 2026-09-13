@@ -1,0 +1,48 @@
+---
+title: Review Process
+description: The multi-stage PR lifecycle for a scraper - draft, CTD review, PDW review, staging QA, launch.
+---
+
+<RepoScope repo="scrapers" />
+
+# Review process
+
+<Callout type="warn">
+  The steps below reflect the current team workflow. Statuses, reviewer
+  assignments, and branch names evolve over time - confirm specifics with your
+  team lead before acting on them.
+</Callout>
+
+A scraper PR passes through three distinct review phases before it reaches
+production. The full lifecycle:
+
+<PRLifecycle />
+
+## Why the PR stays open through staging
+
+The staging merge is not the end of the PR. Merging into `staging` makes the
+spider's output visible on the staging environment of Documenters.org, where
+the City Bureau team evaluates it against the public-site standard. Keeping
+the PR open means CB feedback lands on the same thread - the contributor
+pushes fixes to the same branch and it gets re-merged to staging as needed.
+
+## What each phase checks
+
+- **CTD review** is two checks in one: a QA pass (run the spider, compare
+  output to the source site against the [rubric](/docs/qa/rubric)) and a code
+  review (logic, style, edge cases, test coverage).
+- **PDW review** is a secondary code look plus minor QA - PDW owns operations
+  on the Documenters side.
+- **CB staging QA** is data QA only: does the output meet the standard expected
+  on the public site.
+
+## Tracking through Airtable
+
+The scraper's record in the Airtable backlog mirrors the lifecycle:
+
+- Ready-for-review -> "Ready to integrate to staging" (confirm the exact label
+  with your team lead).
+- CB sign-off -> "Ready for launch" (same caveat).
+
+The backlog entry is created automatically when the PR opens - see
+[Airtable sync](/docs/pipeline/airtable-sync) for how that automation works.

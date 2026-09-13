@@ -1,15 +1,20 @@
 import { source } from "@/lib/docs-source";
 
-export function GET() {
-  const pages = source.getPages();
-  const parts = pages.map((page) => {
-    const url = page.url;
-    const title = page.data.title;
-    const description = page.data.description ?? "";
-    return `## ${title}\n\n${description}\n\nURL: ${url}`;
-  });
+/**
+ * llms-full.txt: every docs page's full processed Markdown, concatenated.
+ * getText("processed") reads the Markdown emitted by the postprocess option
+ * in source.config.ts - this is the body text agents should consume, not a
+ * list of titles.
+ */
+export async function GET() {
+  const parts = await Promise.all(
+    source.getPages().map(async (page) => {
+      const body = await page.data.getText("processed");
+      return `# ${page.data.title}\n\nURL: ${page.url}\n\n${body}`;
+    })
+  );
   return new Response(parts.join("\n\n---\n\n"), {
-    headers: { "content-type": "text/plain" },
+    headers: { "content-type": "text/plain; charset=utf-8" },
   });
 }
 

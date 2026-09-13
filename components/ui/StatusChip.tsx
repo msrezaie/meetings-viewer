@@ -5,11 +5,12 @@ import { highlightMatches } from "@/components/ui/HighlightMatches";
 
 export const STATUS_CHIP_COLOR: Record<
   string,
-  "success" | "error" | "warning" | "default"
+  "success" | "error" | "warning" | "info" | "default"
 > = {
   passed: "success",
   cancelled: "error",
   tentative: "warning",
+  confirmed: "info",
 };
 
 export function StatusChip({

@@ -1,14 +1,24 @@
 ---
-title: Writing a spider
+title: Writing a Spider
 description: How to write a Scrapy spider that produces valid meeting records for the Meetings Viewer.
 ---
 
+<RepoScope repo="scrapers" />
+
 # Writing a spider
+
+<Callout type="warn">
+  Check the pinned Scrapy version in the repo's `Pipfile` before using any API
+  you saw in a recent tutorial. Consumer repos pin Scrapy 2.11.2 - the newer
+  `async def start()` coroutine is silently skipped by that version. Use
+  `start_requests()`.
+</Callout>
 
 ## Spider structure
 
 Every spider extends `CityScrapersSpider` (or `LegistarSpider` for Legistar
-sites) and implements a `parse` method that yields meeting records.
+sites) and implements a `parse` method that yields meeting records. See
+[Spider patterns](/docs/scrapers/spider-patterns) for the architecture choice.
 
 ```python
 from city_scrapers_core.spiders import CityScrapersSpider
@@ -19,11 +29,11 @@ class SandieCityCouncilSpider(CityScrapersSpider):
     name = "sandie_city_council"
     agency = "San Diego City Council"
     timezone = "America/Los_Angeles"
+    start_urls = ["https://example.gov/meetings"]
 
     def parse(self, response):
         for item in response.css(".meeting-item"):
             meeting = Meeting(
-                agency=self.agency,
                 title=self._parse_title(item),
                 description=self._parse_description(item),
                 classification=self._parse_classification(item),
@@ -42,62 +52,104 @@ class SandieCityCouncilSpider(CityScrapersSpider):
 
 ## Field-by-field guide
 
+The authoritative field list and expected behavior live in the
+[schema reference](/docs/qa/schema). Notes below cover the fields that cause
+the most review comments.
+
 ### title
 
-The meeting title. Should be the official name of the meeting, not a date or
-generic label like "Regular Meeting". Include the body name, e.g.
-"City Council Regular Meeting".
+The official meeting name including the body - "City Council Regular
+Meeting", not "Regular Meeting". Strip embedded dates and times: a title like
+"Board Meeting - January 15, 2026 at 6:00 PM" needs normalizing down to the
+body name.
+
+### description
+
+Usually an empty string. Populate only when the source provides one - do not
+synthesize a description from the title.
 
 ### start and end
 
-ISO 8601 datetime strings, timezone-aware. Use the spider's `timezone` property
-and the `city_scrapers_core.utils.timezone` helpers:
+Timezone-**naive** datetime objects. Never embed `tzinfo` - the spider's
+`timezone` class attribute declares the local timezone for the framework.
 
-```python
-from city_scrapers_core.utils import timezone
-
-start = timezone.localize_time(datetime(2026, 1, 15, 10, 0))
-```
-
-If `end` is not available, default to `start + 2 hours`.
-
-<Callout type="warn">
-  The `end` defaults to `start + 2 hours` in the base spider. If this default
-  changes upstream, this doc should be updated. See the [drift
-  detection](/docs/qa/rubric) section for how CI catches this.
-</Callout>
+- `start` is required. If the source has a date but no time, default to
+  midnight and explain in `time_notes` ("see agenda for time").
+- `end` is `None` in most cases. The framework defaults it to
+  `start + 2 hours`; set it explicitly only when the source provides a
+  confirmed end time.
+- For date comparisons against meeting times, use
+  `datetime.now(tz=ZoneInfo(self.timezone))` - not `datetime.utcnow()`
+  (deprecated) and not `datetime.now()` without a timezone, which diverges
+  between your machine and CI runners.
+- Never hardcode year ranges in `range()` calls - they break silently at
+  rollover.
 
 ### status
 
-One of `passed`, `cancelled`, or `tentative`. Use `passed` for meetings that
-have occurred or are confirmed, `cancelled` for meetings that were cancelled,
-and `tentative` for meetings that are planned but not yet confirmed.
+One of `passed`, `tentative`, `confirmed`, `cancelled`. The usual pattern is
+`self._get_status(meeting)`, which derives `passed`/`tentative` from `start`
+relative to now, plus optional cancellation text the method scans for.
+
+- `cancelled` requires explicit evidence on the source - a missing meeting is
+  not sufficient evidence.
+- Account for both spellings on source sites: "cancelled" and "canceled".
 
 ### location
 
-An object with `name` and `address` fields. If the location is unknown, set
-both to empty strings and explain in `time_notes`.
+An object with `name` (room/floor/building) and `address` (full street
+address). Empty strings are acceptable when unknown - say so in `time_notes`
+and point readers at the agenda attachment.
 
 ### links
 
-An array of `{ href, title }` objects, in priority order:
+A list of `{ href, title }` dicts in priority order:
 
-1. Agenda
-2. Video / livestream
-3. Minutes
-4. Other supporting documents
+1. Agenda PDF
+2. Minutes PDF
+3. Video / recording
+4. Other attachments
+
+Always prefer the PDF format; include HTML or other formats when no PDF
+exists. The `title` describes the document type ("Agenda", "Minutes",
+"Video").
 
 ### id
 
-A unique identifier for the meeting. Conventionally a slug derived from the
-agency, date, and title. Must be unique within a single spider's output.
+A unique identifier within the spider's output. The base class's `_get_id`
+builds one from the meeting fields - use it unless the source has a stable
+native ID.
+
+### source
+
+The URL of the page the meeting came from. Prefer the meeting's detail page;
+the listing page URL is acceptable when no detail page exists.
+
+## Error handling
+
+- Log, don't swallow: every `except` block should emit at least a
+  `logger.warning(...)` with enough context to diagnose the failure later. A
+  bare `pass` produces a spider that exits cleanly and yields nothing.
+- Attach `errback=self.handle_error` to `scrapy.Request` calls, especially
+  detail pages.
+- Compile regex patterns at class level, not inside per-item methods - the
+  patterns get recompiled on every call otherwise.
+- Use explicit keys for deduplication, not array position.
 
 ## Running your spider
 
+<CommandBlock command="scrapy crawl {spider} -O data/scrapers/{spider}.json" />
+
+Suppress Scrapy's INFO logs to see only your own output:
+
 ```bash
-# From the city-scrapers repo
-scrapy crawl sandie_city_council -O data/scrapers/sandie_city_council.json
+scrapy crawl {spider} -O test.json -s LOG_LEVEL=WARNING
 ```
 
-Then load the output in the [Meetings Viewer](/docs/viewer) and check it against
-the [QA rubric](/docs/qa/rubric).
+Then validate the output against the schema before writing tests:
+
+<CommandBlock command="scrapy validate {spider}" />
+
+Load the result in the [Meetings Viewer](/docs/viewer) and check it against
+the [QA rubric](/docs/qa/rubric) - or paste the JSON straight into the
+[rubric report](/docs/qa/rubric#rubric-report) on that page.

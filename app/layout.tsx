@@ -1,16 +1,15 @@
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v16-appRouter";
 import InitColorSchemeScript from "@mui/material/InitColorSchemeScript";
-import Box from "@mui/material/Box";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Roboto } from "next/font/google";
 import { siteConfig } from "@/lib/site-config";
 import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
-import { SiteHeader } from "@/components/layout/site-header";
+import { SiteChrome } from "@/components/layout/site-chrome";
+import { DocsSearchProvider } from "@/components/layout/docs-search";
 import { DocsDarkModeSyncScript } from "@/components/layout/dark-mode-sync-script";
 import theme from "./theme";
 import "./globals.css";
-import { SiteFooter } from "@/components/layout/site-footer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,8 +29,18 @@ const roboto = Roboto({
 });
 
 export const metadata: Metadata = {
-  title: siteConfig.name,
+  metadataBase: new URL(siteConfig.url),
+  title: {
+    default: siteConfig.name,
+    template: `%s - ${siteConfig.name}`,
+  },
   description: siteConfig.description,
+  openGraph: {
+    type: "website",
+    siteName: siteConfig.name,
+    title: siteConfig.name,
+    description: siteConfig.description,
+  },
 };
 
 export default function RootLayout({
@@ -53,22 +62,9 @@ export default function RootLayout({
         <AppRouterCacheProvider options={{ enableCssLayer: true }}>
           <ThemeProvider theme={theme}>
             <CssBaseline />
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                minHeight: "100vh",
-              }}
-            >
-              <SiteHeader />
-              <Box
-                component="main"
-                sx={{ display: "flex", flexDirection: "column", flex: 1 }}
-              >
-                {children}
-              </Box>
-              <SiteFooter />
-            </Box>
+            <DocsSearchProvider>
+              <SiteChrome>{children}</SiteChrome>
+            </DocsSearchProvider>
           </ThemeProvider>
         </AppRouterCacheProvider>
       </body>

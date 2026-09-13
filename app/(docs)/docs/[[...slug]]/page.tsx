@@ -7,7 +7,9 @@ import {
   DocsTitle,
   DocsDescription,
 } from "fumadocs-ui/page";
+import { ViewOptionsPopover } from "fumadocs-ui/layouts/docs/page";
 import { getMDXComponents } from "@/components/docs/mdx";
+import { siteConfig } from "@/lib/site-config";
 
 export async function generateMetadata({
   params,
@@ -33,9 +35,19 @@ export default async function Page({
   if (!page) notFound();
 
   const MdxContent = page.data.body;
+  const markdownUrl = `${page.url}.md`;
+  const githubUrl = `${siteConfig.repoUrl}/blob/main/content/docs/${page.path}`;
 
   return (
-    <DocsPage toc={page.data.toc}>
+    <DocsPage
+      toc={page.data.toc}
+      lastUpdate={page.data.lastModified}
+      tableOfContent={{
+        footer: (
+          <ViewOptionsPopover markdownUrl={markdownUrl} githubUrl={githubUrl} />
+        ),
+      }}
+    >
       <DocsTitle>{page.data.title}</DocsTitle>
       <DocsDescription>{page.data.description}</DocsDescription>
       <DocsBody>

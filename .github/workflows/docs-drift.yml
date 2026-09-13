@@ -2,25 +2,26 @@ name: docs-drift
 
 # Detects where docs platform pages and mirrored sources disagree with the
 # artifacts they describe. Findings are posted as a PR comment and written to
-# drift/findings.json (uploaded as an artifact for agents). Blocking findings
-# (confidence: certain) fail the check.
+# docs-platform/drift/findings.json (uploaded as an artifact for agents and
+# consumed by the /docs/conflicts dashboard). Blocking findings
+# (confidence: certain) fail the check once promoted; until then the job is
+# advisory only - see the "Fail on blocking findings" step at the bottom.
 
 on:
   pull_request:
     paths:
       - "content/**"
-      - "drift/**"
-      - "scripts/drift/**"
+      - "docs-platform/**"
       - "lib/**"
       - "data/**"
-      - "components/docs/temp/**"
       - ".github/CODEOWNERS"
   push:
-    branches: [main]
+    # `local` is the repo's default branch - merged PRs (incl. Keystatic
+    # editor PRs) land there.
+    branches: [main, local]
     paths:
       - "content/**"
-      - "drift/**"
-      - "scripts/drift/**"
+      - "docs-platform/**"
       - "lib/**"
       - "data/**"
 
@@ -38,18 +39,26 @@ jobs:
         with:
           node-version: 24
 
+      - name: Run fixture-corpus test
+        run: node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test docs-platform/engine/check.test.ts
+
       - name: Run drift check
         id: drift
-        run: node scripts/drift/check.ts --fail
+        run: node docs-platform/engine/check.ts --fail
         continue-on-error: true
+
+      - name: Verify committed findings are current
+        run: |
+          git diff --exit-code -- docs-platform/drift/findings.json docs-platform/drift/report.md \
+            || (echo "findings.json/report.md are stale - run 'npm run docs:drift' and commit the result" && exit 1)
 
       - name: Upload findings artifact
         uses: actions/upload-artifact@v4
         with:
           name: drift-findings
           path: |
-            drift/findings.json
-            drift/report.md
+            docs-platform/drift/findings.json
+            docs-platform/drift/report.md
           if-no-files-found: ignore
 
       - name: Comment on PR
@@ -60,7 +69,7 @@ jobs:
             const fs = require("fs");
             let body;
             try {
-              body = fs.readFileSync("drift/report.md", "utf8");
+              body = fs.readFileSync("docs-platform/drift/report.md", "utf8");
             } catch {
               body = "Drift check ran but produced no report.";
             }
@@ -88,6 +97,9 @@ jobs:
               });
             }
 
+      # Advisory window: everything reports, nothing blocks. Flip this step to
+      # `run: exit 1` once `certain`-confidence findings have been quiet on real
+      # PRs - see the playbook's section 02.5.
       - name: Fail on blocking findings
         if: steps.drift.outcome == 'failure'
-        run: exit 1
+        run: echo "blocking findings present (advisory mode - not failing)" && exit 0

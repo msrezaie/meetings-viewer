@@ -1,0 +1,57 @@
+---
+title: How to Add a Section
+description: The four-step method for a team to document its agent setup on this site.
+---
+
+# How to add a section
+
+The method for a team to add its own page under
+[agents](/docs/agents). Copy-pasteable as a checklist:
+
+<Steps>
+<Step>
+
+**Write down one real thing, not a speculative one.** The smallest actual
+convention your team already applies with an agent - not an aspirational list
+of everything a well-run team's agent setup could someday include. The rule
+against building for hypothetical readers applies here too.
+
+</Step>
+<Step>
+
+**Put the real file in your team's own repo, not here.** An agent session
+working in `city-scrapers-core` only ever reads that repo's `AGENTS.md` and
+skills directory - nothing hosted only in this repo's docs is ever loaded by
+a session working elsewhere. Put the actual memory/skill/agent/hook file
+where it will actually be read.
+
+</Step>
+<Step>
+
+**Link to it from this site and summarize intent in two or three sentences -
+never a copy.** A duplicate goes stale the moment the source changes and
+nobody notices. A link can't drift out of sync with itself.
+
+</Step>
+<Step>
+
+**List it on the [team table](/docs/agents#the-team-table)** and open a PR
+the same way your team reviews anything else.
+
+</Step>
+</Steps>
+
+## What a good page looks like
+
+- **Owner** - which team maintains the real file.
+- **What exists** - the actual files, linked: `AGENTS.md`, skills, agents,
+  hooks.
+- **Intent** - two or three sentences on what each is for. Not the content.
+- **What's next** - the candidate material sitting unpackaged, if any.
+
+## The exception
+
+If your team's convention describes _another_ team's process (the way the
+scrapers page describes PDW's code-review skill), link plus a two-sentence
+summary of intent is the whole treatment - never restate their checklist or
+imply your team maintains it.

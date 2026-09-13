@@ -8,6 +8,37 @@
 @import "fumadocs-ui/css/neutral.css";
 @import "fumadocs-ui/css/preset.css";
 
+/* Fumadocs -> MUI palette mapping. Fumadocs themes itself through the
+   --color-fd-* custom properties; MUI emits --mui-palette-* variables that
+   already flip between light and dark via data-mui-color-scheme. Mapping one
+   onto the other keeps /docs on the app's own palette instead of the stock
+   neutral preset. The .dark block repeats the same references so it wins
+   over neutral.css's .dark overrides - the MUI variables they point at
+   resolve to the dark values on their own. */
+:root,
+.dark {
+  --color-fd-background: var(--mui-palette-background-default);
+  --color-fd-foreground: var(--mui-palette-text-primary);
+  --color-fd-muted: var(--mui-palette-action-hover);
+  --color-fd-muted-foreground: var(--mui-palette-text-secondary);
+  --color-fd-popover: var(--mui-palette-background-paper);
+  --color-fd-popover-foreground: var(--mui-palette-text-primary);
+  --color-fd-card: var(--mui-palette-background-paper);
+  --color-fd-card-foreground: var(--mui-palette-text-primary);
+  --color-fd-border: var(--mui-palette-divider);
+  --color-fd-primary: var(--mui-palette-primary-main);
+  --color-fd-primary-foreground: var(--mui-palette-primary-contrastText);
+  --color-fd-secondary: var(--mui-palette-action-hover);
+  --color-fd-secondary-foreground: var(--mui-palette-text-primary);
+  --color-fd-accent: var(--mui-palette-action-selected);
+  --color-fd-accent-foreground: var(--mui-palette-text-primary);
+  --color-fd-ring: var(--mui-palette-primary-main);
+  --color-fd-info: var(--mui-palette-info-main);
+  --color-fd-warning: var(--mui-palette-warning-main);
+  --color-fd-error: var(--mui-palette-error-main);
+  --color-fd-success: var(--mui-palette-success-main);
+}
+
 html {
   overscroll-behavior: none;
 }

@@ -1,0 +1,58 @@
+---
+title: Pipeline
+description: How scraper output gets from a spider run to the Documenters platform - scheduled runs, Azure storage, and the Airtable registry.
+---
+
+<RepoScope repo="scrapers" />
+
+# Pipeline
+
+The pipeline covers everything that happens to scraper output after you merge
+a spider: scheduled runs, storage, error reporting, and the Airtable registry
+that tracks which spiders exist.
+
+## The production flow
+
+<Steps>
+<Step>
+
+**Scheduled run** - GitHub Actions workflows in each city-scrapers repo run
+every spider on a daily cron trigger.
+
+</Step>
+<Step>
+
+**Storage** - each spider's JSON output is uploaded to Azure Blob Storage
+containers.
+
+</Step>
+<Step>
+
+**Error reporting** - failures are reported to Sentry.
+
+</Step>
+<Step>
+
+**Archival** - a secondary workflow submits scraped URLs to the Internet
+Archive's Wayback Machine, creating a permanent public record of the source
+pages at scrape time.
+
+</Step>
+</Steps>
+
+New spiders added to `city_scrapers/spiders/` are picked up by the scheduled
+workflow automatically - no workflow changes required.
+
+## The Airtable registry
+
+Alongside the run pipeline, a separate automation keeps the team's Airtable
+spider registry in sync: when a PR touching spider files opens, a workflow
+extracts each spider's `name` and `agency` via AST parsing and upserts the
+records. See [Airtable sync](/docs/pipeline/airtable-sync).
+
+## Pages
+
+- [Scheduled runs](/docs/pipeline/scheduled-runs) - the cron workflows,
+  Azure storage, Sentry, and Wayback archival.
+- [Airtable sync](/docs/pipeline/airtable-sync) - the two-workflow trust
+  boundary that registers new spider slugs.

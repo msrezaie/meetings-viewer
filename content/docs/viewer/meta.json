@@ -1,4 +1,4 @@
 {
   "title": "Meetings Viewer",
-  "pages": ["index", "quick-start"]
+  "pages": ["index", "quick-start", "architecture"]
 }

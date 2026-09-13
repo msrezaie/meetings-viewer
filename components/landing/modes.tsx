@@ -73,7 +73,7 @@ export function Modes() {
                 borderRadius: 1,
               }}
             >
-              lib/scrapers.ts
+              lib/scraper-data.ts
             </Box>
             .
           </Typography>

@@ -6,12 +6,18 @@
 export const siteConfig = {
   name: "Meetings Viewer",
   tagline: "QA tooling for city-scrapers",
+  url:
+    process.env.NEXT_PUBLIC_SITE_URL ??
+    (process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : "http://localhost:3000"),
   description:
     "Inspect the JSON output of city-meeting scrapers as a browsable, filterable table. Built to cut QA time during scraper development.",
   landingDescription:
     "Turn raw Scrapy JSON into a browsable, filterable table. Review a spider's output in minutes instead of an afternoon.",
   docsNavTitle: "City Scrapers Docs",
   footerTagline: "QA tooling for city-scrapers output",
+  repoUrl: "https://github.com/msrezaie/meetings-viewer",
   pages: {
     scrapers: {
       title: "Scrapers",

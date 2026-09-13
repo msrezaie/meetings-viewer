@@ -1,0 +1,93 @@
+---
+title: Source Analysis
+description: Read the source website before writing a spider - DevTools first, JSON APIs before CSS selectors.
+---
+
+<RepoScope repo="scrapers" />
+
+# Source analysis
+
+Research comes before code. The right parse strategy is determined by what the
+source site actually does, not by the first thing that works.
+
+## DevTools first
+
+Open the agency's meeting page and inspect the **Network** tab (filter XHR and
+Fetch) while the page loads:
+
+- **A JSON or XML endpoint feeding the page** is the best outcome. APIs return
+  typed fields; HTML parsing is brittle by comparison.
+- **An iCalendar feed** (`.ics`, RFC 5545) is nearly as good - the structure is
+  standardized.
+- **Rendered HTML only** means CSS selectors, and a more brittle spider.
+
+Use [Postman](https://www.postman.com/) or `curl` to probe the endpoint
+directly - pagination params, filters, and required headers are much easier to
+figure out there than in spider code.
+
+<Callout type="tip">
+  JavaScript-heavy agency sites are usually JAM-stack frontends over a JSON API.
+  The network tab almost always reveals it. Prefer the API over parsing the
+  rendered DOM.
+</Callout>
+
+## Primary and secondary URLs
+
+Many sources split meeting data across pages:
+
+- The **primary URL** is where the meeting list lives - the listing page your
+  spider starts from.
+- **Secondary URLs** - detail pages, document pages - supplement the primary
+  data. Treat them as enrichment: the spider should degrade gracefully when a
+  secondary page is missing or changes shape.
+
+When `parse` yields `Request` objects for detail pages, pass the listing-page
+data through with `cb_kwargs` and attach `errback=self.handle_error` so a dead
+detail page does not kill the whole run. See
+[Testing](/docs/scrapers/testing#two-phase-tests) for how to test this pattern.
+
+## Extraction strategy, in order of preference
+
+<Tabs items={["JSON / API", "CSS selectors", "Hybrid"]}>
+<Tab value="JSON / API">
+
+Parse the endpoint response with `response.json()`. Fields arrive typed;
+dates, titles, and document URLs need no selector guesswork. This is the
+pattern for JS-rendered agency sites and the least brittle option.
+
+```python
+def parse(self, response):
+    for item in response.json()["events"]:
+        yield self._parse_meeting(item)
+```
+
+</Tab>
+<Tab value="CSS selectors">
+
+When no useful endpoint exists, parse `response.css(...)`. Add null checks
+before calling methods on selector results - `.get()` returns `None` on a
+missed selector, and a bare `.get()` chain is the most common way spiders die.
+
+</Tab>
+<Tab value="Hybrid">
+
+Listing page via HTML, detail data via an API call per meeting - or the
+reverse. Common on older CMS sites where the calendar is server-rendered but
+documents are fetched by the frontend. See
+[fortx_Fort_Worth_City_Council.py](https://github.com/City-Bureau/city-scrapers-fortx/blob/main/city_scrapers/spiders/fortx_Fort_Worth_City_Council.py)
+for a GET + POST hybrid.
+
+</Tab>
+</Tabs>
+
+## What to write down
+
+Before moving on, note:
+
+- The **primary URL** and any secondary URLs.
+- The **extraction mode** (API / CSS / hybrid) and why.
+- **Known edge cases** in the source data: variant title spellings, missing
+  times, meetings listed in PDFs only. These belong in the scraper's spec and
+  its tests - not discovered in review.
+- Whether the site shows signs of
+  [bot detection](/docs/scrapers/bot-detection).

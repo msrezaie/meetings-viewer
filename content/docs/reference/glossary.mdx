@@ -1,0 +1,64 @@
+---
+title: Glossary
+description: Platform and program vocabulary used across these docs.
+---
+
+# Glossary
+
+## Organizations and teams
+
+- **City Bureau (CB)** - the nonprofit behind Documenters.org; performs the
+  final staging QA on scraper output before launch.
+- **Public Data Works (PDW)** - the team that owns Documenters platform
+  operations; performs secondary code review and merges scrapers to staging.
+- **CTD** - the development team that writes and maintains the spiders.
+- **Documenters.org** - the public-facing platform that scraper output
+  ultimately powers.
+
+## Scraper vocabulary
+
+- **Spider** - a Scrapy class that extracts meeting records from one source.
+  One spider per agency per source.
+- **Spider factory** - a pattern where one file generates multiple spiders
+  from a `spider_configs` list - each entry becomes a distinct spider slug.
+- **Mixin** - a shared class (e.g. `LegistarSpider`) that spiders inherit
+  from to reuse a source platform's parsing logic.
+- **Slug** - a spider's `name` value; the identifier used in `scrapy crawl`,
+  the Airtable registry, and output file names.
+- **Meeting record** - one JSON object a spider yields; the
+  [schema](/docs/qa/schema) is the contract.
+- **Naive datetime** - a datetime with no timezone info attached. Meeting
+  `start`/`end` values are always naive; the spider's `timezone` attribute
+  declares which local zone they are in.
+- **`spider_configs`** - the list of dicts a spider factory iterates over;
+  each entry's `name` and `agency` produce a separate spider.
+- **Classification** - the meeting type vocabulary from city-scrapers-core:
+  Advisory Committee, Board, City Council, Commission, Committee, Forum,
+  Police Beat, Not classified.
+
+## Pipeline vocabulary
+
+- **Slug table** - the Airtable spider registry the sync workflow upserts
+  into; keyed by agency name.
+- **Reusable workflow** - a GitHub Actions workflow declared with
+  `on: workflow_call`, defined once in `city-scrapers-core` and invoked by
+  caller stubs in each consumer repo.
+- **`workflow_run` trigger** - the second half of the two-workflow pattern;
+  runs on the base repo's default branch so it safely holds secrets.
+- **Staging** - the Documenters environment where CB evaluates scraper output
+  before launch. A PR merges into `staging` but stays open through CB QA.
+
+## Docs-platform vocabulary
+
+- **RepoScope** - the callout at the top of a page declaring which repository
+  it describes (`meetings-viewer` or `scrapers`).
+- **Drift check** - the CI job (`npm run docs:drift`) that compares
+  documented claims against the master source of truth and reports
+  conflicts.
+- **Master** - the authoritative source a claim is checked against (code,
+  generated artifacts, or a mirrored source doc).
+- **Mirror** - a byte-faithful copy of an external source under
+  `docs-platform/sources/`, kept for drift detection - never edited to fix
+  content; the fix lands upstream.
+- **llms-full.txt** - the generated file at `/llms-full.txt` containing every
+  docs page as clean Markdown, for agent consumption.

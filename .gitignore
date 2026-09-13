@@ -49,3 +49,6 @@ next-env.d.ts
 /.lighthouseci/
 # playwright MCP snapshots
 /.playwright-mcp/
+
+# local AI tool state
+/.claude/

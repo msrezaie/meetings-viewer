@@ -3,8 +3,8 @@ import { llms } from "fumadocs-core/source";
 
 const llmsConfig = llms(source);
 
-export function GET() {
-  return new Response(llmsConfig.index(), {
+export async function GET() {
+  return new Response(await llmsConfig.index(), {
     headers: { "content-type": "text/plain" },
   });
 }

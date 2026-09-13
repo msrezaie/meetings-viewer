@@ -37,7 +37,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version-file: .nvmrc
 
       - name: Run fixture-corpus test
         run: node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test docs-platform/engine/check.test.ts

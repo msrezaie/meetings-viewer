@@ -1192,10 +1192,10 @@ export function getMDXComponents(components?) {
             green
           </h3>
           <p>
-            Vale, cspell, lychee, axe-core and Lighthouse CI all stay. The
-            correction this playbook makes to its own earlier draft: these are
+            Vale, cspell, lychee, axe-core and Lighthouse CI all stay. One
+            scoping correction to state plainly: these are
             <strong>platform</strong> quality gates, and sizing them against how
-            many pages currently exist was the wrong measure. Accessibility and
+            many pages currently exist is the wrong measure. Accessibility and
             performance budgets don't become worthwhile at some page count —
             they're either part of the definition of done or they aren't.
           </p>
@@ -1263,11 +1263,23 @@ export function getMDXComponents(components?) {
 
           <h3>1.3 Drift detection — promoted, not replaced</h3>
           <p>
-            The original research proposed piloting drift detection. This
-            playbook's earlier draft argued for generating pages instead. That
-            was a false choice, and the reasoning behind it was wrong in a way
-            worth naming: it treated drift as a content-quality problem to be
-            designed away, when it is the platform's <em>product</em>.
+            The original research proposed piloting drift detection — tooling
+            that notices when a page and its source stop matching. The tempting
+            counter-proposal is to skip the detector and generate the drifting
+            page instead: render <code>qa/schema.mdx</code> straight from the
+            types in <code>lib/scraper-data.ts</code>, and the page can never
+            disagree with the code because the page <em>is</em> the code,
+            formatted.
+          </p>
+          <p>
+            That is a false choice, and the reasoning behind it is wrong in a
+            way worth naming: it treats drift as a content-quality problem to be
+            designed away, when detecting drift is the platform's
+            <em>product</em>. The disagreements that actually cost a scraper
+            developer trust aren't ones this repo can generate away — a CTD
+            page, a PDW document, and <code>city-scrapers-core</code>'s
+            <code>constants.py</code> saying three different things live in
+            sources this app can't write to.
           </p>
           <p>
             Generation and detection do different jobs. Generation eliminates
@@ -1276,6 +1288,15 @@ export function getMDXComponents(components?) {
             option everywhere else, which is most places: sources owned by other
             teams, in other repositories, in documents this app can't write to.
             Section 02 is that capability, and it's the main build of round two.
+          </p>
+          <p>
+            Detection alone would be noise, so section 02 also specifies what
+            the reporter does with a finding: it records the exact claim, both
+            sources' values, a confidence class, and the owning developer
+            resolved from <code>CODEOWNERS</code> — then surfaces it as a PR
+            comment at the moment of change, a dashboard row as standing state,
+            and a JSON record an agent can act on. A human routes the correction
+            upstream; the platform never resolves it.
           </p>
 
           <h3>1.4 Diagrams — match the form to the content</h3>
@@ -1399,7 +1420,10 @@ export function getMDXComponents(components?) {
                   <td><span class="pill cut">Barely</span></td>
                   <td>
                     Reachability and a freshness clock only. No content
-                    comparison is possible without a machine-readable source.
+                    comparison is possible without a machine-readable source. A
+                    page that restates one's substance carries a provenance line
+                    and a short freshness clock — asking the owning team for a
+                    named contact is a courtesy, not a gate.
                   </td>
                 </tr>
               </tbody>
@@ -2239,12 +2263,12 @@ export function getMDXComponents(components?) {
             The pipeline diagram missed a mode — corrected, then confirmed
           </h3>
           <p>
-            This diagram's first draft said the Meetings Viewer "never touches
-            production" and left it there. That was wrong in a way that matters,
-            and the now-provided Meetings Viewer Technical Specification
-            confirms it precisely (§6, its own "Production mode (not yet fully
-            planned)"): a second, planned mode fetches PR-scoped scraper output
-            from a dedicated public
+            It would be easy to draw the Meetings Viewer as never touching
+            production and stop there. That is wrong in a way that matters, and
+            the now-provided Meetings Viewer Technical Specification confirms it
+            precisely (§6, its own "Production mode (not yet fully planned)"): a
+            second, planned mode fetches PR-scoped scraper output from a
+            dedicated public
             <code>meetings-viewer-data</code> repo, laid out as
             <code>prs/{scraper_repo}/{pr_number}/manifest.json</code>
             plus a <code>scrapers/</code> subfolder — populated by two workflows
@@ -2256,7 +2280,7 @@ export function getMDXComponents(components?) {
             <code>/pr/{repo}/{pr_number}/scrapers</code> route — no backend, no
             database, no auth on the read side (§7's architectural invariants
             are explicit about this). Same UI, same components, same routes as
-            local mode — only <code>lib/scrapers.ts</code>'s implementation
+            local mode — only <code>lib/scraper-data.ts</code>'s implementation
             changes (§5.2). That mode doesn't touch Documenters.org's
             Azure/ETL/Postgres pipeline either, but it's explicitly meant to be
             used <em>during PR review</em> — which means by PDW and CB, not just
@@ -2504,9 +2528,7 @@ export function getMDXComponents(components?) {
               Specification's own §6, itself headed "Production mode (not yet
               fully planned)." <code>/docs/viewer/architecture.mdx</code> (§3,
               below) is where this belongs, not <code>/docs/pipeline</code>
-              — a correction from this playbook's own previous draft, which
-              guessed wrong about which page this content would seed before the
-              spec was available.
+              — an earlier guess placed it there before the spec was available.
             </p>
           </div>
 
@@ -2654,10 +2676,10 @@ export function getMDXComponents(components?) {
                     get a per-field verdict against the corrected rubric (§2) —
                     timezone-naive check, link order, status logic, duplicate
                     IDs. Runs client-side; mostly a lift from the
-                    already-existing <code>lib/duplicates.ts</code> and the
-                    app's own status/format helpers, so it stays true to "the
-                    viewer shows exactly what the spider produced" (§2) rather
-                    than reimplementing QA logic a second way.
+                    already-existing <code>lib/duplicate-detection.ts</code> and
+                    the app's own status/format helpers, so it stays true to
+                    "the viewer shows exactly what the spider produced" (§2)
+                    rather than reimplementing QA logic a second way.
                     <strong>Permanently git-owned once it ships (§1.1)</strong>
                     — <code>/qa/index.mdx</code> leaves the sync allowlist for
                     good at that point.
@@ -2921,19 +2943,18 @@ export function getMDXComponents(components?) {
               <code>components/scrapers/ScrapersTable.tsx</code> already defines
               <code>Status</code> and <code>Last Run</code> columns (fields
               <code>last_run_status</code> and <code>last_run</code>) on the
-              spider list, and <code>lib/scrapers.ts</code>'s
+              spider list, and <code>lib/scraper-data.ts</code>'s
               <code>SpiderEntry</code> type declares both fields, but
               <code>listScrapers()</code> only ever returns
-              <code>{ slug }</code>. This playbook's previous draft called that
-              "half-built and never finished." The Meetings Viewer spec says
-              otherwise, explicitly (§5.4, "Local fields explicitly out of
-              scope"): <code>agency</code>, <code>last_run</code>, and
-              <code>last_run_status</code> are deliberately unpopulated in local
-              mode — "no local mechanism produces or stores them." The
-              placeholder isn't a gap. It's the local half of a shape whose
-              other half is Production mode (§4.2 of the spec: "The shape
-              supports adding optional fields … in production without breaking
-              the local consumer").
+              <code>{ slug }</code>. It looks half-built and never finished. The
+              Meetings Viewer spec says otherwise, explicitly (§5.4, "Local
+              fields explicitly out of scope"): <code>agency</code>,
+              <code>last_run</code>, and <code>last_run_status</code> are
+              deliberately unpopulated in local mode — "no local mechanism
+              produces or stores them." The placeholder isn't a gap. It's the
+              local half of a shape whose other half is Production mode (§4.2 of
+              the spec: "The shape supports adding optional fields … in
+              production without breaking the local consumer").
             </p>
           </div>
 
@@ -2954,9 +2975,9 @@ export function getMDXComponents(components?) {
                 <code>manifest.json</code></strong
               >, fetched the same way the viewer's own production mode will
               (§3's spec citation) — <code>raw.githubusercontent.com</code>, no
-              backend. A local mtime-and-self-check substitute (this playbook's
-              own earlier draft) would directly contradict the spec's §5.4 and
-              §7 — scrapped, not built.
+              backend. A local mtime-and-self-check substitute would directly
+              contradict the spec's §5.4 and §7 — considered and scrapped, not
+              built.
             </li>
             <li>
               <strong

@@ -164,6 +164,28 @@ export function extract(spec: ExtractSpec, ref: string): ExtractResult | null {
       return { tokens: [...found] };
     }
 
+    case "path-listing": {
+      const text = readSource(ref);
+      if (!text) return null;
+      const region = capture(text, spec.pattern);
+      if (!region) return null;
+      // Reconstruct repo-relative paths from indentation: a line nested
+      // under `app/` asserts `app/<name>`, and so on.
+      const stack: { indent: number; seg: string }[] = [];
+      const paths: string[] = [];
+      for (const line of region.split("\n")) {
+        const m = line.match(/^(\s*)(\S+)/);
+        if (!m) continue;
+        const indent = m[1].length;
+        const seg = m[2].replace(/\/+$/, "");
+        while (stack.length && stack[stack.length - 1].indent >= indent)
+          stack.pop();
+        paths.push([...stack.map((s) => s.seg), seg].join("/"));
+        stack.push({ indent, seg });
+      }
+      return paths.length ? { tokens: paths } : null;
+    }
+
     case "keyword-choice": {
       const text = readSource(ref);
       if (!text) return null;

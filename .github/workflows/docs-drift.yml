@@ -3,9 +3,9 @@ name: docs-drift
 # Detects where docs platform pages and mirrored sources disagree with the
 # artifacts they describe. Findings are posted as a PR comment and written to
 # docs-platform/drift/findings.json (uploaded as an artifact for agents and
-# consumed by the /docs/conflicts dashboard). Blocking findings
-# (confidence: certain) fail the check once promoted; until then the job is
-# advisory only - see the "Fail on blocking findings" step at the bottom.
+# consumed by the /docs/conflicts dashboard). Findings with confidence
+# "certain" are blocking (BLOCKING_GATE_ENABLED in engine/evaluate.ts) and
+# fail this check - see the "Fail on blocking findings" step at the bottom.
 
 on:
   pull_request:
@@ -49,7 +49,7 @@ jobs:
 
       - name: Verify committed findings are current
         run: |
-          git diff --exit-code -- docs-platform/drift/findings.json docs-platform/drift/report.md \
+          git diff --exit-code -I'generated_at' -- docs-platform/drift/findings.json docs-platform/drift/report.md \
             || (echo "findings.json/report.md are stale - run 'npm run docs:drift' and commit the result" && exit 1)
 
       - name: Upload findings artifact
@@ -97,9 +97,9 @@ jobs:
               });
             }
 
-      # Advisory window: everything reports, nothing blocks. Flip this step to
-      # `run: exit 1` once `certain`-confidence findings have been quiet on real
-      # PRs - see the playbook's section 02.5.
+      # Promoted per playbook section 02.5: `certain`-confidence findings now
+      # block. Resolve the disagreement upstream or mute a false positive via
+      # docs-platform/drift/mutes.json to go green.
       - name: Fail on blocking findings
         if: steps.drift.outcome == 'failure'
-        run: echo "blocking findings present (advisory mode - not failing)" && exit 0
+        run: echo "blocking drift findings - see the report above" && exit 1

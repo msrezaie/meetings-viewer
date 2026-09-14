@@ -122,6 +122,29 @@ const fixtureClaims: Claim[] = [
       },
     ],
   },
+  {
+    id: "fixture-structure",
+    kind: "repo-paths",
+    subject: "fixture project-structure paths",
+    assertedBy: [
+      {
+        ref: `${F}/fixture-tree-ok.mdx`,
+        class: "git-prose",
+        extract: {
+          type: "path-listing",
+          pattern: "### Project structure\\s*```\\n([\\s\\S]+?)```",
+        },
+      },
+      {
+        ref: `${F}/fixture-tree-broken.mdx`,
+        class: "git-prose",
+        extract: {
+          type: "path-listing",
+          pattern: "### Project structure\\s*```\\n([\\s\\S]+?)```",
+        },
+      },
+    ],
+  },
 ];
 
 // What the corpus is planted to produce.
@@ -132,6 +155,7 @@ const expectedFindings = new Set([
   "fixture-status-vocab::docs-platform/fixtures/fixture-data.json",
   "fixture-link-order::docs-platform/fixtures/fixture-order-wrong.mdx",
   "fixture-tz::docs-platform/fixtures/fixture-tz-aware.mdx",
+  "fixture-structure::docs-platform/fixtures/fixture-tree-broken.mdx",
 ]);
 
 test("drift engine recall and precision on the fixture corpus", () => {

@@ -5,7 +5,7 @@
  */
 
 import { createHash } from "node:crypto";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { extract } from "./extract.ts";
 import { ownerOf } from "./owners.ts";
@@ -14,11 +14,11 @@ import type { Claim, Confidence, Finding, Mute, SourceSpec } from "./types.ts";
 export const ROOT = resolve(import.meta.dirname, "..", "..");
 
 /**
- * Whether `certain` findings block a merge. Playbook section 2.5: ship every
- * class non-blocking for the first two weeks, watch the false-positive rate,
- * then promote `certain` to blocking.
+ * Whether `certain` findings block a merge. Promoted per playbook section
+ * 2.5 after the advisory window: a `certain` finding now fails `check.ts
+ * --fail`, and docs-drift.yml turns that into a failing PR check.
  */
-export const BLOCKING_GATE_ENABLED = false;
+export const BLOCKING_GATE_ENABLED = true;
 
 const normValue = (s: string) => s.toLowerCase().replace(/\s+/g, " ").trim();
 
@@ -43,10 +43,13 @@ function fingerprint(f: Omit<Finding, "fingerprint">): string {
 function actionFor(claim: Claim, src: SourceSpec): string {
   if (claim.kind === "repo-fact")
     return `Fix ${src.page ?? src.ref}: the assertion is false against this repo.`;
-  if (src.page) return `Edit ${src.ref} so it agrees with ${claim.master.ref}.`;
+  if (claim.kind === "repo-paths")
+    return `Edit ${src.ref}: update the listing - the missing paths were renamed or removed (or restore them in the repo).`;
+  if (src.page)
+    return `Edit ${src.ref} so it agrees with ${claim.master?.ref}.`;
   if (src.ref.startsWith("docs-platform/sources/"))
-    return `Do not edit the mirror. Check whether upstream ${claim.master.ref} changed; if the mirror is stale, re-sync it and update sources.json.`;
-  return `Review ${src.ref} against ${claim.master.ref}.`;
+    return `Do not edit the mirror. Check whether upstream ${claim.master?.ref} changed; if the mirror is stale, re-sync it and update sources.json.`;
+  return `Review ${src.ref} against ${claim.master?.ref}.`;
 }
 
 /** Assemble a finding, attach owner/action/fingerprint, return it complete. */
@@ -57,21 +60,22 @@ function makeFinding(
   evidence: Finding["evidence"],
   confidence?: Confidence
 ): Finding {
-  const conf = confidence ?? confidenceFor(claim.master);
+  const conf =
+    confidence ?? (claim.master ? confidenceFor(claim.master) : "certain");
   const f: Omit<Finding, "fingerprint"> = {
     id: `${claim.id}::${src.ref}`,
     claim: claim.id,
     subject: claim.subject,
     confidence: conf,
-    // Promotion gate (playbook section 2.5): ship every class non-blocking
-    // for the first two weeks and watch the false-positive rate. Flip
-    // BLOCKING_GATE_ENABLED only once `certain` findings have been quiet on
-    // real pull requests - a gate that is red on day one gets disabled, and
-    // the feature never recovers.
+    // Promotion gate (playbook section 2.5): `certain` findings block once
+    // BLOCKING_GATE_ENABLED is set - see docs-drift.yml for the CI half.
     blocking: conf === "certain" && BLOCKING_GATE_ENABLED,
     owner: ownerOf(src.ref),
     action: actionFor(claim, src),
-    master: { ref: claim.master.ref, value: masterValue },
+    master: {
+      ref: claim.master?.ref ?? "repo working tree",
+      value: masterValue,
+    },
     evidence,
   };
   return { ...f, fingerprint: fingerprint(f) };
@@ -86,7 +90,7 @@ function unreadable(claim: Claim, src: SourceSpec): Finding {
     blocking: false,
     owner: ownerOf(src.ref),
     action: `Check the extractor pattern in docs-platform/drift/claims.ts against ${src.ref}.`,
-    master: { ref: claim.master.ref, value: null },
+    master: { ref: claim.master?.ref ?? "repo working tree", value: null },
     evidence: [
       {
         ref: src.ref,
@@ -243,6 +247,47 @@ function checkRepoFact(claim: Extract<Claim, { kind: "repo-fact" }>): {
   };
 }
 
+/**
+ * Repo-paths: a page lists repo paths (a project-structure block). The repo
+ * working tree is the master; every listed path must exist. A missing path
+ * means the doc outlived a rename or removal - verifiable, so "certain".
+ */
+function checkRepoPaths(claim: Extract<Claim, { kind: "repo-paths" }>): {
+  findings: Finding[];
+  statuses: Map<string, string>;
+} {
+  const findings: Finding[] = [];
+  const statuses = new Map<string, string>();
+  statuses.set("(repo working tree)", "master");
+
+  for (const src of claim.assertedBy) {
+    const res = extract(src.extract, src.ref);
+    if (!res || !res.tokens) {
+      findings.push(unreadable(claim, src));
+      statuses.set(src.ref, "unreadable");
+      continue;
+    }
+    const missing = res.tokens.filter((p) => !existsSync(resolve(ROOT, p)));
+    if (missing.length) {
+      findings.push(
+        makeFinding(claim, src, null, [
+          {
+            ref: src.ref,
+            page: src.page,
+            value: res.tokens,
+            missing,
+            note: "listed paths that do not exist in the repo",
+          },
+        ])
+      );
+      statuses.set(src.ref, "conflicts");
+    } else {
+      statuses.set(src.ref, "agrees");
+    }
+  }
+  return { findings, statuses };
+}
+
 /** Mirrors past their TTL produce prompt findings - never block. */
 export function checkMirrorFreshness(): Finding[] {
   const p = resolve(ROOT, "docs-platform/sources/sources.json");
@@ -299,11 +344,13 @@ export function evaluateClaims(claimList: Claim[]): {
         ? checkVocabulary(claim)
         : claim.kind === "proposition"
           ? checkProposition(claim)
-          : checkRepoFact(claim);
+          : claim.kind === "repo-fact"
+            ? checkRepoFact(claim)
+            : checkRepoPaths(claim);
     findings.push(...f);
     const restated = [...statuses.entries()].map(([ref, status]) => {
       const spec =
-        claim.master.ref === ref
+        claim.master?.ref === ref
           ? claim.master
           : claim.kind === "repo-fact"
             ? claim.page

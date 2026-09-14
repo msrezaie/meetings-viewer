@@ -1,12 +1,12 @@
 {
-  "generated_at": "2026-09-13T04:19:33.087Z",
+  "generated_at": "2026-09-14T02:17:03.818Z",
   "findings": [
     {
       "id": "status-vocabulary::docs-platform/sources/city-scraper-project-tech-guide.md",
       "claim": "status-vocabulary",
       "subject": "meeting.status vocabulary",
       "confidence": "certain",
-      "blocking": false,
+      "blocking": true,
       "owner": "@msrezaie",
       "action": "Do not edit the mirror. Check whether upstream docs-platform/sources/city-scrapers-core/constants.py changed; if the mirror is stale, re-sync it and update sources.json.",
       "master": {
@@ -38,7 +38,7 @@
       "claim": "status-vocabulary",
       "subject": "meeting.status vocabulary",
       "confidence": "certain",
-      "blocking": false,
+      "blocking": true,
       "owner": "@msrezaie",
       "action": "Do not edit the mirror. Check whether upstream docs-platform/sources/city-scrapers-core/constants.py changed; if the mirror is stale, re-sync it and update sources.json.",
       "master": {
@@ -70,7 +70,7 @@
       "claim": "status-vocabulary",
       "subject": "meeting.status vocabulary",
       "confidence": "certain",
-      "blocking": false,
+      "blocking": true,
       "owner": "@msrezaie",
       "action": "Do not edit the mirror. Check whether upstream docs-platform/sources/city-scrapers-core/constants.py changed; if the mirror is stale, re-sync it and update sources.json.",
       "master": {
@@ -102,7 +102,7 @@
       "claim": "classification-vocabulary",
       "subject": "meeting.classification vocabulary",
       "confidence": "certain",
-      "blocking": false,
+      "blocking": true,
       "owner": "@msrezaie",
       "action": "Do not edit the mirror. Check whether upstream docs-platform/sources/city-scrapers-core/constants.py changed; if the mirror is stale, re-sync it and update sources.json.",
       "master": {
@@ -138,7 +138,7 @@
       "claim": "classification-vocabulary",
       "subject": "meeting.classification vocabulary",
       "confidence": "certain",
-      "blocking": false,
+      "blocking": true,
       "owner": "@msrezaie",
       "action": "Review data/scrapers/test_spider2.json against docs-platform/sources/city-scrapers-core/constants.py.",
       "master": {
@@ -297,6 +297,58 @@
         {
           "ref": "content/docs/qa/schema.mdx",
           "page": "/docs/qa/schema",
+          "status": "agrees"
+        }
+      ]
+    },
+    {
+      "subject": "viewer storage model (no database, no API server)",
+      "claim": "viewer-storage-model",
+      "restated": [
+        {
+          "ref": "docs-platform/sources/meetings-viewer-technical-specification.md",
+          "status": "master"
+        },
+        {
+          "ref": "content/docs/viewer/architecture.mdx",
+          "page": "/docs/viewer/architecture",
+          "status": "agrees"
+        }
+      ]
+    },
+    {
+      "subject": "contributing page project-structure listing",
+      "claim": "project-structure-paths",
+      "restated": [
+        {
+          "ref": "(repo working tree)",
+          "status": "master"
+        },
+        {
+          "ref": "content/docs/contributing/index.mdx",
+          "page": "/docs/contributing",
+          "status": "agrees"
+        }
+      ]
+    },
+    {
+      "subject": "viewer/architecture.mdx data-source module",
+      "claim": "architecture-data-module",
+      "restated": [
+        {
+          "ref": "content/docs/viewer/architecture.mdx",
+          "page": "/docs/viewer/architecture",
+          "status": "agrees"
+        }
+      ]
+    },
+    {
+      "subject": "viewer/architecture.mdx duplicate-detection module",
+      "claim": "architecture-dedup-module",
+      "restated": [
+        {
+          "ref": "content/docs/viewer/architecture.mdx",
+          "page": "/docs/viewer/architecture",
           "status": "agrees"
         }
       ]

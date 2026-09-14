@@ -273,6 +273,84 @@ export const claims: Claim[] = [
     ],
   },
   {
+    kind: "proposition",
+    id: "viewer-storage-model",
+    subject: "viewer storage model (no database, no API server)",
+    master: {
+      ref: "docs-platform/sources/meetings-viewer-technical-specification.md",
+      class: "external",
+      extract: {
+        type: "keyword-choice",
+        pattern: "Architectural invariants([\\s\\S]+?)(?=\\n###)",
+        options: ["no database", "a database"],
+      },
+    },
+    assertedBy: [
+      {
+        ref: "content/docs/viewer/architecture.mdx",
+        class: "git-prose",
+        page: "/docs/viewer/architecture",
+        extract: {
+          type: "keyword-choice",
+          pattern: "## Two modes([\\s\\S]+?)(?=\\n## )",
+          options: ["no database", "a database"],
+        },
+      },
+    ],
+  },
+  {
+    kind: "repo-paths",
+    id: "project-structure-paths",
+    subject: "contributing page project-structure listing",
+    assertedBy: [
+      {
+        ref: "content/docs/contributing/index.mdx",
+        class: "git-prose",
+        page: "/docs/contributing",
+        extract: {
+          type: "path-listing",
+          pattern: "### Project structure\\s*```\\n([\\s\\S]+?)```",
+        },
+      },
+    ],
+  },
+  {
+    kind: "repo-fact",
+    id: "architecture-data-module",
+    subject: "viewer/architecture.mdx data-source module",
+    assertion:
+      "Page cites lib/scraper-data.ts as the MeetingRecord type and data-source module.",
+    master: {
+      ref: "lib/scraper-data.ts",
+      class: "executable",
+      extract: { type: "file-exists" },
+    },
+    page: {
+      ref: "content/docs/viewer/architecture.mdx",
+      class: "git-prose",
+      page: "/docs/viewer/architecture",
+      extract: { type: "file-exists" },
+    },
+  },
+  {
+    kind: "repo-fact",
+    id: "architecture-dedup-module",
+    subject: "viewer/architecture.mdx duplicate-detection module",
+    assertion:
+      "Page cites lib/duplicate-detection.ts for same-start record grouping.",
+    master: {
+      ref: "lib/duplicate-detection.ts",
+      class: "executable",
+      extract: { type: "file-exists" },
+    },
+    page: {
+      ref: "content/docs/viewer/architecture.mdx",
+      class: "git-prose",
+      page: "/docs/viewer/architecture",
+      extract: { type: "file-exists" },
+    },
+  },
+  {
     kind: "repo-fact",
     id: "schema-page-generated",
     subject: "qa/schema.mdx generation claim",

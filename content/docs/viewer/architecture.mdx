@@ -18,16 +18,19 @@ description: The two data modes, the meeting record shape, and the invariants bo
 
 The viewer was designed to operate in two modes:
 
-- **Static/local mode** - reads scraper output files from `data/scrapers/` in
+- **Local mode** - reads scraper output files from `data/scrapers/` in
   the repo. This is the QA tool mode: run a spider, open the viewer, review.
-- **SaaS mode** - the same UI backed by a database, deployed as part of the
-  Documenters platform.
+- **Production mode** - the same UI reading scraper output committed to a
+  dedicated `meetings-viewer-data` repo by the city scraper repos' PR
+  workflows, fetched over `raw.githubusercontent.com` URLs.
 
 Both modes share the same invariants: the meeting record schema, the status
-and classification vocabularies, and the link priority order. A scraper that
-produces correct output in static mode produces correct output in SaaS mode
-
-- the [schema](/docs/qa/schema) is the contract.
+and classification vocabularies, and the link priority order. No database
+and no application-managed API server exists in either mode - the
+mode-specific behavior is confined to the data-source module,
+`lib/scraper-data.ts`. A scraper that produces correct output in local mode
+produces correct output in production mode - the
+[schema](/docs/qa/schema) is the contract.
 
 ## The data layer
 
@@ -43,8 +46,9 @@ Supporting modules:
   titles by significant-word overlap. Generic words ("the", "meeting",
   "regular") are ignored so "City Council Meeting" and "City Council Regular
   Meeting" collide.
-- `lib/scraper-loader.ts` - reads `data/scrapers/*.json` at request time and
-  normalizes records into `MeetingRecord`.
+- `lib/meeting-columns.ts` - column definitions for the record table.
+- `lib/meeting-utils.ts` - record helpers: status normalization and location
+  formatting.
 
 ## Why a table
 
@@ -61,9 +65,17 @@ calendar or card list:
 
 ## Open questions the spec leaves open
 
-- How SaaS mode authenticates and scopes data per city.
-- Whether static mode and SaaS mode share a deployment or ship separately.
-- How link status checking (CS-127) surfaces results in the UI.
+Production mode is documented as not yet fully planned. The spec's open
+items:
+
+- The token mechanism for cross-repo writes to `meetings-viewer-data`
+  (PAT vs GitHub App).
+- How concurrent workflow runs against the data repo are handled
+  (retry-with-rebase, a queue, or an accepted race with a periodic sweep).
+- Whether merged-PR data is preserved anywhere, or deleted along with
+  unmerged-PR data.
+- A periodic sweep for orphaned PR directories whose PRs no longer exist on
+  the source repo.
 
 ## Source
 

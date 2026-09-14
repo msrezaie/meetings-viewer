@@ -1,0 +1,141 @@
+---
+title: Contributing
+description: How to contribute to City Scrapers - both the code and the docs.
+---
+
+# Contributing
+
+## Editing the docs
+
+These docs live in `content/docs/` in the Meetings Viewer repo. They're written
+in MDX, which is Markdown with support for React components.
+
+### The git path (for developers)
+
+1. Edit the `.mdx` files in `content/docs/`.
+2. Run `npm run dev` and check your changes at
+   [http://localhost:3000/docs](http://localhost:3000/docs).
+3. Open a PR. Vercel will generate a preview URL.
+
+### The visual editor path (for everyone)
+
+A Keystatic editor is mounted at [`/keystatic`](/keystatic) for mentors, PMs,
+and anyone who prefers not to use the terminal.
+
+Three things to know about how it works:
+
+- **Two storage modes.** Until the GitHub app env vars exist, the editor
+  runs `local` mode - no login, saves write straight into the working tree
+  on the machine running `next dev`. Once `NEXT_PUBLIC_KEYSTATIC_GITHUB_APP_SLUG`
+  is set (created via `/keystatic/setup`), it switches to `github` mode:
+  OAuth login required, only people with repo write access can save.
+- **In GitHub mode, saves go through a PR.** The editor works on
+  `keystatic/*` branches; on first save a GitHub Action opens a PR against
+  the default branch automatically. The PR gets the normal review and
+  [drift check](/docs/conflicts) before merge - editor commits never land on
+  the default branch directly.
+- **Component-importing pages are prose-editable only.** Pages using live
+  components - `<RepoScope>`, `<SchemaTable>`, `<Steps>`, `<RubricReport>` -
+  render them as labeled blocks. Make prose edits in the editor; make
+  structural changes (adding, reordering, or removing components) in the
+  repo.
+
+<Callout type="info">
+  On GitHub without a local checkout, use [github.dev](https://github.dev) -
+  press `.` on any GitHub page to open a full browser-based editor. Fork the
+  repo, edit the MDX, and open a PR.
+</Callout>
+
+## Editing the code
+
+The Meetings Viewer is a Next.js 16 app using MUI 9 and Tailwind CSS 4.
+
+### Project structure
+
+```
+app/
+  (landing)/   - landing page
+  (docs)/      - documentation routes (Fumadocs)
+  (viewer)/    - scraper viewer routes
+  (keystatic)/ - visual editor mount
+  layout.tsx   - root layout with MUI theme
+  theme.ts     - MUI theme definition
+  globals.css  - CSS layers + Fumadocs theme mapping
+components/
+  layout/      - site header, footer, chrome, docs search
+  landing/     - landing page components
+  scrapers/    - scraper workspace components
+  ui/          - shared UI components (StatusChip, etc.)
+  docs/        - MDX components (RepoScope, SchemaTable, ...)
+lib/
+  docs-source.ts        - Fumadocs content source
+  scraper-data.ts       - MeetingRecord type + data loading
+  duplicate-detection.ts - duplicate detection logic
+  meeting-columns.ts    - table column definitions
+  meeting-utils.ts      - meeting record utilities
+content/docs/  - MDX documentation content
+docs-platform/ - docs-only engine, sources, generated artifacts, playbooks
+```
+
+### Code organization
+
+Code is organized by what kind of thing it is (pure logic vs. UI vs.
+constant) and how far it reaches (used in one place vs. shared), with the
+three surfaces kept separate: landing under `components/landing/`, docs
+under `components/docs/` + `content/docs/` + `docs-platform/`, viewer under
+`components/scrapers/` + `app/(viewer)/`.
+
+- Pure logic with no JSX that operates on data belongs in `lib/` -
+  meeting-specific helpers in `lib/meeting-utils.ts`, otherwise the relevant
+  `lib/` module. A hook or component needing this logic imports it from
+  `lib/`, never from another component.
+- A presentational component used by two or more parents belongs in
+  `components/ui/`.
+- A feature or page component belongs in its surface's folder
+  (`components/landing/`, `components/scrapers/`, `components/docs/`).
+- A sub-component used by exactly one parent stays un-exported in that
+  parent's file.
+- Constants live at the smallest scope that needs them: local to a file,
+  bound to the component that owns them, or in the shared
+  `lib/`/`components/ui/` module they belong to if genuinely shared across
+  files.
+- Docs-platform internals (drift engine, mirrored sources, generated
+  artifacts, prose/vocab config) live under `docs-platform/` - not the repo
+  root - unless the framework requires it (e.g. `keystatic.config.ts`,
+  `.vale.ini`).
+
+### Running locally
+
+```bash
+npm install
+npm run dev
+```
+
+The dev server starts at [http://localhost:3000](http://localhost:3000).
+
+### Docs commands
+
+```bash
+npm run docs:drift        # rewrite findings.json + report.md
+npm run docs:drift:check  # same, exiting 1 on blocking findings
+npm run docs:drift:test   # fixture-corpus recall/precision test
+npm run docs:schema       # regenerate docs-platform/generated/meeting-schema.json
+npm run docs:schema:check # fail if the generated schema is stale
+npm run docs:links        # internal link + anchor check over content/docs
+npm run docs:sync         # re-sync mirrored upstream sources
+```
+
+### Opening a PR
+
+1. Create a branch from the current production branch.
+2. Make your changes.
+3. Run `npm run lint` and `npm run build` to verify.
+4. Open a PR with a clear description of what changed and why.
+
+<Callout type="warn">
+  If you're changing documentation that describes code behavior (e.g. the schema
+  fields, the `end` default, the duplicate detection algorithm), make sure the
+  docs match the code. The drift check will flag disagreements - see
+  [/docs/conflicts](/docs/conflicts) for the standing view - but it's faster to
+  get it right in the PR.
+</Callout>

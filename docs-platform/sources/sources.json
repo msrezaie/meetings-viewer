@@ -1,0 +1,53 @@
+{
+  "$comment": "Provenance for sources mirrored into docs-platform/sources/. A mirrored file is a byte-faithful snapshot of an upstream artifact; when synced_at + ttl_days has passed, the drift check emits a `prompt`-confidence finding instead of silently trusting a stale copy.",
+  "sources": [
+    {
+      "ref": "docs-platform/sources/city-scrapers-core/constants.py",
+      "origin": "City-Bureau/city-scrapers-core",
+      "origin_path": "city_scrapers_core/constants.py",
+      "url": "https://github.com/City-Bureau/city-scrapers-core/blob/main/city_scrapers_core/constants.py",
+      "synced_at": "2026-09-14",
+      "ttl_days": 30
+    },
+    {
+      "ref": "docs-platform/sources/city-scrapers-development-guide.md",
+      "origin": "Code The Dream (Google Docs)",
+      "url": "https://docs.google.com/document/d/1EW1WqadB_EJig3qAiQkZgOUserl17OmSJST1TcFC5vQ",
+      "synced_at": "2026-09-12",
+      "ttl_days": 90
+    },
+    {
+      "ref": "docs-platform/sources/meetings-viewer-technical-specification.md",
+      "origin": "Code The Dream (Google Docs)",
+      "url": "https://docs.google.com/document/d/1svsB02_nHnnHXde1Y_20vboPY-x9XjRWy9mqJg5dvNQ",
+      "synced_at": "2026-09-12",
+      "ttl_days": 90
+    },
+    {
+      "ref": "docs-platform/sources/scrapy-project-resources.md",
+      "origin": "Code The Dream (Google Docs)",
+      "url": "https://docs.google.com/document/d/1Z4ra_qSWn4TtCOBFoA1kZNdDefuKNjr2PKs8q2nJQko",
+      "synced_at": "2026-09-12",
+      "ttl_days": 180
+    },
+    {
+      "ref": "docs-platform/sources/city-scraper-project-tech-guide.md",
+      "origin": "City Bureau / Documenters Network",
+      "synced_at": "2026-09-12",
+      "ttl_days": 90
+    },
+    {
+      "ref": "docs-platform/sources/pdw-code-review-issues.mdx",
+      "origin": "Public Data Works",
+      "url": "https://docs.pdw.co/city-scrapers-overview-of-reviews",
+      "synced_at": "2026-08-28",
+      "ttl_days": 90
+    },
+    {
+      "ref": "docs-platform/sources/skills/spider-review/SKILL.md",
+      "origin": "Public Data Works (mirrored agent skill)",
+      "synced_at": "2026-09-12",
+      "ttl_days": 90
+    }
+  ]
+}

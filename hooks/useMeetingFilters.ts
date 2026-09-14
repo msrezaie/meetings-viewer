@@ -1,9 +1,20 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type { MeetingRecord } from "@/lib/scrapers";
-import { locationText, normalizeStatus } from "@/lib/meetings";
-import { buildDuplicateGroups, type DuplicateInfo } from "@/lib/duplicates";
+import type { MeetingRecord } from "@/lib/scraper-data";
+import { normalizeStatus } from "@/lib/meeting-utils";
+import {
+  SEARCHABLE_COLUMNS,
+  type SearchableColumnKey,
+  type SearchScope,
+} from "@/lib/meeting-columns";
+import {
+  buildDuplicateGroups,
+  type DuplicateInfo,
+} from "@/lib/duplicate-detection";
+
+export { SEARCH_SCOPE_OPTIONS } from "@/lib/meeting-columns";
+export type { SearchableColumnKey, SearchScope } from "@/lib/meeting-columns";
 
 export const STATUS_OPTIONS = [
   { value: "all", label: "All" },
@@ -13,29 +24,33 @@ export const STATUS_OPTIONS = [
   { value: "duplicates", label: "Duplicates" },
 ];
 
-export const SEARCH_FIELD_OPTIONS = [
-  { value: "title", label: "Title" },
-  { value: "description", label: "Description" },
-  { value: "time_notes", label: "Time Notes" },
-  { value: "location", label: "Location" },
-  { value: "source", label: "Source" },
+export const LINKS_OPTIONS = [
+  { value: "all", label: "All" },
+  { value: "has-links", label: "Has links" },
+  { value: "no-links", label: "No links" },
 ] as const;
 
-export type SearchField = (typeof SEARCH_FIELD_OPTIONS)[number]["value"];
+export type LinksFilter = (typeof LINKS_OPTIONS)[number]["value"];
+
+type SearchIndex = Record<SearchableColumnKey, string>;
 
 export interface MeetingFiltersState {
   search: string;
-  searchField: SearchField;
+  searchScope: SearchScope;
   statusFilter: string;
+  linksFilter: LinksFilter;
   dateFrom: string;
   dateTo: string;
   setSearch: (value: string) => void;
-  setSearchField: (value: SearchField) => void;
+  setSearchScope: (value: SearchScope) => void;
   setStatusFilter: (value: string) => void;
+  setLinksFilter: (value: LinksFilter) => void;
   setDateFrom: (value: string) => void;
   setDateTo: (value: string) => void;
   clearDates: () => void;
   filteredRecords: MeetingRecord[];
+  textMatchCount: number;
+  matchingSearchColumns: SearchableColumnKey[];
   duplicateInfoMap: Map<MeetingRecord, DuplicateInfo>;
 }
 
@@ -53,21 +68,46 @@ function parseLocalDate(s: string): Date | null {
  * the FiltersPanel while the table only receives the filtered result.
  */
 
-function getFieldValue(record: MeetingRecord, field: SearchField): string {
-  switch (field) {
-    case "title":
-      return record.title ?? "";
-    case "description":
-      return record.description ?? "";
-    case "time_notes":
-      return record.time_notes ?? "";
-    case "location":
-      return locationText(record) ?? "";
-    case "source":
-      return record.source ?? "";
-    default:
-      return "";
+interface IndexedMeeting {
+  record: MeetingRecord;
+  values: SearchIndex;
+}
+
+function buildSearchIndex(record: MeetingRecord): IndexedMeeting {
+  const values = {} as SearchIndex;
+
+  for (const column of SEARCHABLE_COLUMNS) {
+    values[column.key] = column.getSearchValue(record).toLowerCase();
   }
+
+  return { record, values };
+}
+
+function countOccurrences(text: string, query: string): number {
+  if (!query) return 0;
+
+  let count = 0;
+  let index = text.indexOf(query);
+  while (index !== -1) {
+    count += 1;
+    index = text.indexOf(query, index + query.length);
+  }
+  return count;
+}
+
+function countSearchMatches(
+  values: SearchIndex,
+  scope: SearchScope,
+  query: string
+): number {
+  if (scope === "all") {
+    return SEARCHABLE_COLUMNS.reduce(
+      (count, { key }) => count + countOccurrences(values[key], query),
+      0
+    );
+  }
+
+  return countOccurrences(values[scope], query);
 }
 
 // "no name" / "no address" to find records missing that part, in addition to
@@ -92,8 +132,9 @@ export function useMeetingFilters(
   records: MeetingRecord[]
 ): MeetingFiltersState {
   const [search, setSearch] = useState("");
-  const [searchField, setSearchField] = useState<SearchField>("title");
+  const [searchScope, setSearchScope] = useState<SearchScope>("all");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [linksFilter, setLinksFilter] = useState<LinksFilter>("all");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
   const duplicateInfoMap = useMemo(() => {
@@ -104,65 +145,105 @@ export function useMeetingFilters(
     () => new Set(records.filter((r) => duplicateInfoMap.get(r)!.isDuplicate)),
     [records, duplicateInfoMap]
   );
+  const indexedRecords = useMemo(
+    () => records.map(buildSearchIndex),
+    [records]
+  );
 
-  const filteredRecords = useMemo(() => {
-    const query = search.trim().toLowerCase();
-    let filtered = records;
+  const { filteredRecords, textMatchCount, matchingSearchColumns } =
+    useMemo(() => {
+      const query = search.trim().toLowerCase();
+      let filtered = indexedRecords;
+      let textMatchCount = 0;
+      let matchingSearchColumns: SearchableColumnKey[] = [];
 
-    if (statusFilter === "duplicates") {
-      filtered = filtered.filter((r) => duplicateSet.has(r));
-    } else if (statusFilter !== "all") {
-      filtered = filtered.filter(
-        (r) => normalizeStatus(r.status) === statusFilter
-      );
-    }
+      if (statusFilter === "duplicates") {
+        filtered = filtered.filter(({ record }) => duplicateSet.has(record));
+      } else if (statusFilter !== "all") {
+        filtered = filtered.filter(
+          ({ record }) => normalizeStatus(record.status) === statusFilter
+        );
+      }
 
-    if (dateFrom || dateTo) {
-      const from = parseLocalDate(dateFrom);
-      const toDate = parseLocalDate(dateTo) ?? (from ? new Date(from) : null);
-      if (toDate) toDate.setHours(23, 59, 59, 999);
+      if (linksFilter !== "all") {
+        filtered = filtered.filter(({ record }) =>
+          linksFilter === "has-links"
+            ? (record.links?.length ?? 0) > 0
+            : (record.links?.length ?? 0) === 0
+        );
+      }
 
-      filtered = filtered.filter((r) => {
-        const isWithinDateRange = (dateStr: string | undefined) => {
-          if (!dateStr) return false;
-          const meetingDate = new Date(dateStr);
-          if (isNaN(meetingDate.getTime())) return false;
-          if (from && meetingDate < from) return false;
-          if (toDate && meetingDate > toDate) return false;
-          return true;
-        };
-        return isWithinDateRange(r.start) || isWithinDateRange(r.end);
-      });
-    }
+      if (dateFrom || dateTo) {
+        const from = parseLocalDate(dateFrom);
+        const toDate = parseLocalDate(dateTo) ?? (from ? new Date(from) : null);
+        if (toDate) toDate.setHours(23, 59, 59, 999);
 
-    if (query) {
-      filtered = filtered.filter((r) =>
-        searchField === "location"
-          ? matchesLocationQuery(r, query)
-          : getFieldValue(r, searchField).toLowerCase().includes(query)
-      );
-    }
+        filtered = filtered.filter(({ record }) => {
+          const isWithinDateRange = (dateStr: string | undefined) => {
+            if (!dateStr) return false;
+            const meetingDate = new Date(dateStr);
+            if (isNaN(meetingDate.getTime())) return false;
+            if (from && meetingDate < from) return false;
+            if (toDate && meetingDate > toDate) return false;
+            return true;
+          };
+          return (
+            isWithinDateRange(record.start) || isWithinDateRange(record.end)
+          );
+        });
+      }
 
-    return filtered;
-  }, [
-    records,
-    search,
-    searchField,
-    statusFilter,
-    dateFrom,
-    dateTo,
-    duplicateSet,
-  ]);
+      if (query) {
+        filtered = filtered.filter(({ record, values }) => {
+          if (searchScope === "all") {
+            return SEARCHABLE_COLUMNS.some(({ key }) =>
+              values[key].includes(query)
+            );
+          }
+
+          if (searchScope === "location") {
+            return matchesLocationQuery(record, query);
+          }
+
+          return values[searchScope].includes(query);
+        });
+        textMatchCount = filtered.reduce(
+          (count, { values }) =>
+            count + countSearchMatches(values, searchScope, query),
+          0
+        );
+        matchingSearchColumns = SEARCHABLE_COLUMNS.filter(({ key }) =>
+          filtered.some(({ values }) => values[key].includes(query))
+        ).map(({ key }) => key);
+      }
+
+      return {
+        filteredRecords: filtered.map(({ record }) => record),
+        textMatchCount,
+        matchingSearchColumns,
+      };
+    }, [
+      indexedRecords,
+      search,
+      searchScope,
+      statusFilter,
+      linksFilter,
+      dateFrom,
+      dateTo,
+      duplicateSet,
+    ]);
 
   return {
     search,
-    searchField,
+    searchScope,
     statusFilter,
+    linksFilter,
     dateFrom,
     dateTo,
     setSearch,
-    setSearchField,
+    setSearchScope,
     setStatusFilter,
+    setLinksFilter,
     setDateFrom,
     setDateTo,
     clearDates: () => {
@@ -170,6 +251,8 @@ export function useMeetingFilters(
       setDateTo("");
     },
     filteredRecords,
+    textMatchCount,
+    matchingSearchColumns,
     duplicateInfoMap,
   };
 }

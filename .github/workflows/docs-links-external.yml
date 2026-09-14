@@ -1,0 +1,82 @@
+name: docs-links-external
+
+# External link rot has nothing to do with the pull request that happens to
+# be open - lychee runs on a weekly schedule and rolls findings up into a
+# single issue instead of blocking a developer on another site's downtime
+# (playbook P5, W-4).
+
+on:
+  schedule:
+    - cron: "0 9 * * 1" # Mondays 09:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  lychee:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract outbound links into a list
+        run: |
+          node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON -e "
+            const { DOC_LINKS } = await import('./docs-platform/links.ts');
+            const fs = await import('node:fs');
+            fs.writeFileSync('/tmp/registry-links.txt', DOC_LINKS.flatMap(g => g.items.map(i => i.url)).join('\n'));
+          "
+
+      - name: Check external links
+        id: lychee
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: >-
+            --verbose --no-progress --max-concurrency 8
+            --accept 200,204,206,301,302,403,429
+            './content/**/*.mdx'
+            './docs-platform/**/*.md'
+            './README.md'
+            /tmp/registry-links.txt
+          format: markdown
+          output: /tmp/lychee-report.md
+          fail: false
+
+      - name: Publish rollup issue on failures
+        if: steps.lychee.outputs.exit_code != 0
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require("fs");
+            const report = fs.readFileSync("/tmp/lychee-report.md", "utf8");
+            const title = "docs: external link check rollup";
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: "open",
+              labels: "docs-links",
+            });
+            const body = [
+              "<!-- lychee-rollup -->",
+              `Latest run: ${context.payload.schedule ?? "manual"} - ${new Date().toISOString().slice(0, 10)}`,
+              "",
+              report,
+            ].join("\n");
+            const existing = issues.find((i) => i.title === title);
+            if (existing) {
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existing.number,
+                body,
+              });
+            } else {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title,
+                labels: ["docs-links"],
+                body,
+              });
+            }

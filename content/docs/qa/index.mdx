@@ -1,0 +1,76 @@
+---
+title: QA & Review
+description: The review workflow for checking scraper output against the rubric before merging.
+---
+
+# QA & Review
+
+Reviewing a scraper PR comes down to one question: **is the output correct?**
+The QA workflow exists to answer that quickly and consistently.
+
+## The review process
+
+<Steps>
+<Step>
+
+**Pull the PR** and run the spider locally:
+
+<CommandBlock command="scrapy crawl {spider} -O data/scrapers/{spider}.json" />
+
+</Step>
+<Step>
+
+**Open the viewer** at `http://localhost:3000/scrapers/<spider-name>` and scan
+the output - or paste the JSON into the
+[rubric report](/docs/qa/rubric#rubric-report).
+
+</Step>
+<Step>
+
+**Apply the rubric** - check each field against the
+[QA rubric](/docs/qa/rubric). The rubric is designed to be applied field by
+field, in order.
+
+</Step>
+<Step>
+
+**Check the schema** - make sure every required field is present and matches
+the [Schema reference](/docs/qa/schema).
+
+</Step>
+<Step>
+
+**Leave review comments** referencing specific rubric rules, e.g. "field
+`links` is out of priority order - see
+[/docs/qa/schema#links](/docs/qa/schema#links)".
+
+</Step>
+</Steps>
+
+<Callout type="tip">
+  The fastest way to review is the viewer in one tab and the rubric in another.
+  The viewer shows you the data; the rubric tells you what to check.
+</Callout>
+
+## What to block on
+
+- Missing required fields (`id`, `title`, `start`, `status`, `source`).
+- Datetimes that carry timezone info (`start`/`end` must be naive).
+- Duplicate records (same start time + similar title).
+- Status inconsistent with `start` time (e.g. `passed` for a future meeting).
+- Status or classification values outside the
+  [schema vocabularies](/docs/qa/schema).
+- Links out of priority order.
+
+## What to comment on (not block)
+
+- Title formatting (should include the body name).
+- Description quality (should be useful, not just a copy of the title).
+- `time_notes` when location is empty (should explain why).
+
+## Where this fits
+
+The rubric answers "is this output correct" for one PR. For the whole
+multi-team PR lifecycle, see [Review process](/docs/qa/review-process). For
+the recurring findings PDW catalogued across 23 real PRs, see
+[Review issues](/docs/qa/review-issues).

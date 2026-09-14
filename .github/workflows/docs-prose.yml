@@ -1,0 +1,49 @@
+name: docs-prose
+
+# Prose quality gate (playbook P5, W-3): cspell and Vale run on changed files
+# only, so adoption doesn't begin with a wall of pre-existing findings. Vale's
+# vocabulary is seeded under docs-platform/vale/ - extend the accept list as
+# project terms appear; no external style packages are tracked, so an upstream
+# rule change can't fail an unrelated PR.
+
+on:
+  pull_request:
+    paths:
+      - "content/**"
+      - "docs-platform/**"
+      - ".vale.ini"
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  prose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Collect changed prose files
+        id: changed
+        uses: tj-actions/changed-files@v46
+        with:
+          files: |
+            content/**/*.mdx
+            content/**/*.md
+            docs-platform/**/*.md
+
+      - name: Spell check changed files
+        if: steps.changed.outputs.any_changed == 'true'
+        run: |
+          npx -y cspell@10.3.0 --no-progress --config docs-platform/cspell.config.yaml \
+            ${{ steps.changed.outputs.all_changed_files }}
+
+      - name: Vale lint changed files
+        if: steps.changed.outputs.any_changed == 'true'
+        uses: errata-ai/vale-action@v2
+        with:
+          files: ${{ steps.changed.outputs.all_changed_files }}
+          vale_flags: "--minAlertLevel=warning"
+          fail_on_error: false

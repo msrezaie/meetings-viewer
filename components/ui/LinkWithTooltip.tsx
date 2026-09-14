@@ -2,17 +2,21 @@ import Box from "@mui/material/Box";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import { ReactNode } from "react";
+import { highlightMatches } from "@/components/ui/HighlightMatches";
+import { TOOLTIP_ENTER_DELAY } from "@/lib/ui-constants";
 
 interface LinkWithTooltipProps {
   href: string;
   label?: ReactNode;
+  highlight?: string;
   maxWidth?: number | string;
 }
 
 export default function LinkWithTooltip({
   href,
   label,
-  maxWidth = 95,
+  highlight,
+  maxWidth = "100%",
 }: LinkWithTooltipProps) {
   const displayLabel: ReactNode = label || (
     <Typography
@@ -22,16 +26,22 @@ export default function LinkWithTooltip({
       No title
     </Typography>
   );
+  const renderedLabel =
+    typeof label === "string"
+      ? highlightMatches([label], highlight ?? "")
+      : displayLabel;
+  const renderedHref = highlightMatches([href], highlight ?? "");
 
   return (
     <Tooltip
       title={
         <Typography variant="body2" sx={{ whiteSpace: "nowrap" }}>
-          {href}
+          {renderedHref}
         </Typography>
       }
       placement="right"
-      enterDelay={200}
+      disableInteractive
+      enterDelay={TOOLTIP_ENTER_DELAY}
       slotProps={{
         popper: {
           modifiers: [
@@ -73,7 +83,7 @@ export default function LinkWithTooltip({
           verticalAlign: "top",
         }}
       >
-        {displayLabel}
+        {renderedLabel}
       </Box>
     </Tooltip>
   );

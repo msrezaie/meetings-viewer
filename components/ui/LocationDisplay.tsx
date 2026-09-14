@@ -2,8 +2,10 @@
 
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import type { MeetingRecord } from "@/lib/scrapers";
+import type { MeetingRecord } from "@/lib/scraper-data";
+import OverflowTooltip from "./OverflowTooltip";
 import { highlightMatches } from "./HighlightMatches";
+import { LOCATION_MAX_LINES } from "@/lib/ui-constants";
 
 function LocationPart({
   value,
@@ -14,26 +16,26 @@ function LocationPart({
   fallback: string;
   highlight?: string;
 }) {
-  return (
-    <Box
-      sx={{
-        display: "-webkit-box",
-        WebkitLineClamp: 2,
-        WebkitBoxOrient: "vertical",
-        overflow: "hidden",
-      }}
+  const content = value ? (
+    highlightMatches([value], highlight ?? "")
+  ) : (
+    <Typography
+      component="span"
+      sx={{ color: "error.main", fontSize: "inherit" }}
     >
-      {value ? (
-        highlightMatches([value], highlight ?? "")
-      ) : (
-        <Typography
-          component="span"
-          sx={{ color: "error.main", fontSize: "inherit" }}
-        >
-          {fallback}
-        </Typography>
-      )}
-    </Box>
+      {highlightMatches([fallback], highlight ?? "")}
+    </Typography>
+  );
+
+  return (
+    <OverflowTooltip
+      title={value || fallback}
+      wrap
+      maxLines={LOCATION_MAX_LINES}
+      contentKey={`${value}:${highlight ?? ""}`}
+    >
+      {content}
+    </OverflowTooltip>
   );
 }
 
@@ -48,15 +50,11 @@ export function LocationDisplay({
   const name = record.location?.name?.trim() ?? "";
   const address = record.location?.address?.trim() ?? "";
 
-  if (!name && !address) return <>—</>;
-
   return (
     <Box
       sx={{
         display: "flex",
         flexDirection: "column",
-        py: 1,
-        px: 1,
         wordBreak: "break-word",
         width: "100%",
         overflow: "hidden",

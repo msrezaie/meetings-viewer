@@ -1,0 +1,67 @@
+---
+title: Meetings Viewer
+description: Inspect scraper JSON output as a browsable, filterable table. Built to cut QA time during scraper development.
+---
+
+<RepoScope repo="meetings-viewer" />
+
+# Meetings Viewer
+
+The Meetings Viewer turns raw Scrapy JSON into a browsable, filterable table.
+It exists to speed up the most repetitive part of scraper development:
+checking that your output is correct, field by field.
+
+## What it does
+
+- Loads JSON files from `data/scrapers/` in the repo.
+- Renders each meeting record as a row in a data grid.
+- Highlights duplicates, missing fields, and status inconsistencies.
+- Lets you filter by classification, status, date range, and free-text search.
+
+## Status values
+
+Meeting records use four status values. These are rendered with the real
+component used in the app:
+
+<div>
+  <StatusChip status="passed" /> - the meeting happened or was confirmed.
+</div>
+
+<div>
+  <StatusChip status="cancelled" /> - the meeting was cancelled.
+</div>
+
+<div>
+  <StatusChip status="tentative" /> - the meeting is planned but not confirmed.
+</div>
+
+<div>
+  <StatusChip status="confirmed" /> - a newer vocabulary member; upcoming and
+  confirmed by the source.
+</div>
+
+<Callout type="info">
+  The status legend above is rendered with the actual `StatusChip` component
+  from the app, not a screenshot. If the component changes, this page updates
+  automatically - the "live component" pattern described in the docs platform
+  research.
+</Callout>
+
+## Where the data comes from
+
+The viewer reads from `data/scrapers/<spider-name>.json`. Each file is the
+output of a `scrapy crawl <spider> -O data/scrapers/<spider-name>.json` run.
+The file format is a JSON array of meeting records matching the
+[schema](/docs/qa/schema).
+
+The filename without `.json` must match the spider's `name` attribute - it
+becomes the slug in the viewer's URL: `fortx_council.json` is served at
+`/scrapers/fortx_council`.
+
+## Next steps
+
+- [Quick start](/docs/viewer/quick-start) - load your scraper output and start
+  reviewing.
+- [Architecture](/docs/viewer/architecture) - the two modes, data shapes, and
+  the invariants both share.
+- [QA rubric](/docs/qa/rubric) - the field-by-field checks to apply.

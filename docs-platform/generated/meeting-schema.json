@@ -1,0 +1,85 @@
+{
+  "$comment": "GENERATED FILE - do not edit. Run `npm run docs:schema` to regenerate. Input: lib/scraper-data.ts MeetingRecord + docs-platform/sources/city-scrapers-core/constants.py.",
+  "generated_from": [
+    "lib/scraper-data.ts",
+    "docs-platform/sources/city-scrapers-core/constants.py"
+  ],
+  "fields": [
+    {
+      "name": "id",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "title",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "description",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "classification",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "start",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "end",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "all_day",
+      "type": "boolean",
+      "required": true
+    },
+    {
+      "name": "time_notes",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "location",
+      "type": "{ name: string; address: string }",
+      "required": true
+    },
+    {
+      "name": "links",
+      "type": "{ href: string; title: string }[]",
+      "required": true
+    },
+    {
+      "name": "source",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "status",
+      "type": "string",
+      "required": true
+    }
+  ],
+  "statuses": [
+    "cancelled",
+    "tentative",
+    "confirmed",
+    "passed"
+  ],
+  "classifications": [
+    "Advisory Committee",
+    "Board",
+    "City Council",
+    "Commission",
+    "Committee",
+    "Forum",
+    "Police Beat",
+    "Not classified"
+  ]
+}

@@ -1,0 +1,46 @@
+"use client";
+
+import Box from "@mui/material/Box";
+import type { MeetingRecord } from "@/lib/scraper-data";
+import type { DuplicateInfo } from "@/lib/duplicate-detection";
+import { MeetingSelectionProvider } from "@/contexts/MeetingSelectionContext";
+import MeetingsTable from "@/components/scrapers/MeetingsTable";
+import MeetingDetailPanel from "@/components/scrapers/MeetingDetailPanel";
+import type { SearchScope } from "@/lib/meeting-columns";
+import { SECTION_GAP } from "@/lib/ui-constants";
+
+export default function MeetingsLayout({
+  records,
+  search,
+  searchScope,
+  duplicateInfoMap,
+}: {
+  records: MeetingRecord[];
+  /** Current search keyword, to highlight matches in the table. */
+  search: string;
+  /** Search scope used to highlight matches in the table. */
+  searchScope: SearchScope;
+  /** Per-record duplicate info computed from the full, unfiltered dataset. */
+  duplicateInfoMap: Map<MeetingRecord, DuplicateInfo>;
+}) {
+  return (
+    <MeetingSelectionProvider>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "row",
+          gap: SECTION_GAP,
+          alignItems: "flex-start",
+        }}
+      >
+        <MeetingsTable
+          records={records}
+          search={search}
+          searchScope={searchScope}
+          duplicateInfoMap={duplicateInfoMap}
+        />
+        <MeetingDetailPanel />
+      </Box>
+    </MeetingSelectionProvider>
+  );
+}

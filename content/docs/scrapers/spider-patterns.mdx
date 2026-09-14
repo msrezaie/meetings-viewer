@@ -1,0 +1,135 @@
+---
+title: Spider Patterns
+description: Singular spiders vs spider factories, CityScrapersSpider vs LegistarSpider, and where mixins fit.
+---
+
+<RepoScope repo="scrapers" />
+
+# Spider patterns
+
+Two decisions shape a spider file before any parsing code exists:
+
+1. **Which base class** - `CityScrapersSpider` or `LegistarSpider`.
+2. **Which architecture** - a singular spider or a spider factory.
+
+The second decision is usually predetermined by the URL requirements in the
+assignment. When it is not clear, ask the team lead before proceeding -
+rework between the two is expensive.
+
+## Base classes
+
+### CityScrapersSpider
+
+The default base class, declared in `city-scrapers-core`. Every spider is a
+Scrapy spider underneath; `CityScrapersSpider` adds the meeting schema, the
+`_get_id` and `_get_status` helpers, and validation plumbing.
+
+```python
+class SandieCityCouncilSpider(CityScrapersSpider):
+    name = "sandie_city_council"      # canonical slug - filenames, URLs, Airtable
+    agency = "San Diego City Council" # human-readable agency name
+    timezone = "America/Los_Angeles"  # declares the local timezone
+    start_urls = ["https://example.gov/meetings"]
+```
+
+Class attributes unique to the spider - `name`, `agency`, `timezone`,
+`start_urls` - are declared at class level. Nothing else is required; `parse`
+does the work.
+
+### LegistarSpider
+
+A specialized base class for agencies on the Legistar platform (the Granicus
+legislative management system many US cities use). Legistar exposes both a
+public web interface and a documented REST API:
+
+- **Use the Legistar API when available.** The endpoint pattern is predictable
+  and returns structured JSON - far more reliable than the HTML interface.
+- **Pagination and detail traversal are built in.** The base class handles
+  them; your subclass overrides only what differs.
+- The agency's Legistar **client key** appears in the URL's subdomain:
+  `chicago.legistar.com` means client key `chicago`.
+
+## Architecture
+
+### Singular spider
+
+One spider class producing output for one agency - or for several agencies on
+a shared source when the parsing logic is identical and there is no need to
+run them independently. This is the common case; start here.
+
+### Spider factory
+
+When one source hosts many agencies that differ only in filter criteria, the
+factory pattern generates a separate, independently runnable spider per agency
+from a single file. Two parts:
+
+- A **mixin** in `city_scrapers/mixins/` holds all shared parsing logic. It has
+  no `name` and no `start_urls`.
+- A **`spider_configs` list** in the spider file, where each dict defines one
+  spider: its `name`, `agency`, and the filter values (event types, category
+  IDs) that distinguish it.
+
+```python
+# city_scrapers/spiders/sandie_nationalcity.py
+from city_scrapers.mixins import SandieNationalCityMixin
+
+spider_configs = [
+    {
+        "class_name": "SandieCityCouncilSpider",
+        "name": "sandie_national_council_committees",
+        "agency": "San Diego National City - City Council",
+        "event_type": "City Council",
+    },
+    {
+        "class_name": "SandieBoardsCommissionsSpider",
+        "name": "sandie_national_boards_commissions",
+        "agency": "San Diego National City - Boards and Commissions",
+        "event_type": ["Board of Library Trustees", "Planning Commission"],
+    },
+]
+```
+
+The framework reads `spider_configs` and emits one spider per entry - each
+with its own cron schedule, output file, and slug in the Airtable registry.
+See real examples in the
+[city-scrapers-tulsa](https://github.com/City-Bureau/city-scrapers-tulsa/pull/6)
+and
+[city-scrapers-colgo](https://github.com/City-Bureau/city-scrapers-colgo/pull/6)
+pull requests.
+
+<Callout type="warn">
+  The Airtable slug registry contains one record per `spider_configs` entry, not
+  one per file. A factory file adding five agencies registers five slugs.
+</Callout>
+
+### When to choose the factory
+
+- A single source hosts multiple agencies with slightly different filtering
+  criteria.
+- Each agency must be runnable as a distinct spider with its own slug.
+- Parsing logic is substantially shared - only the filters differ.
+
+## Two-phase spiders
+
+When meeting data spans a listing page and detail pages, `parse` yields
+`Request` objects and a second method parses each detail page. Carry
+listing-page data across with `cb_kwargs`:
+
+```python
+def parse(self, response):
+    for row in response.css("tr.meeting-row"):
+        yield scrapy.Request(
+            url=self.detail_url.format(id=row.css("::attr(data-id)").get()),
+            callback=self.parse_detail,
+            cb_kwargs={"item": row},
+            errback=self.handle_error,
+        )
+
+def parse_detail(self, response, item):
+    # item carries listing-page context; response has the detail payload
+    ...
+```
+
+Always attach `errback=self.handle_error` - a dead detail page should log and
+continue, not kill the run. The matching test layout is in
+[Testing](/docs/scrapers/testing#two-phase-tests).

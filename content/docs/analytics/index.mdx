@@ -1,0 +1,61 @@
+---
+title: Analytics
+description: Fleet health and docs-platform performance - for team leads and senior developers, not day-to-day QA.
+---
+
+<RepoScope repo="meetings-viewer" />
+
+<Callout type="info">
+  This page is for team leads and senior developers tracking fleet health and
+  docs-platform performance. It is not needed for day-to-day scraper QA - if you
+  are reviewing one spider's output, the [rubric](/docs/qa/rubric) is the tool
+  you want.
+</Callout>
+
+# Analytics
+
+Two questions this page answers: across every spider this cohort has shipped,
+what is healthy and what is stale - and is the docs platform itself fast?
+
+## Fleet health
+
+<Callout type="warn">
+  **Waiting on Production mode.** The real fleet data source is Production
+  mode's `manifest.json`, fetched the same way the viewer's own production mode
+  will fetch it - from `raw.githubusercontent.com`, with no backend. Until
+  Production mode ships, this panel is an honest empty state rather than a
+  fabricated local number.
+</Callout>
+
+The spec is explicit about why no local substitute was built: `agency`,
+`last_run`, and `last_run_status` are deliberately unpopulated in local mode
+
+- "no local mechanism produces or stores them." The `ScrapersTable` Status
+  and Last Run columns are not a half-finished feature; they are the local half
+  of a shape whose other half is Production mode. A local mtime-and-self-check
+  substitute would contradict the spec, so it was considered and scrapped.
+
+When Production mode ships, this panel renders stat tiles - counts of healthy
+spiders, stale spiders (no run in 24h+), and schema errors on last run -
+status-colored straight from the MUI theme (the same success/warning/error
+mapping `StatusChip` uses), with a fleet table extending the existing
+`ScrapersTable` DataGrid below them:
+
+<KpiRow>
+  <KpiTile
+    value="-"
+    label="Healthy - ran & validated within 24h"
+    status="good"
+  />
+  <KpiTile value="-" label="Stale - no run in 24h+" status="warn" />
+  <KpiTile value="-" label="Schema errors on last run" status="bad" />
+</KpiRow>
+
+## Docs performance trend
+
+Lighthouse CI writes one JSON record per build to
+`docs-platform/lighthouse/history.json`; this panel renders it. No telemetry
+service, no runtime dependency, nothing that phones out from a reader's
+browser.
+
+<LighthouseTrend />

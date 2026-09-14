@@ -1,0 +1,79 @@
+---
+title: Scoping a Target
+description: How to decide whether an agency website is worth scraping - and when to recommend against it.
+---
+
+<RepoScope repo="scrapers" />
+
+# Scoping a target
+
+Before writing a spider, answer one question: **is this scrape worth doing?**
+If the assignment already came scoped - a priority flag or scraping tips from
+the assigner - it usually is. If you were handed a list of agencies and asked
+to choose, the scoping is yours.
+
+## When to recommend against scraping
+
+It is a legitimate outcome to conclude a site should not be scraped. In
+general, skip a target when:
+
+- **The site is thin.** It shows a date per meeting and little else - no
+  titles, no locations, no documents.
+- **There are few meetings.** A handful of dates per year can be entered
+  manually by a network partner in under ten minutes.
+- **The structure fights scraping.** Details live in PDFs or unstructured
+  free text that would need OCR.
+- **It will break fast.** If the page structure looks like it churns yearly,
+  the maintenance cost outweighs the data.
+
+The general rule: do not build a scraper that will break within a year to
+produce information someone could have typed by hand in ten minutes. If you
+are unsure, talk to the Documenters Network or the scrape requester before
+writing code.
+
+## Minimum viable data
+
+When a scrape is a priority but the site is bare bones, partial data can
+still justify it:
+
+- Meeting start dates plus a hardcoded meeting time (with a `time_notes`
+  explanation) is a valid scrape.
+- `location` and `title` can be hardcoded when the agency meets in one place
+  under one name.
+- If agenda links live on a separate, stable page, hardcoding that page's URL
+  in `links` beats parsing a brittle listing.
+
+## Robots.txt
+
+Scrapy respects `robots.txt` by default. The project position is that public
+meeting data is public information: a public agency site - or a contractor
+site hosting that agency's meeting data - is fair to scrape. If a target
+blocks scraping in `robots.txt`, override it on that spider only:
+
+```python
+class ExampleSpider(CityScrapersSpider):
+    custom_settings = {"ROBOTSTXT_OBEY": False}
+```
+
+See `cle_building_standards.py` in city-scrapers-cle for a live example.
+
+## Time range
+
+Scrapers target upcoming meetings, but capturing a month or two of past
+meetings is worthwhile when cheap - agencies backfill minutes and documents
+for past meetings, and that data has value.
+
+When an API lets you set the range with query params, aim for everything from
+the current date forward plus the prior window you can get. Do not
+over-engineer pagination for a few extra months of history.
+
+## Filtering out fluff
+
+Agencies mix community picnics, holidays, and office closures into meeting
+calendars. Filter non-meeting events out in the spider - the output should be
+public meetings only.
+
+## Next step
+
+Target looks good? Move on to
+[Source analysis](/docs/scrapers/source-analysis).

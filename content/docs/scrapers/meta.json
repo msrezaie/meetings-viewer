@@ -1,0 +1,14 @@
+{
+  "title": "Building Scrapers",
+  "pages": [
+    "index",
+    "scoping-a-target",
+    "source-analysis",
+    "spider-patterns",
+    "writing-a-spider",
+    "bot-detection",
+    "scraper-types",
+    "testing",
+    "contributing"
+  ]
+}

@@ -1,0 +1,63 @@
+---
+title: Agents, Memory & Skills
+description: How teams on this project use AI coding agents - the vocabulary, the decision method, and who owns what.
+---
+
+# Agents, memory & skills
+
+A shared place for how teams use AI coding agents effectively - not just CTD,
+but the frontend team on this repo, whoever owns the scraper repos, whoever
+owns the CI/CD automation in [pipeline](/docs/pipeline), and any team that
+comes after. The goal is the same as everything else here: less duplicated
+tribal knowledge, less onboarding by osmosis.
+
+Almost none of this content exists yet, so this section is a **method for
+growing it team by team**, not a finished structure to fill in.
+
+## Where this repo stands today
+
+One file: `AGENTS.md`, one rule - a warning that this app's pinned Next.js
+version has breaking changes versus a model's training data. No skills
+directory, no subagents, no hooks. That is the honest starting point; nothing
+below invents practices this repo doesn't have yet.
+
+## The vocabulary - four mechanisms, one job each
+
+| Mechanism    | Lives at                                                      | For                                                                                                                      | In this repo, today |
+| ------------ | ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ------------------- |
+| **Memory**   | `AGENTS.md` / `CLAUDE.md`, repo root                          | Standing context every agent session loads automatically - the guardrails you'd otherwise repeat in every prompt         | One rule (above)    |
+| **Skill**    | `.claude/skills/<name>/SKILL.md` (or your agent's equivalent) | A packaged, reusable procedure - a checklist or workflow invoked by name mid-session, not repeated from memory each time | None yet            |
+| **Subagent** | `.claude/agents/<name>.md` (or equivalent)                    | A specialized persona with its own tool access, for a recurring task worth a dedicated role - a reviewer, a researcher   | None yet            |
+| **Hook**     | `.claude/settings.json` (or equivalent)                       | An automated action on a session event - run a formatter after every edit, block a risky command                         | None yet            |
+
+## The decision method
+
+Short version:
+
+- Something every session must **always know** -> memory.
+- A procedure you'd explain **the same way every time** -> a skill.
+- A distinct role worth its own **context and tool scope** -> a subagent.
+- Something that should happen **automatically, unasked** -> a hook.
+
+Most teams starting out only ever need the first two.
+
+## The team table
+
+| Team                       | Page                                            | What exists today                                                                                             |
+| -------------------------- | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| Meetings viewer (frontend) | [meetings-viewer](/docs/agents/meetings-viewer) | `AGENTS.md` with the Next.js version warning                                                                  |
+| Scrapers (CTD + PDW)       | [scrapers](/docs/agents/scrapers)               | One confirmed skill: spider-review (PDW, review-side); a write-side companion is recommended, not yet adopted |
+| DevOps / CI-CD             | [devops](/docs/agents/devops)                   | Stub - owned by whoever maintains the automation in [pipeline](/docs/pipeline)                                |
+
+## The one rule that keeps this honest
+
+**The docs hold the facts; the skills hold the judgment.** A skill carries
+procedure, heuristics, and worked examples - the things that are genuinely its
+own. For anything enumerable and generated (schema fields, constants,
+commands, the QA rubric) it links to the doc anchor instead of restating it.
+That works because this site publishes per-page `.md` routes and
+`llms-full.txt` - an agent can follow the link and read the source text
+directly.
+
+To add your team's section, follow
+[how to add a section](/docs/agents/how-to-add-a-section).

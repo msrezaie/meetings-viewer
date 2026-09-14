@@ -1,0 +1,62 @@
+---
+title: Bot Detection
+description: When a source site blocks standard requests - recognizing bot detection and bypassing it with scrapy-playwright.
+---
+
+<RepoScope repo="scrapers" />
+
+# Bot detection
+
+Some source sites run bot-detection systems (Akamai, Cloudflare, PerimeterX)
+that block standard HTTP requests. When that happens, `scrapy-playwright`
+lets Scrapy drive a real Chromium browser - which passes most detection
+because it behaves like a genuine browser session.
+
+## How to recognize it
+
+Bot detection is the likely cause when **all** of these hold:
+
+- Standard Scrapy or `curl` requests consistently return 403s, challenge
+  pages, or empty HTML.
+- The same URL loads normally in a real browser.
+- No request-level fix works: user-agent strings, headers, cookies, rate
+  limiting.
+
+Always exhaust standard requests first - Playwright is a fallback, not a
+starting point.
+
+## How it works
+
+Yield requests with `meta={"playwright": True}` to route them through the
+browser instead of Scrapy's HTTP client:
+
+```python
+def start_requests(self):
+    yield scrapy.Request(
+        url=self.start_url,
+        meta={"playwright": True, "playwright_include_page": True},
+        callback=self.parse,
+    )
+
+async def parse(self, response):
+    page = response.meta["playwright_page"]
+    # interact if needed: wait_for_selector, click, scroll
+    await page.close()
+    # continue parsing response.text or response.css(...)
+```
+
+## Session cookies
+
+For sites requiring an authenticated session, use Playwright to run the login
+flow, capture the cookies, and pass them to subsequent plain requests.
+Playwright returns a list of dicts; `requests`-style calls want a plain dict:
+
+```python
+cookies = {c["name"]: c["value"] for c in context.cookies()}
+```
+
+<Callout type="warn">
+  Playwright adds significant run time - a full browser launches per spider. Use
+  it only when bot detection is confirmed to block standard requests, and note
+  the reason in the spider's docstring.
+</Callout>

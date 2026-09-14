@@ -1,0 +1,56 @@
+name: docs-build
+
+# Blocking gate: the docs build must pass and every internal link/anchor in
+# content/docs must resolve. Deterministic - a link either resolves against a
+# real page and heading or it doesn't - so this blocks from day one
+# (playbook P5, W-2).
+
+on:
+  pull_request:
+    paths:
+      - "content/**"
+      - "docs-platform/**"
+      - "lib/**"
+      - "app/**"
+      - "components/**"
+      - "source.config.ts"
+      - "keystatic.config.ts"
+      - "README.md"
+  push:
+    branches: [main]
+    paths:
+      - "content/**"
+      - "docs-platform/**"
+      - "lib/**"
+      - "app/**"
+      - "components/**"
+      - "README.md"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Internal link and anchor check
+        run: node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON docs-platform/engine/check-links.ts
+
+      - name: Verify generated schema is current
+        run: |
+          node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON docs-platform/engine/generate-schema.ts
+          git diff --exit-code -- docs-platform/generated/meeting-schema.json \
+            || (echo "meeting-schema.json is stale - run 'npm run docs:schema' and commit the result" && exit 1)

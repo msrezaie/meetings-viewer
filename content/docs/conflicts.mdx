@@ -1,0 +1,63 @@
+---
+title: Conflicts
+description: The standing view of every open drift finding - who owns it, how confident it is, and what to do about it.
+---
+
+<RepoScope repo="meetings-viewer" />
+
+# Conflicts
+
+This page is the standing view of the drift report - the same records that
+appear as PR comments and in `docs-platform/drift/findings.json`, rendered
+for reading. It is generated at build time from the committed findings file;
+run `npm run docs:drift` to refresh it.
+
+## The contract
+
+The platform detects that two sources disagree, locates the disagreement
+precisely, and names the owner who should act. **It does not decide who is
+right, does not edit anyone's source, and does not silently correct a page.**
+A human routes the correction upstream; a manager merges once it is settled.
+
+## Confidence levels
+
+- **certain** - a page contradicts an executable source (code, constants, a
+  generated schema). Code is the arbiter; these block the merge once the gate
+  is promoted.
+- **likely** - two prose sources disagree, or a cited symbol is gone.
+  Comments on the PR and requests the owner's review; a human decides.
+- **prompt** - an external source is stale or unreachable. Dashboard row and
+  digest only; never touches a PR.
+
+## Open findings
+
+<ConflictPanel />
+
+## Muting a finding
+
+A finding you have judged to be a false positive can be muted once and stay
+muted. Add its fingerprint (shown in the table) to
+`docs-platform/drift/mutes.json` with a reason:
+
+```json
+{
+  "mutes": [
+    {
+      "fingerprint": "72edf66908bc68ea",
+      "reason": "mirror intentionally stale pending upstream re-sync",
+      "expires": "2026-12-31"
+    }
+  ]
+}
+```
+
+Mutes expire automatically when the disagreeing values change, because the
+fingerprint hashes them in - a muted finding that starts disagreeing
+_differently_ resurfaces.
+
+## The full report
+
+The same findings rendered as Markdown live at
+`docs-platform/drift/report.md`; the agent-readable record is
+`docs-platform/drift/findings.json`. Overlap maps - which subjects are
+restated in which documents - are in the report's footer.

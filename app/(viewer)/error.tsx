@@ -1,0 +1,51 @@
+"use client";
+
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Typography from "@mui/material/Typography";
+
+/**
+ * Route group error boundary for (app). Catches unhandled errors from any
+ * server or client component under /scrapers and renders a fallback UI with
+ * the error message, digest ID, and a retry button.
+ */
+export default function Error({
+  error,
+  reset,
+}: {
+  error: Error & { digest?: string };
+  reset: () => void;
+}) {
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        flex: 1,
+        textAlign: "center",
+      }}
+    >
+      <Typography variant="h4" sx={{ fontWeight: 700, mb: 2 }}>
+        Something went wrong
+      </Typography>
+      <Typography color="text.secondary" sx={{ mb: 2 }}>
+        {error.message ||
+          "An unexpected error occurred while loading scraper data."}
+      </Typography>
+      {error.digest && (
+        <Typography
+          variant="caption"
+          color="text.disabled"
+          sx={{ display: "block", mb: 4, fontFamily: "monospace" }}
+        >
+          Error ID: {error.digest}
+        </Typography>
+      )}
+      <Button onClick={reset} variant="outlined" sx={{ textTransform: "none" }}>
+        Try again
+      </Button>
+    </Box>
+  );
+}

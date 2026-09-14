@@ -1,14 +1,9 @@
-import Box from "@mui/material/Box";
-import Tooltip from "@mui/material/Tooltip";
-import Typography from "@mui/material/Typography";
+import OverflowTooltip from "./OverflowTooltip";
 import { highlightMatches } from "./HighlightMatches";
 import { linkifyText } from "./Linkify";
 
-const MAX_LENGTH = 50;
-
 interface TruncatedTextProps {
   text: string | null | undefined;
-  maxLength?: number;
   wrap?: boolean;
   maxLines?: number;
   /** Search keyword to highlight within the rendered text, if any. */
@@ -17,128 +12,23 @@ interface TruncatedTextProps {
 
 export default function TruncatedText({
   text,
-  maxLength = MAX_LENGTH,
   wrap = false,
   maxLines,
   highlight,
 }: TruncatedTextProps) {
   if (!text) return <>—</>;
 
-  const isTruncated = text.length > maxLength;
   const renderedText = highlightMatches(linkifyText(text), highlight ?? "");
 
-  if (wrap) {
-    const box = (
-      <Box
-        sx={{
-          whiteSpace: "normal",
-          wordBreak: "break-word",
-          width: "100%",
-          ...(maxLines && {
-            display: "-webkit-box",
-            WebkitLineClamp: maxLines,
-            WebkitBoxOrient: "vertical",
-            overflow: "hidden",
-          }),
-        }}
-      >
-        {isTruncated ? (
-          <span
-            style={{
-              cursor: "pointer",
-              borderBottom: "1px dashed currentColor",
-              textDecorationSkipInk: "none",
-            }}
-          >
-            {renderedText}
-          </span>
-        ) : (
-          renderedText
-        )}
-      </Box>
-    );
-
-    if (!isTruncated) return box;
-
-    return (
-      <Tooltip
-        title={
-          <Typography
-            variant="body2"
-            sx={{ whiteSpace: "pre-wrap", maxWidth: 320 }}
-          >
-            {renderedText}
-          </Typography>
-        }
-        placement="top"
-        arrow
-        enterDelay={200}
-        slotProps={TOOLTIP_SLOT_PROPS}
-      >
-        {box}
-      </Tooltip>
-    );
-  }
-
-  const inner = (
-    <Box
-      component="span"
-      sx={{
-        display: "block",
-        overflow: "hidden",
-        textOverflow: "ellipsis",
-        whiteSpace: "nowrap",
-        ...(isTruncated && {
-          cursor: "pointer",
-          borderBottom: "1px dashed currentColor",
-          textDecorationSkipInk: "none",
-        }),
-      }}
+  return (
+    <OverflowTooltip
+      title={renderedText}
+      wrap={wrap}
+      maxLines={maxLines}
+      contentKey={`${text}:${highlight ?? ""}`}
+      component={wrap ? "div" : "span"}
     >
       {renderedText}
-    </Box>
-  );
-
-  if (!isTruncated) return inner;
-
-  return (
-    <Tooltip
-      title={
-        <Typography
-          variant="body2"
-          sx={{ whiteSpace: "pre-wrap", maxWidth: 320 }}
-        >
-          {renderedText}
-        </Typography>
-      }
-      placement="top"
-      arrow
-      enterDelay={200}
-      slotProps={TOOLTIP_SLOT_PROPS}
-    >
-      {inner}
-    </Tooltip>
+    </OverflowTooltip>
   );
 }
-
-const TOOLTIP_SLOT_PROPS = {
-  tooltip: {
-    sx: {
-      bgcolor: "background.paper",
-      color: "text.primary",
-      boxShadow: 3,
-      border: "1px solid",
-      borderColor: "divider",
-      p: 1.5,
-    },
-  },
-  arrow: {
-    sx: {
-      color: "background.paper",
-      "&::before": {
-        border: "1px solid",
-        borderColor: "divider",
-      },
-    },
-  },
-};

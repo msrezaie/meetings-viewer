@@ -1,0 +1,43 @@
+name: docs-editor-pr
+
+# Keystatic's GitHub storage mode commits editor saves to keystatic/*
+# branches (see branchPrefix in keystatic.config.ts). This workflow turns
+# each pushed editor branch into a PR against the repo's default branch so
+# every editor change gets the same review + drift-check gates as a human
+# PR. Pushing more commits to an existing keystatic/* branch updates the
+# already-open PR.
+
+on:
+  push:
+    branches: ["keystatic/**"]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  open-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Open or reuse PR for the editor branch
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: ${{ github.ref_name }}
+          BASE: ${{ github.event.repository.default_branch }}
+        run: |
+          set -e
+          existing=$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number')
+          if [ -n "$existing" ]; then
+            echo "PR #$existing already open for $BRANCH - nothing to do"
+            exit 0
+          fi
+          gh pr create \
+            --base "$BASE" \
+            --head "$BRANCH" \
+            --title "Docs edit via Keystatic ($BRANCH)" \
+            --body "$(cat <<'EOF'
+          Docs content change saved through the Keystatic editor at /keystatic.
+
+          Generated with [Devin](https://devin.ai)
+          EOF
+          )"

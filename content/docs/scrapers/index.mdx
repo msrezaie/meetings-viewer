@@ -1,0 +1,94 @@
+---
+title: Building Scrapers
+description: The development workflow for writing city-meeting scrapers, from source analysis to PR.
+---
+
+<RepoScope repo="scrapers" />
+
+# Building scrapers
+
+City Scrapers uses [Scrapy](https://scrapy.org/) to extract public meeting
+information from government websites. Each spider produces a JSON array of
+meeting records that flows into Documenters.org - and that you can inspect in
+the [Meetings Viewer](/docs/viewer) while you develop.
+
+## The workflow
+
+<Steps>
+<Step>
+
+**Scope the target** - decide whether the agency's site is worth scraping at
+all, and whether anyone has already scoped it. See
+[Scoping a target](/docs/scrapers/scoping-a-target).
+
+</Step>
+<Step>
+
+**Analyze the source** - open the agency's meeting page in DevTools, check the
+Network tab for a JSON endpoint, and pick a primary URL. See
+[Source analysis](/docs/scrapers/source-analysis).
+
+</Step>
+<Step>
+
+**Pick a spider pattern** - `LegistarSpider` for Legistar sites, a spider
+factory for many similar agencies, or a singular `CityScrapersSpider` for
+everything else. See [Spider patterns](/docs/scrapers/spider-patterns).
+
+</Step>
+<Step>
+
+**Write the spider** - implement `parse` and the `_parse_*` helpers, following
+the [schema](/docs/qa/schema) field by field. See
+[Writing a spider](/docs/scrapers/writing-a-spider).
+
+</Step>
+<Step>
+
+**Run and inspect** - `scrapy crawl <name> -O <name>.json`, then load the file
+in the viewer and apply the [QA rubric](/docs/qa/rubric).
+
+</Step>
+<Step>
+
+**Test and submit** - write pytest tests against saved fixtures, run
+flake8/black/isort, open a PR. See [Testing](/docs/scrapers/testing) and
+[Contributing](/docs/scrapers/contributing).
+
+</Step>
+</Steps>
+
+<Callout type="info">
+  The tight loop is steps 4 and 5: run the spider, refresh the viewer, fix,
+  repeat. The viewer exists to make that loop fast.
+</Callout>
+
+## Common pitfalls
+
+- **Lowercase `-o`**: silently appends to an existing file, duplicating
+  records. Always use uppercase `-O`.
+- **Timezone-aware datetimes**: `start` and `end` must be naive. The spider's
+  `timezone` class attribute declares the local timezone; never embed `tzinfo`
+  in the datetime itself.
+- **Missing time defaults**: if a source has a date but no time, default to
+  midnight and say so in `time_notes`.
+- **Links out of order**: the priority is agenda, minutes, video, then other
+  attachments - not agenda, video, minutes.
+- **`async def start()`**: consumer repos pin Scrapy 2.11.2, which does not
+  recognize the newer `start()` coroutine. Use `start_requests()`.
+
+## Section map
+
+- [Scoping a target](/docs/scrapers/scoping-a-target) - is this site worth
+  scraping at all?
+- [Source analysis](/docs/scrapers/source-analysis) - read the source before
+  writing code.
+- [Spider patterns](/docs/scrapers/spider-patterns) - singular spiders, spider
+  factories, mixins.
+- [Writing a spider](/docs/scrapers/writing-a-spider) - the field-by-field
+  parse implementation.
+- [Bot detection](/docs/scrapers/bot-detection) - when the site fights back.
+- [Scraper types](/docs/scrapers/scraper-types) - the taxonomy with real
+  examples.
+- [Testing](/docs/scrapers/testing) - fixtures, freeze_time, two-phase tests.
+- [Contributing](/docs/scrapers/contributing) - fork, pipenv, lint, PR.

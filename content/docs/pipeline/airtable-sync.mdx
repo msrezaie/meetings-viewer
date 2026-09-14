@@ -1,0 +1,108 @@
+---
+title: Airtable Sync
+description: The two-workflow automation that registers new spider slugs in the Airtable spider registry on every PR.
+---
+
+<RepoScope repo="scrapers" />
+
+# Airtable sync
+
+The team tracks every spider in an Airtable registry - the "Slug table". Before
+automation, a maintainer had to open each new spider file by hand, locate the
+`name` and `agency` values (digging through `spider_configs` lists for spider
+factories), and copy them into Airtable. Slugs got mistyped, factory spiders
+got missed, updates required a second manual pass.
+
+The sync workflow eliminates that step by extracting the fields directly from
+the source of truth - the spider file - on every PR.
+
+## The two-workflow trust boundary
+
+The implementation separates untrusted code (from the PR) from privileged
+operations (writing to Airtable). This is structural, not conventional: GitHub
+withholds repository secrets from workflows triggered by fork PRs, which is
+how most external contributions arrive.
+
+<Steps>
+<Step>
+
+**Step 1 - Parse (unprivileged).** `parse-spiders.yml` triggers on
+`pull_request` events touching spider files. It checks out the PR branch,
+uses `tj-actions/changed-files` to find modified spiders, runs
+`scripts/sync_spiders.py` (fetched from `city-scrapers-core`) to extract
+spider names and agencies via **AST parsing - no code execution** - and
+uploads the result as a JSON artifact. This workflow has no secrets.
+
+</Step>
+<Step>
+
+**Step 2 - Sync (privileged).** `sync-airtable.yml` triggers on `workflow_run`
+when Step 1 completes. Because `workflow_run` always executes in the context
+of the _base repository's default branch_ - not the PR branch - it safely has
+secrets access. It downloads the artifact, validates the data, and writes to
+Airtable using a PAT stored as a repository secret.
+
+</Step>
+</Steps>
+
+<Callout type="warn">
+  Why two workflows? A single `pull_request`-triggered workflow cannot access
+  secrets for fork PRs. The two-workflow artifact pattern enforces the trust
+  boundary: untrusted PR code is only ever *read* (never executed), and the
+  privileged write runs on verified base-branch code.
+</Callout>
+
+## Where the logic lives
+
+The sync uses a **reusable workflow** pattern - the logic lives once in
+`city-scrapers-core`, and each city repo carries only a small caller stub:
+
+- `city-scrapers-core/.github/workflows/sync-airtable.yml` - the reusable
+  workflow (`on: workflow_call`). Checks out the consumer repo, detects
+  changed spider files, installs dependencies via pipenv, runs the script.
+- `city-scrapers-core/scripts/sync_spiders.py` - AST-parses spider files and
+  upserts to Airtable via pyairtable. At runtime the workflow checks out
+  `city-scrapers-core` into a `.shared-workflows/` subdirectory.
+- Consumer repos: `parse-spiders.yml` (step 1 caller) and `sync-airtable.yml`
+  (step 2 caller passing the three secrets).
+
+Updates to the workflow or script propagate to all consumer repos
+automatically - no per-repo changes.
+
+## Extraction and the agency key
+
+The script AST-parses each changed spider file:
+
+- Regular spiders: `name` and `agency` class attributes.
+- Spider factories: `name` and `agency` from each dict entry in
+  `spider_configs` - each entry becomes a separate Airtable record.
+
+The Airtable lookup uses the **agency name as the key** (the source of truth).
+
+<Callout type="warn">
+  If an agency string is ever edited in a spider file (e.g. fixing a typo), the
+  script treats it as a *new* agency and creates a duplicate record rather than
+  updating the existing one. The stale record needs manual cleanup. This is an
+  accepted tradeoff - silently overwriting on slug match risks clobbering
+  unrelated records; a duplicate is easy to detect and fix.
+</Callout>
+
+## Required secrets
+
+Three secrets must exist in each consumer repo. Configure them as
+**organization-level secrets** scoped to the relevant repositories (GitHub
+Org -> Settings -> Secrets and variables -> Actions):
+
+| Secret             | Value                                                                                                                      |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------- |
+| `AIRTABLE_PAT`     | Personal access token with `data.records:read` and `data.records:write` scopes, granted access to the spider registry base |
+| `AIRTABLE_BASE_ID` | The base ID (`app...`) containing the spider registry table                                                                |
+| `AIRTABLE_TABLE`   | The table name or ID (`tbl...`) of the spider registry                                                                     |
+
+## What it means for contributors
+
+Nothing to do manually. Open a PR that adds or edits a spider file, and the
+registry updates itself. The Airtable record's _status_ is a different matter
+
+- that is updated by hand as the PR moves through the
+  [review lifecycle](/docs/qa/review-process).

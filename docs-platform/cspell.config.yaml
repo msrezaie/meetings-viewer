@@ -1,0 +1,79 @@
+# cspell config for the docs platform prose gate (docs-prose.yml). Scopes to
+# content + docs-platform prose; project terms live in `words`.
+version: "0.2"
+language: en
+files: []
+words:
+  # project and platform names
+  - cityscrapers
+  - documenters
+  - fumadocs
+  - keystatic
+  - airtable
+  - legistar
+  - civicclerk
+  - drupal
+  - pyairtable
+  - wayback
+  - docers
+  # tooling
+  - cspell
+  - lychee
+  - scrapy
+  - errback
+  - cb_kwargs
+  - pipenv
+  - codeowners
+  - llms
+  - mdx
+  - nohup
+  # domain terms
+  - scraper
+  - scrapers
+  - spider
+  - spiders
+  - subagent
+  - subagents
+  - timezone
+  - tzinfo
+  - datetime
+  - datetimes
+  - vocab
+  - vocabularies
+  - frontmatter
+  - crawl
+  # proper nouns
+  - pdw
+  - CTD
+  - Devin
+  - Rezaie
+  # scraper tooling and repo names
+  - pytest
+  - freezegun
+  - isort
+  - pdfminer
+  - icalendar
+  - genspider
+  - utcnow
+  - dedup
+  - upserts
+  - browsable
+  - pasteable
+  - frontends
+  - devartslab
+  # city slugs and fixture names
+  - sandie
+  - sandiego
+  - nationalcity
+  - colgo
+  - kancit
+  - fortx
+  - losca
+  - Pipfile
+  - ROBOTSTXT
+ignorePaths:
+  - "node_modules/**"
+  - "docs-platform/sources/**" # mirrored sources: byte-faithful, never edited
+  - "docs-platform/playbooks/**"
+  - "docs-platform/drift/findings.json"
+  - "**/package-lock.json"

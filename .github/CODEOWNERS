@@ -1,0 +1,19 @@
+# Paths are routing addresses, not access controls. When a drift finding
+# touches a path, the LAST matching pattern names who gets told first.
+# Owners must hold write access or GitHub silently skips them.
+#
+# If more maintainers join, split these by path rather than adding parallel
+# registries - this file is the single ownership map for the repo.
+
+# Default: everything routes to the repo maintainer.
+*                                    @msrezaie
+
+# Docs platform: content, engine, claim registry, mirrored sources.
+content/docs/**                      @msrezaie
+docs-platform/**                     @msrezaie
+
+# App code that docs pages assert facts about.
+lib/**                               @msrezaie
+app/**                               @msrezaie
+components/**                        @msrezaie
+data/**                              @msrezaie

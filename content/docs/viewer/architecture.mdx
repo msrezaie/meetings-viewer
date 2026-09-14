@@ -1,0 +1,89 @@
+---
+title: Viewer Architecture
+description: The two data modes, the meeting record shape, and the invariants both modes share.
+---
+
+<RepoScope repo="meetings-viewer" />
+
+# Viewer architecture
+
+<Callout type="info">
+  This page summarizes `meetings-viewer-technical-specification.md`, mirrored at
+  `docs-platform/sources/meetings-viewer-technical-specification.md`. It
+  reflects the spec, not necessarily the current implementation - where the code
+  and the spec disagree, the code wins.
+</Callout>
+
+## Two modes, one data shape
+
+The viewer was designed to operate in two modes:
+
+- **Local mode** - reads scraper output files from `data/scrapers/` in
+  the repo. This is the QA tool mode: run a spider, open the viewer, review.
+- **Production mode** - the same UI reading scraper output committed to a
+  dedicated `meetings-viewer-data` repo by the city scraper repos' PR
+  workflows, fetched over `raw.githubusercontent.com` URLs.
+
+Both modes share the same invariants: the meeting record schema, the status
+and classification vocabularies, and the link priority order. No database
+and no application-managed API server exists in either mode - the
+mode-specific behavior is confined to the data-source module,
+`lib/scraper-data.ts`. A scraper that produces correct output in local mode
+produces correct output in production mode - the
+[schema](/docs/qa/schema) is the contract.
+
+## The data layer
+
+`lib/scraper-data.ts` defines the `MeetingRecord` type - 12 fields, 4
+statuses, 8 classifications. The generated table of record is
+`docs-platform/generated/meeting-schema.json` (regenerate with
+`npm run docs:schema`); the human-readable view is the
+[schema page](/docs/qa/schema).
+
+Supporting modules:
+
+- `lib/duplicate-detection.ts` - groups records by start time, then compares
+  titles by significant-word overlap. Generic words ("the", "meeting",
+  "regular") are ignored so "City Council Meeting" and "City Council Regular
+  Meeting" collide.
+- `lib/meeting-columns.ts` - column definitions for the record table.
+- `lib/meeting-utils.ts` - record helpers: status normalization and location
+  formatting.
+
+`/scrapers` itself is populated by `listScrapers()` in the same module,
+which returns `{ "spiders": [{ "slug": "..." }] }` built at request time
+from the `data/scrapers/` directory listing. There is no manifest file on
+disk - the listing is the source of truth.
+
+## Why a table
+
+The spec documents why the table is the primary surface rather than a
+calendar or card list:
+
+- **Field coverage** - every record field is visible at once, which is what
+  QA needs.
+- **Sorting and filtering** - the grid handles classification, status, and
+  date-range filters without bespoke UI.
+- **Duplicate detection** - same-start records appear adjacent when sorted by
+  start time.
+- **Density** - hundreds of records are reviewable without pagination tricks.
+
+## Open questions the spec leaves open
+
+Production mode is documented as not yet fully planned. The spec's open
+items:
+
+- The token mechanism for cross-repo writes to `meetings-viewer-data`
+  (PAT vs GitHub App).
+- How concurrent workflow runs against the data repo are handled
+  (retry-with-rebase, a queue, or an accepted race with a periodic sweep).
+- Whether merged-PR data is preserved anywhere, or deleted along with
+  unmerged-PR data.
+- A periodic sweep for orphaned PR directories whose PRs no longer exist on
+  the source repo.
+
+## Source
+
+The full spec, including the original data-model discussion and UI
+requirements, is mirrored at
+`docs-platform/sources/meetings-viewer-technical-specification.md`.

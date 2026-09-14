@@ -1,0 +1,4 @@
+{
+  "$comment": "Mute entries suppress a known-accepted drift finding by fingerprint (see the fingerprint in findings.json or report.md). A mute expires automatically when the disagreeing values change, because the fingerprint hashes them in. `expires` (YYYY-MM-DD) is optional.",
+  "mutes": []
+}

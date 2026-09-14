@@ -1,0 +1,112 @@
+---
+title: Schema Reference
+description: The twelve fields every meeting record must have, with types, examples, and edge cases.
+---
+
+<RepoScope repo="meetings-viewer" />
+
+# Schema reference
+
+Every meeting record is a JSON object with the fields below. The table is
+generated from the `MeetingRecord` type in `lib/scraper-data.ts` plus the
+vocabularies mirrored from `city-scrapers-core` - regenerate with
+`npm run docs:schema`, and never hand-edit the field list.
+
+## Fields
+
+<SchemaTable />
+
+### id
+
+A unique identifier for the meeting within this spider's output.
+Conventionally a slug derived from the agency, date, and title.
+
+### title
+
+The official name of the meeting, including the body name - "City Council
+Regular Meeting", not "Regular Meeting". Strip embedded dates and times from
+the source string.
+
+### description
+
+Usually an empty string. Populate only when the source provides one; do not
+synthesize.
+
+### classification
+
+The meeting type, e.g. "Board", "Commission", "City Council". Derive it from
+keywords in the title or hardcode it when the title cannot determine it. The
+full vocabulary from `city-scrapers-core` constants, rendered live from the
+generated schema:
+
+<ClassificationVocabulary />
+
+### start
+
+- **Type**: `string`, naive datetime `"YYYY-MM-DD HH:mm:ss"`.
+- **Required**: yes.
+
+Always produce a timezone-**naive** datetime - never embed `tzinfo`. The
+spider's `timezone` class attribute declares the local timezone for the
+framework. If the source has a date but no time, default to midnight and
+explain in `time_notes`.
+
+### end
+
+- **Type**: `string`, naive datetime `"YYYY-MM-DD HH:mm:ss"`.
+- **Required**: yes.
+
+`None`/empty in most cases - the framework defaults `end` to `start + 2
+hours`. Set it explicitly only when the source provides a confirmed end time.
+
+<Callout type="warn">
+  The `end` default is defined in the base spider class upstream. If it changes,
+  this page should be updated - the drift check watches for it.
+</Callout>
+
+### all_day
+
+`false` in nearly all cases. Set `true` only when the source explicitly
+designates the event as all-day.
+
+### time_notes
+
+Empty string, or a descriptive note. When `start` defaults to midnight, write
+a note pointing readers at the agenda attachment for the actual time. Also
+use it to explain an empty `location`.
+
+### location
+
+`{ name: string, address: string }` - `name` is the room/floor/building,
+`address` the full street address. Empty strings when unknown, with a note in
+`time_notes`.
+
+### links
+
+`{ href: string, title: string }[]`. `title` describes the document type
+("Agenda", "Minutes", "Video"). Prefer PDF format; include HTML or other
+formats when no PDF exists. Records list links in priority order:
+
+1. Agenda PDF
+2. Minutes PDF
+3. Video / recording
+4. Other attachments
+
+### source
+
+The URL of the page the meeting was scraped from. Prefer the meeting's detail
+page; the listing page is acceptable when no detail page exists.
+
+### status
+
+One of `cancelled`, `tentative`, `confirmed`, `passed`.
+
+Rendered live from the generated schema:
+
+<StatusVocabulary />
+
+The usual derivation is `self._get_status(meeting)`: `passed` when `start` is
+before now, `tentative` when `start` is after now, `cancelled` only when the
+source explicitly confirms a cancellation - a missing meeting is not
+evidence. `confirmed` is a newer vocabulary member; see
+[the viewer docs](/docs/viewer#status-values) for how the app renders it.

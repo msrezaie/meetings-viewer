@@ -1,0 +1,71 @@
+---
+title: Scrapers
+description: The review-side skill that checks what a spider PR ships - and the lifecycle shape a write-side companion should take once adopted.
+---
+
+<RepoScope repo="scrapers" />
+
+# Scrapers - agent setup
+
+The scraper repos have one confirmed skill in use today, covering the review
+end of the scraper lifecycle.
+
+## spider-review
+
+|                   |                                                                                              |
+| ----------------- | -------------------------------------------------------------------------------------------- |
+| **Owner**         | PDW                                                                                          |
+| **When it fires** | After the PR opens - standalone or as a GitHub Actions check                                 |
+| **Shape**         | Evaluative: review mindset, a process, a large reference checklist, output-validation tables |
+| **Invocation**    | Invoked deliberately, per PR                                                                 |
+
+Owned by PDW: this site describes it and links to it; it does not restate
+the checklist or imply CTD maintains it. A byte-faithful mirror (for drift
+detection, not the source of truth) lives at
+`docs-platform/sources/skills/spider-review/SKILL.md`.
+
+## The recommended lifecycle shape
+
+`spider-review` covers what happens after a PR opens. The write side -
+building, refactoring, debugging a spider - is the natural companion slot,
+and the recommended shape for any team that adds one: **one skill that helps
+you write it, one that checks what you wrote, and no overlap between them.**
+
+## The docs-hold-the-facts rule
+
+Skills tend to carry their own copies of facts these docs also publish
+
+- the meeting schema, the status and classification constants, the lint and
+  test commands, the validation checklist. Copies drift from `constants.py`,
+  and one of them will eventually fail a correct spider in CI.
+
+The rule that prevents a repeat, pointed the other way from the usual
+link-not-duplicate rule:
+
+> **The docs hold the facts; the skills hold the judgment.** A skill carries
+> procedure, heuristics, and worked examples. For anything enumerable and
+> generated - [schema fields](/docs/qa/schema), constants, commands, the
+> [QA rubric](/docs/qa/rubric) - it links to the doc anchor instead of
+> restating it.
+
+This only works because the site publishes per-page `.md` routes and
+`llms-full.txt`: an agent can follow the link and read the text directly.
+Agent-readability is a page requirement, not a nice-to-have - a page
+restating a source that agents can't read inherits the defect it was created
+to fix.
+
+## A pipeline this platform does not duplicate
+
+An external review document names a `test-and-verify-scraper-outputs` skill
+in development, plus an anomaly-detection system that is Phase 1 of the
+"Scrapers Stability System" - target shape: a three-step automated pipeline
+(code-review check, spider output verification, staging deploy).
+
+That matters here because the [rubric report](/docs/qa/rubric#rubric-report)
+validates a spider's JSON output against the schema, and step 2 of PDW's
+pipeline validates spider output against the schema - the same check in two
+places, built by two teams. The rubric report is scoped deliberately as the
+_human-facing_ half: interactive, runs in the browser on a pasted file,
+serves a QA reviewer rather than a CI job - and it reads the same generated
+constants (`docs-platform/generated/meeting-schema.json`) the automated half
+should read, so a fix in `city-scrapers-core` reaches both at once.

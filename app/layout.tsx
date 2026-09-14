@@ -1,8 +1,13 @@
+import { AppRouterCacheProvider } from "@mui/material-nextjs/v16-appRouter";
+import InitColorSchemeScript from "@mui/material/InitColorSchemeScript";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Roboto } from "next/font/google";
-import { AppRouterCacheProvider } from "@mui/material-nextjs/v16-appRouter";
+import { siteConfig } from "@/lib/site-config";
 import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
+import { SiteChrome } from "@/components/layout/site-chrome";
+import { DocsSearchProvider } from "@/components/layout/docs-search";
+import { DocsDarkModeSyncScript } from "@/components/layout/dark-mode-sync-script";
 import theme from "./theme";
 import "./globals.css";
 
@@ -24,9 +29,18 @@ const roboto = Roboto({
 });
 
 export const metadata: Metadata = {
-  title: "Meetings Viewer",
-  description:
-    "A web interface for inspecting the JSON output of city-meeting scrapers.",
+  metadataBase: new URL(siteConfig.url),
+  title: {
+    default: siteConfig.name,
+    template: `%s - ${siteConfig.name}`,
+  },
+  description: siteConfig.description,
+  openGraph: {
+    type: "website",
+    siteName: siteConfig.name,
+    title: siteConfig.name,
+    description: siteConfig.description,
+  },
 };
 
 export default function RootLayout({
@@ -40,11 +54,17 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} ${roboto.variable} h-full antialiased`}
     >
-      <body className="flex min-h-full flex-col">
+      <body>
+        <InitColorSchemeScript attribute="data" />
+        {/* Sync Fumadocs .dark class with MUI color scheme before hydration */}
+        <DocsDarkModeSyncScript />
+        {/* enableCssLayer keeps MUI's generated styles inside @layer mui so Tailwind utilities win. */}
         <AppRouterCacheProvider options={{ enableCssLayer: true }}>
           <ThemeProvider theme={theme}>
             <CssBaseline />
-            {children}
+            <DocsSearchProvider>
+              <SiteChrome>{children}</SiteChrome>
+            </DocsSearchProvider>
           </ThemeProvider>
         </AppRouterCacheProvider>
       </body>

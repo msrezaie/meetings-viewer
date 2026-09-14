@@ -1,0 +1,101 @@
+---
+title: Contributing a Spider
+description: Fork, pipenv, genspider, validate, lint, test, PR - the contribution workflow for the scraper repos.
+---
+
+<RepoScope repo="scrapers" />
+
+# Contributing a spider
+
+## Repository setup
+
+<Steps>
+<Step>
+
+**Fork the repository** on GitHub. Every contribution starts from a personal
+fork - never commit directly to the main repository.
+
+</Step>
+<Step>
+
+**Clone your fork** and select "Contribute to the parent project" when GitHub
+prompts, so the fork tracks upstream.
+
+</Step>
+<Step>
+
+**Create the environment** with pipenv and install dependencies:
+
+```bash
+pipenv shell
+pipenv sync --dev
+```
+
+</Step>
+<Step>
+
+**Verify setup** before changing anything:
+
+```bash
+pipenv run pytest
+```
+
+</Step>
+</Steps>
+
+Always work in a feature branch named for the work, e.g.
+`add-sandie-nationalcity` or `fix-losca-board-links` - never on main.
+
+## Generate the spider
+
+```bash
+scrapy genspider spider_name "Agency Full Name" https://source-url.gov
+```
+
+The generated file lands in `city_scrapers/spiders/`. The naming convention is
+`<prefix>_<identifier>` - a short jurisdiction code plus an identifier, e.g.
+`sandie_national_council_committees`, `losca_public_works`.
+
+## Validate and inspect output
+
+<CommandBlock command="scrapy validate {spider}" />
+
+Then load the output in the viewer and apply the
+[QA rubric](/docs/qa/rubric).
+
+## Lint and format
+
+All three must pass before a PR merges:
+
+```bash
+pipenv run flake8 .          # style / lint
+pipenv run black . --check   # format check (run `black <file>` to fix)
+pipenv run isort . --check   # import order (run `isort <file>` to fix)
+```
+
+Usual workflow: write code, run black and isort to auto-fix, run flake8 to
+catch the rest, commit.
+
+## Run tests
+
+```bash
+pytest                              # full suite
+pytest tests/test_example_agency.py # one spider
+pytest tests/test_example_agency.py -k test_title  # one test
+pytest -v                           # verbose
+```
+
+## The PR
+
+Open the PR against the main repository's default branch as a **draft**. It
+should contain:
+
+- The spider file in `city_scrapers/spiders/`.
+- The mixin file in `city_scrapers/mixins/` (spider factory pattern only).
+- The test file plus saved fixtures in `tests/files/`.
+- A description naming the spider slug(s), the source URL(s), and any notable
+  implementation decisions.
+
+All CI checks (flake8, black, isort, pytest) must pass before review. For what
+happens after the PR opens, see the
+[review process](/docs/qa/review-process).

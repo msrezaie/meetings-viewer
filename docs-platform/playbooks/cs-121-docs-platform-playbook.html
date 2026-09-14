@@ -4,11 +4,11 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <!--
-  CS-121 — Documentation platform: implementation playbook (v2).
+  CS-121 Documentation platform: implementation playbook (v2).
   Companion to cs-121-docs-platform-research.html. Self-contained: open
   this file directly in a browser, no build step.
 -->
-    <title>City Scrapers Docs Platform — Build Scope</title>
+    <title>City Scrapers Docs Platform: Build Scope</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -620,6 +620,7 @@
   <body>
     <div class="shell">
       <nav class="toc">
+        <a href="#sb"><span>&#9679;</span>Build state</a>
         <a href="#s0"><span>00</span>Framework contract</a>
         <a href="#s1"><span>01</span>Scheduling the calls</a>
         <a href="#s2"><span>02</span>Conflict reporter</a>
@@ -637,38 +638,261 @@
         <div class="docket-card">
           <div class="docket-meta">
             <span><b>CS-121</b>&nbsp;Documentation platform</span>
-            <span>Round&nbsp;<b>2 — build scope</b></span>
+            <span>Round&nbsp;<b>2, build in progress</b></span>
             <span
-              >Builds on&nbsp;<b>cs-121-docs-platform-research.html</b></span
+              >Branch&nbsp;<b
+                >CS-121-docs-platform-implementation-phase-2</b
+              ></span
             >
-            <span
-              >Status&nbsp;<b>P0–P5 shipped; P6 partial, P7 underway</b></span
-            >
+            <span>Verified&nbsp;<b>14 Sep 2026</b></span>
           </div>
           <h1>The platform that tells you where the docs disagree</h1>
           <p class="standfirst">
-            Round one chose the platform; Fumadocs inside the app is built and
-            working. This is the build scope for round two. Every capability the
-            research called for still stands — what's added is the feature that
-            makes this worth a scraper developer's attention:
+            Round one chose the platform. Round two built the thing that makes
+            it worth a scraper developer's attention:
             <strong
               >the platform compares its input sources, reports where they
               disagree, and names the CTD developer who owns that path.</strong
             >
-            It never resolves the disagreement itself. A human routes the
-            correction upstream and nothing merges until it's settled. Section
-            00 is the framework contract; section 02 is the main build.
+            It never resolves the disagreement; a human routes the correction
+            upstream and nothing merges until it's settled. That engine is now
+            running and catching real drift. Start with the build-state section
+            below for what's live; section 00 is the framework contract, and
+            section 02 is the design the build follows.
           </p>
         </div>
+
+        <!-- ============ BUILD STATE ============ -->
+        <section id="sb" class="col" style="padding-top: 8px">
+          <h2><span class="num">&#9679;</span>What is running right now</h2>
+          <p>
+            Verified against branch
+            <code>CS-121-docs-platform-implementation-phase-2</code> on 14
+            September 2026. Everything below was checked by running it, not by
+            reading the roadmap; this section is the ground truth the rest of
+            the playbook is measured against.
+          </p>
+
+          <div class="kpi-row">
+            <div class="kpi-tile good">
+              <div class="kpi-num">31</div>
+              <div class="kpi-lab">MDX pages live across 9 sections</div>
+            </div>
+            <div class="kpi-tile good">
+              <div class="kpi-num">9</div>
+              <div class="kpi-lab">
+                Claims in the registry, checked every run
+              </div>
+            </div>
+            <div class="kpi-tile bad">
+              <div class="kpi-num">5</div>
+              <div class="kpi-lab">
+                Live findings: all <code>certain</code>, all blocking
+              </div>
+            </div>
+            <div class="kpi-tile good">
+              <div class="kpi-num">6</div>
+              <div class="kpi-lab">CI workflows</div>
+            </div>
+          </div>
+
+          <div class="note tip">
+            <span class="lab"
+              >The reporter works, and it caught the real thing</span
+            >
+            <p>
+              <code>npm run docs:drift</code> parses
+              <code>constants.py</code> as the master and finds four documents
+              restating the status and classification vocabularies incorrectly,
+              including the <code>CANCELED</code> single-L spelling and the
+              omitted <code>confirmed</code> status. These are exactly the
+              disagreements the round-one research predicted would exist and
+              could not be caught by reading. Two fixture tests pass; the engine
+              exits <code>0</code> with findings written, and
+              <code>--fail</code> is what makes the gate blocking.
+            </p>
+          </div>
+
+          <h3>Shipped</h3>
+          <div class="scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Capability</th>
+                  <th>Where it lives</th>
+                  <th>State</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Drift / conflict engine</td>
+                  <td>
+                    <code>docs-platform/engine/</code> - extract, evaluate,
+                    check, owners
+                  </td>
+                  <td><span class="pill done">BLOCKING</span></td>
+                </tr>
+                <tr>
+                  <td>Claim registry</td>
+                  <td><code>docs-platform/drift/claims.ts</code></td>
+                  <td><span class="pill done">9 claims</span></td>
+                </tr>
+                <tr>
+                  <td>Source provenance + TTL</td>
+                  <td>
+                    <code>docs-platform/sources/sources.json</code> - 7 mirrored
+                    sources, 30-180 day TTLs
+                  </td>
+                  <td><span class="pill done">LIVE</span></td>
+                </tr>
+                <tr>
+                  <td>Ownership routing</td>
+                  <td>
+                    <code>.github/CODEOWNERS</code> - last-match-wins, per-path
+                  </td>
+                  <td><span class="pill done">LIVE</span></td>
+                </tr>
+                <tr>
+                  <td>Three outputs from one record</td>
+                  <td>
+                    <code>findings.json</code>, <code>report.md</code>,
+                    <code>/docs/conflicts</code> via
+                    <code>&lt;ConflictPanel&gt;</code>
+                  </td>
+                  <td><span class="pill done">ALL THREE</span></td>
+                </tr>
+                <tr>
+                  <td>Mute-by-fingerprint</td>
+                  <td>
+                    <code>docs-platform/drift/mutes.json</code> - expires when
+                    values change
+                  </td>
+                  <td><span class="pill done">LIVE, 0 muted</span></td>
+                </tr>
+                <tr>
+                  <td>Fixture corpus</td>
+                  <td>
+                    <code>docs-platform/fixtures/</code> - 11 fixtures, agree /
+                    missing / extra / order / unreadable
+                  </td>
+                  <td><span class="pill done">2 tests pass</span></td>
+                </tr>
+                <tr>
+                  <td>Generated schema</td>
+                  <td>
+                    <code>generate-schema.ts</code> -&gt;
+                    <code>meeting-schema.json</code>, with <code>--check</code>
+                  </td>
+                  <td><span class="pill done">LIVE</span></td>
+                </tr>
+                <tr>
+                  <td>Keystatic editor</td>
+                  <td>
+                    <code>keystatic.config.ts</code> +
+                    <code>docs-editor-pr.yml</code>
+                  </td>
+                  <td><span class="pill done">PR-BASED</span></td>
+                </tr>
+                <tr>
+                  <td>CI suite</td>
+                  <td>
+                    build, drift, prose, links-external, quality, editor-pr
+                  </td>
+                  <td><span class="pill done">6 WORKFLOWS</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="note info">
+            <span class="lab">An open question answered by building it</span>
+            <p>
+              Section 01 flagged that Keystatic's commit behaviour was
+              undocumented, and that it decided whether editor changes reach the
+              conflict reporter at all. <code>docs-editor-pr.yml</code>
+              settles it: edits arrive as pull requests, so they pass through
+              every gate including the drift check. The editor and the reporter
+              did not need separate wiring.
+            </p>
+          </div>
+
+          <h3>Not yet</h3>
+          <div class="scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Gap</th>
+                  <th>Blocked on</th>
+                  <th>Next move</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Lighthouse trend is empty</td>
+                  <td>
+                    Nothing: <code>history.json</code> has
+                    <code>points: []</code> because no CI run has appended one
+                    yet
+                  </td>
+                  <td>
+                    Merge to the branch <code>docs-quality.yml</code> runs on;
+                    the first green build seeds it
+                  </td>
+                </tr>
+                <tr>
+                  <td>Fleet KPI panel is an empty state</td>
+                  <td>
+                    Production mode, deliberately, per the viewer spec's "local
+                    fields out of scope"
+                  </td>
+                  <td>Correct as-is. Do not substitute a local mtime proxy.</td>
+                </tr>
+                <tr>
+                  <td>Only <code>certain</code> findings exist</td>
+                  <td>
+                    Nothing: no <code>likely</code> or
+                    <code>prompt</code> finding has fired yet
+                  </td>
+                  <td>
+                    Confirms the confidence ladder is untested at its noisy end.
+                    Watch the first TTL expiry.
+                  </td>
+                </tr>
+                <tr>
+                  <td>Mute path unexercised</td>
+                  <td>Zero muted findings so far</td>
+                  <td>
+                    Mute one deliberately and confirm the fingerprint
+                    invalidates when values change
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="note warn">
+            <span class="lab">The one risk worth watching</span>
+            <p>
+              Drift is blocking with five open <code>certain</code> findings,
+              and all five are in <em>mirrored</em> sources: upstream documents
+              nobody here should edit. The engine says so correctly ("Do not
+              edit the mirror"), but a gate that cannot be cleared by the person
+              it blocks is the failure mode section 02 warned about. Either the
+              upstream correction lands, or those five get muted with a reason
+              while the conversation happens. Leaving them blocking and
+              unactionable is what teaches developers to route around the gate.
+            </p>
+          </div>
+        </section>
 
         <!-- ============ 00 FRAMEWORK CONTRACT ============ -->
         <section id="s0" class="col" style="padding-top: 8px">
           <h2><span class="num">00</span>What the framework defines</h2>
           <p>
-            Read this first. It's the contract Fumadocs imposes on this app —
-            the directory it reads, the frontmatter fields it validates, the
-            file that controls navigation, and what one source file becomes at
-            build time. Everything here is taken from
+            Read this first. It's the contract Fumadocs imposes on this app, the
+            directory it reads, the frontmatter fields it validates, the file
+            that controls navigation, and what one source file becomes at build
+            time. Everything here is taken from
             <code>fumadocs-core@16.15.1</code>'s own schema, not from convention
             or preference.
           </p>
@@ -685,12 +909,12 @@ export const docs = defineDocs({
           <p>
             <code>lib/docs-source.ts</code> then maps that collection to a URL
             prefix via <code>loader({ baseUrl: "/docs" })</code>. Files outside
-            <code>content/docs</code> are not compiled, not routed, not indexed
-            — regardless of extension or location in the repo. A
+            <code>content/docs</code> are not compiled, not routed, not indexed,
+            regardless of extension or location in the repo. A
             <code>.mdx</code> file anywhere else is an ordinary file on disk.
           </p>
 
-          <h3>The frontmatter schema — exactly four author-facing fields</h3>
+          <h3>The frontmatter schema, exactly four author-facing fields</h3>
           <p>
             Fumadocs validates every page against <code>pageSchema</code>. The
             full set, from <code>fumadocs-core/dist/source/schema.d.ts</code>:
@@ -749,19 +973,19 @@ export const docs = defineDocs({
           </div>
           <p>
             (<code>_openapi</code> is the fifth key and is reserved for
-            <code>fumadocs-openapi</code>'s generator — not hand-authored.)
+            <code>fumadocs-openapi</code>'s generator, not hand-authored.)
             Unknown keys are stripped rather than rejected, so a typo in a field
             name fails silently: the value is dropped and the page renders
             without it.
           </p>
           <pre><code><span style="opacity:.65">---</span>
-title: Any page title          <span style="opacity:.65"># required — omit it and the build fails</span>
+title: Any page title          <span style="opacity:.65"># required, omit it and the build fails</span>
 description: One sentence.     <span style="opacity:.65"># optional, but it's the search snippet</span>
 <span style="opacity:.65">---</span>
 
 <span style="opacity:.65"># Body starts here</span></code></pre>
 
-          <h3><code>meta.json</code> — the navigation contract</h3>
+          <h3><code>meta.json</code> - the navigation contract</h3>
           <p>
             A folder's <code>meta.json</code> is validated against
             <code>metaSchema</code>. It controls the sidebar; it has no effect
@@ -799,7 +1023,7 @@ description: One sentence.     <span style="opacity:.65"># optional, but it's th
                   <td><code>root</code></td>
                   <td>boolean | string</td>
                   <td>
-                    Marks the folder as a <em>root</em> — a separate top-level
+                    Marks the folder as a <em>root</em>, a separate top-level
                     docs tree, which is how a sidebar tab / section switcher is
                     created.
                   </td>
@@ -852,7 +1076,7 @@ description: One sentence.     <span style="opacity:.65"># optional, but it's th
                 <tr>
                   <td><code>"..."</code></td>
                   <td>
-                    <strong>Rest</strong> — every remaining child not named
+                    <strong>Rest</strong>: every remaining child not named
                     explicitly. <code>"z...a"</code> does the same in reverse
                     order.
                   </td>
@@ -860,14 +1084,14 @@ description: One sentence.     <span style="opacity:.65"># optional, but it's th
                 <tr>
                   <td><code>"!page-name"</code></td>
                   <td>
-                    <strong>Exclude</strong> — keep the page routable but hide
-                    it from the sidebar.
+                    <strong>Exclude</strong>: keep the page routable but hide it
+                    from the sidebar.
                   </td>
                 </tr>
                 <tr>
                   <td><code>"...folder-name"</code></td>
                   <td>
-                    <strong>Extract</strong> — flatten a subfolder's children
+                    <strong>Extract</strong>: flatten a subfolder's children
                     into this level.
                   </td>
                 </tr>
@@ -905,8 +1129,8 @@ description: One sentence.     <span style="opacity:.65"># optional, but it's th
               With no <code>meta.json</code>, Fumadocs falls back to listing the
               folder's children automatically. A file left out of an
               <em>existing</em> <code>pages</code> array, however, stays
-              routable and searchable but never appears in the sidebar — which
-              in practice means nobody finds it. Either list it, or use
+              routable and searchable but never appears in the sidebar, which in
+              practice means nobody finds it. Either list it, or use
               <code>"..."</code> so new files are picked up by default.
             </p>
           </div>
@@ -991,7 +1215,7 @@ description: One sentence.     <span style="opacity:.65"># optional, but it's th
           <p>
             A right-hand table of contents is derived from the body's
             <code>##</code> and <code>###</code> headings via
-            <code>page.data.toc</code> — so structure the body with real
+            <code>page.data.toc</code> - so structure the body with real
             headings, not bold lines.
           </p>
 
@@ -999,13 +1223,13 @@ description: One sentence.     <span style="opacity:.65"># optional, but it's th
           <p>
             <code>components/docs/mdx.tsx</code> is the extension point.
             Anything registered in <code>getMDXComponents()</code> is available
-            in every page with no per-file import — the app already does this
+            in every page with no per-file import, the app already does this
             with <code>&lt;StatusChip&gt;</code>:
           </p>
           <pre><code>// components/docs/mdx.tsx
 export function getMDXComponents(components?) {
   return {
-    ...defaultMdxComponents,   <span style="opacity:.65">// Callout, Tabs, Steps, Accordion…</span>
+    ...defaultMdxComponents,   <span style="opacity:.65">// Callout, Tabs, Steps, Accordion...</span>
     StatusChip,                <span style="opacity:.65">// your own, usable in any .mdx</span>
     ...components,
   };
@@ -1030,17 +1254,17 @@ export function getMDXComponents(components?) {
         </section>
 
         <div class="note warn">
-          <span class="lab">Notation — planning only, never shipped</span>
+          <span class="lab">Notation, planning only, never shipped</span>
           <p>
-            The <code>§</code> shorthand throughout this playbook is a drafting
-            convention for cross-referencing source documents and this
+            The <code>section</code> shorthand throughout this playbook is a
+            drafting convention for cross-referencing source documents and this
             playbook's own sections. It must not survive into the built site: no
-            <code>§</code> in any MDX page, heading, nav label, or component.
-            Published pages name their source in prose ("per the Development
-            Guidelines, Meeting schema") and link to headings by anchor. Section
-            numbers also collide by coincidence between documents — where the
-            source isn't obvious from the sentence, this playbook names the
-            document explicitly.
+            <code>section</code> in any MDX page, heading, nav label, or
+            component. Published pages name their source in prose ("per the
+            Development Guidelines, Meeting schema") and link to headings by
+            anchor. Section numbers also collide by coincidence between
+            documents, where the source isn't obvious from the sentence, this
+            playbook names the document explicitly.
           </p>
         </div>
 
@@ -1061,13 +1285,13 @@ export function getMDXComponents(components?) {
         <div class="verdict">
           <div class="verdict-head">
             <h2>What this playbook adds to the original research</h2>
-            <span class="stamp">round 2 — build scope</span>
+            <span class="stamp">round 2, build scope</span>
           </div>
           <p>
             The original research's calls all stand. Fumadocs, MDX content, the
             search route, and <code>llms.txt</code> are built and working;
             Keystatic, the CI quality gates, and drift detection are still the
-            plan — this playbook schedules them rather than replacing them.
+            plan, this playbook schedules them rather than replacing them.
             What's genuinely new is a capability the research didn't name:
             <strong
               >the platform's job is to detect inconsistency across its input
@@ -1089,7 +1313,7 @@ export function getMDXComponents(components?) {
                   <td>Keystatic at <code>/keystatic</code>, P3</td>
                   <td>
                     <span class="pill keep">KEPT</span> Scoped as a platform
-                    capability in P4 — an editing surface that doesn't require a
+                    capability in P4, an editing surface that doesn't require a
                     terminal. Who uses it is a later question.
                   </td>
                 </tr>
@@ -1107,7 +1331,7 @@ export function getMDXComponents(components?) {
                   <td>Fiberplane Drift, piloted</td>
                   <td>
                     <span class="pill change">EXPANDED</span> Promoted from a
-                    nice-to-have into the platform's core feature — see section
+                    nice-to-have into the platform's core feature, see section
                     02. Generation and drift detection are complements, not
                     alternatives.
                   </td>
@@ -1156,13 +1380,13 @@ export function getMDXComponents(components?) {
           <p>
             The original research chose four capabilities. None are dropped
             here. What this section adds is <em>when</em> each lands and what it
-            has to be sized against — because a capability shipped in the wrong
+            has to be sized against, because a capability shipped in the wrong
             order becomes an obstacle rather than a benefit, and the goal of
             this round is that a scraper developer feels the platform save them
             time, not cost them any.
           </p>
 
-          <h3>1.1 Keystatic — a platform capability, scheduled for P4</h3>
+          <h3>1.1 Keystatic, a platform capability, scheduled for P4</h3>
           <p>
             An editing surface that doesn't require a terminal is a property of
             the platform, independent of who ends up using it. It mounts as an
@@ -1185,13 +1409,13 @@ export function getMDXComponents(components?) {
               Whether an edit commits directly to a branch or opens a pull
               request is undocumented, and it determines whether edits made
               through the editor pass through the conflict reporter in section
-              02 at all. Test it before the phase is estimated — if edits bypass
+              02 at all. Test it before the phase is estimated, if edits bypass
               CI, the editor and the reporter need wiring together.
             </p>
           </div>
 
           <h3>
-            1.2 The CI quality gates — sized to the platform, sequenced to stay
+            1.2 The CI quality gates, sized to the platform, sequenced to stay
             green
           </h3>
           <p>
@@ -1199,7 +1423,7 @@ export function getMDXComponents(components?) {
             scoping correction to state plainly: these are
             <strong>platform</strong> quality gates, and sizing them against how
             many pages currently exist is the wrong measure. Accessibility and
-            performance budgets don't become worthwhile at some page count —
+            performance budgets don't become worthwhile at some page count,
             they're either part of the definition of done or they aren't.
           </p>
           <p>
@@ -1219,9 +1443,7 @@ export function getMDXComponents(components?) {
                 <tr>
                   <td>Build + internal link/anchor check</td>
                   <td>Broken MDX, dead cross-references</td>
-                  <td>
-                    Being deterministic — it either resolves or it doesn't
-                  </td>
+                  <td>Being deterministic, it either resolves or it doesn't</td>
                 </tr>
                 <tr>
                   <td>cspell</td>
@@ -1232,7 +1454,7 @@ export function getMDXComponents(components?) {
                   <td>lychee</td>
                   <td>External link rot</td>
                   <td>
-                    Scheduled, reporting to an issue — never blocking a PR on
+                    Scheduled, reporting to an issue, never blocking a PR on
                     someone else's downtime
                   </td>
                 </tr>
@@ -1248,7 +1470,7 @@ export function getMDXComponents(components?) {
                   <td>axe-core</td>
                   <td>Accessibility violations</td>
                   <td>
-                    Being genuinely deterministic — this is the one that should
+                    Being genuinely deterministic, this is the one that should
                     block
                   </td>
                 </tr>
@@ -1256,7 +1478,7 @@ export function getMDXComponents(components?) {
                   <td>Lighthouse CI</td>
                   <td>Performance regressions</td>
                   <td>
-                    Median of three runs, warning-only — shared runners are too
+                    Median of three runs, warning-only, shared runners are too
                     noisy to gate on
                   </td>
                 </tr>
@@ -1264,9 +1486,9 @@ export function getMDXComponents(components?) {
             </table>
           </div>
 
-          <h3>1.3 Drift detection — promoted, not replaced</h3>
+          <h3>1.3 Drift detection, promoted, not replaced</h3>
           <p>
-            The original research proposed piloting drift detection — tooling
+            The original research proposed piloting drift detection, tooling
             that notices when a page and its source stop matching. The tempting
             counter-proposal is to skip the detector and generate the drifting
             page instead: render <code>qa/schema.mdx</code> straight from the
@@ -1279,14 +1501,14 @@ export function getMDXComponents(components?) {
             way worth naming: it treats drift as a content-quality problem to be
             designed away, when detecting drift is the platform's
             <em>product</em>. The disagreements that actually cost a scraper
-            developer trust aren't ones this repo can generate away — a CTD
-            page, a PDW document, and <code>city-scrapers-core</code>'s
+            developer trust aren't ones this repo can generate away, a CTD page,
+            a PDW document, and <code>city-scrapers-core</code>'s
             <code>constants.py</code> saying three different things live in
             sources this app can't write to.
           </p>
           <p>
             Generation and detection do different jobs. Generation eliminates
-            drift where this repo owns both sides — a page rendered from a type
+            drift where this repo owns both sides, a page rendered from a type
             in this codebase cannot disagree with it. Detection is the only
             option everywhere else, which is most places: sources owned by other
             teams, in other repositories, in documents this app can't write to.
@@ -1296,18 +1518,18 @@ export function getMDXComponents(components?) {
             Detection alone would be noise, so section 02 also specifies what
             the reporter does with a finding: it records the exact claim, both
             sources' values, a confidence class, and the owning developer
-            resolved from <code>CODEOWNERS</code> — then surfaces it as a PR
+            resolved from <code>CODEOWNERS</code> - then surfaces it as a PR
             comment at the moment of change, a dashboard row as standing state,
             and a JSON record an agent can act on. A human routes the correction
             upstream; the platform never resolves it.
           </p>
 
-          <h3>1.4 Diagrams — match the form to the content</h3>
+          <h3>1.4 Diagrams, match the form to the content</h3>
           <p>
             No disagreement with the original research here; both say the same
             thing. Linear processes render as MUI's <code>Stepper</code>, which
             is already a dependency and inherits the app's own visual system.
-            Actual graphs — data flows, trust boundaries — are hand-authored SVG
+            Actual graphs, data flows, trust boundaries, are hand-authored SVG
             or Mermaid. The distinction is the content's shape, not a blanket
             preference for one tool.
           </p>
@@ -1351,7 +1573,7 @@ export function getMDXComponents(components?) {
 
           <h3>2.1 Why a docs platform is the right place for this</h3>
           <p>
-            A scraper developer's real cost isn't finding documentation — it's
+            A scraper developer's real cost isn't finding documentation, it's
             trusting it. When the same fact appears in four documents owned by
             three organizations, the developer either checks all four (slow) or
             picks one and hopes (wrong). Both outcomes make docs a tax rather
@@ -1388,7 +1610,7 @@ export function getMDXComponents(components?) {
                   <td><span class="pill keep">Fully</span></td>
                   <td>
                     Parse it and compare against what the page publishes.
-                    Highest confidence — code is the arbiter.
+                    Highest confidence, code is the arbiter.
                   </td>
                 </tr>
                 <tr>
@@ -1425,7 +1647,7 @@ export function getMDXComponents(components?) {
                     Reachability and a freshness clock only. No content
                     comparison is possible without a machine-readable source. A
                     page that restates one's substance carries a provenance line
-                    and a short freshness clock — asking the owning team for a
+                    and a short freshness clock, asking the owning team for a
                     named contact is a courtesy, not a gate.
                   </td>
                 </tr>
@@ -1439,8 +1661,8 @@ export function getMDXComponents(components?) {
               near-certain defect. A reported staleness on an external document
               is a <em>prompt to go ask someone</em>, and may be a false alarm.
               If the reporter presents both with the same weight, developers
-              learn to ignore it — the single most likely way this feature
-              fails. Every finding carries its class and its confidence.
+              learn to ignore it, the single most likely way this feature fails.
+              Every finding carries its class and its confidence.
             </p>
           </div>
 
@@ -1448,12 +1670,12 @@ export function getMDXComponents(components?) {
           <p>
             Detection without routing is just a longer build log. The platform
             resolves each finding to a person using <code>CODEOWNERS</code>,
-            which GitHub already reads natively — no bespoke ownership registry
+            which GitHub already reads natively, no bespoke ownership registry
             to maintain alongside it.
           </p>
           <div class="note danger">
             <span class="lab"
-              >Verified — three constraints that shape the design</span
+              >Verified, three constraints that shape the design</span
             >
             <p>
               Checked against GitHub's own documentation, because each one
@@ -1464,7 +1686,7 @@ export function getMDXComponents(components?) {
                 A code owner
                 <strong>must have explicit <code>write</code> access</strong> to
                 the repository, even via a team. Listing someone without it
-                fails quietly — no request, no error.
+                fails quietly, no request, no error.
               </li>
               <li>
                 The <code>CODEOWNERS</code> file
@@ -1487,10 +1709,11 @@ export function getMDXComponents(components?) {
             while work is in progress.
           </p>
           <p>
-            This repository has
-            <strong>no <code>CODEOWNERS</code> file today</strong>, so routing
-            currently has nothing to resolve against. Creating it is the first
-            task of this section, and it is a single file.
+            <code>.github/CODEOWNERS</code> now exists and every finding
+            resolves through it, the live report groups all five findings under
+            <code>@msrezaie</code>. It is a single file using last-match-wins
+            per path, and it stayed one file rather than growing a parallel
+            ownership registry alongside it.
           </p>
 
           <h4>
@@ -1502,14 +1725,14 @@ export function getMDXComponents(components?) {
             The practical shape, given that merges on this repo are currently
             performed by a small number of people:
           </p>
-          <pre><code><span style="opacity:.65"># .github/CODEOWNERS — on the base branch</span>
+          <pre><code><span style="opacity:.65"># .github/CODEOWNERS, on the base branch</span>
 <span style="opacity:.65"># Paths are routing addresses, not access controls.</span>
 
 /content/docs/                 @ctd/docs-maintainers
 /components/docs/              @ctd/docs-maintainers
 /.github/workflows/            @ctd/platform
 
-<span style="opacity:.65"># Narrower paths win — the LAST matching pattern applies,</span>
+<span style="opacity:.65"># Narrower paths win, the LAST matching pattern applies,</span>
 <span style="opacity:.65"># so put specific overrides below general ones.</span>
 /content/docs/scrapers/        @ctd/scraper-leads</code></pre>
 
@@ -1612,7 +1835,7 @@ export function getMDXComponents(components?) {
                 fill="currentColor"
                 opacity=".6"
               >
-                code — the arbiter
+                code, the arbiter
               </text>
 
               <rect
@@ -1675,7 +1898,7 @@ export function getMDXComponents(components?) {
                 fill="currentColor"
                 opacity=".6"
               >
-                other orgs — clock only
+                other orgs, clock only
               </text>
 
               <line
@@ -2120,7 +2343,7 @@ export function getMDXComponents(components?) {
                   <td>Two prose sources disagree, or a cited symbol is gone</td>
                   <td>
                     Comments on the PR and requests the owner's review. Does not
-                    block — a human decides.
+                    block, a human decides.
                   </td>
                 </tr>
                 <tr>
@@ -2148,7 +2371,7 @@ export function getMDXComponents(components?) {
           <h3>2.6 Proving it works before trusting it</h3>
           <p>
             The reporter needs a test corpus with <em>known</em> disagreements
-            in it — documents where the answer is already established, so a
+            in it, documents where the answer is already established, so a
             missed detection is visibly a bug rather than an open question. The
             program's existing source documents serve this purpose well: they
             contain real, naturally occurring inconsistencies across several
@@ -2157,12 +2380,12 @@ export function getMDXComponents(components?) {
           <p>Two things this fixture set is for, and one it is not:</p>
           <ul>
             <li>
-              <strong>Recall</strong> — of the disagreements a human reviewer
-              can find by reading, how many does the reporter surface?
+              <strong>Recall</strong>: of the disagreements a human reviewer can
+              find by reading, how many does the reporter surface?
             </li>
             <li>
-              <strong>Precision</strong> — how many findings does it raise that
-              a developer would judge to be noise? This number governs whether
+              <strong>Precision</strong>: how many findings does it raise that a
+              developer would judge to be noise? This number governs whether
               anything is ever allowed to block.
             </li>
             <li>
@@ -2177,7 +2400,7 @@ export function getMDXComponents(components?) {
               A developer opens a pull request touching a documentation page.
               Within the CI run, they see a comment naming the exact claim, the
               two sources that disagree, which one is authoritative, the
-              confidence, and the CTD developer to talk to — without having
+              confidence, and the CTD developer to talk to, without having
               opened any of the source documents themselves.
             </p>
           </div>
@@ -2191,60 +2414,60 @@ export function getMDXComponents(components?) {
             for yet: source analysis method, spider architecture patterns,
             bot-detection, testing, the full contribution and PR review
             workflow, and the CI/CD pipeline that runs scrapers in production.
-            Some of that belongs under the existing two doors (§5.6 of the
-            original research); some of it — the review process, the production
-            pipeline — is neither "building" nor "reviewing" content, it's
-            orientation content both audiences eventually need and a third kind
-            of reader (a PM, a new CTD lead) may come to
+            Some of that belongs under the existing two doors (section 5.6 of
+            the original research); some of it, the review process, the
+            production pipeline, is neither "building" nor "reviewing" content,
+            it's orientation content both audiences eventually need and a third
+            kind of reader (a PM, a new CTD lead) may come to
             <code>/docs</code> looking for directly.
           </p>
           <p>
             One structural risk the guide introduces: it describes a
-            <em>different repo family</em> — <code>city-scrapers-core</code>
+            <em>different repo family</em>, <code>city-scrapers-core</code>
             and per-city consumer repos like
-            <code>city-scrapers-colgo</code> — from the one this app's own
+            <code>city-scrapers-colgo</code> - from the one this app's own
             <code>/docs/contributing</code> page describes (this Next.js repo).
             Blending them without saying so is exactly the kind of confusion
             this platform exists to prevent. Every new page that describes the
-            scraper repos gets a repo-scope callout (§4).
+            scraper repos gets a repo-scope callout (section 4).
           </p>
           <!-- prettier-ignore -->
           <pre class="tree">
 <span class="k">/docs</span>
-  index.mdx                        <span class="k">— two doors, unchanged</span>
+  index.mdx                        <span class="k">, two doors, unchanged</span>
   <span class="k">/scrapers</span>  (Building Scrapers)
-    index.mdx                      <span class="k">— workflow overview, reordered to source-first</span>
-    source-analysis.mdx            <span class="new-tag">NEW</span> <span class="k">— DevTools-first analysis, primary/secondary URL, singular-vs-factory (§1)</span>
-    spider-patterns.mdx            <span class="new-tag">NEW</span> <span class="k">— CityScrapersSpider vs LegistarSpider, singular vs factory + mixins</span>
-    writing-a-spider.mdx           <span class="fix-tag">FIX</span> <span class="k">— CSS/API/hybrid extraction</span>
-    bot-detection.mdx              <span class="new-tag">NEW</span> <span class="k">— scrapy-playwright, when and how (§2.4)</span>
-    testing.mdx                    <span class="new-tag">NEW</span> <span class="k">— pytest patterns, two-phase tests, freeze_time (§2.6)</span>
-    contributing.mdx               <span class="new-tag">NEW</span> <span class="k">— fork/pipenv/genspider/validate/lint, command reference</span>
-    scraper-types.mdx              <span class="new-tag">NEW</span> <span class="k">— the scraper-type taxonomy</span>
-    scoping-a-target.mdx           <span class="new-tag">NEW</span> <span class="k">— target-scoping guidance</span>
+    index.mdx                      <span class="k">, workflow overview, reordered to source-first</span>
+    source-analysis.mdx            <span class="new-tag">NEW</span> <span class="k">, DevTools-first analysis, primary/secondary URL, singular-vs-factory (section 1)</span>
+    spider-patterns.mdx            <span class="new-tag">NEW</span> <span class="k">, CityScrapersSpider vs LegistarSpider, singular vs factory + mixins</span>
+    writing-a-spider.mdx           <span class="fix-tag">FIX</span> <span class="k">, CSS/API/hybrid extraction</span>
+    bot-detection.mdx              <span class="new-tag">NEW</span> <span class="k">, scrapy-playwright, when and how (section 2.4)</span>
+    testing.mdx                    <span class="new-tag">NEW</span> <span class="k">, pytest patterns, two-phase tests, freeze_time (section 2.6)</span>
+    contributing.mdx               <span class="new-tag">NEW</span> <span class="k">, fork/pipenv/genspider/validate/lint, command reference</span>
+    scraper-types.mdx              <span class="new-tag">NEW</span> <span class="k">, the scraper-type taxonomy</span>
+    scoping-a-target.mdx           <span class="new-tag">NEW</span> <span class="k">, target-scoping guidance</span>
   <span class="k">/qa</span>  (QA &amp; Review)
-    index.mdx, schema.mdx, rubric.mdx   <span class="fix-tag">FIX</span> <span class="k">— schema.mdx renders the generated constants table (section 03)</span>
-    review-process.mdx             <span class="new-tag">NEW</span> <span class="k">— the 5-stage pipeline, rendered as a Stepper (§3.9)</span>
-    review-issues.mdx              <span class="new-tag">NEW</span> <span class="k">— external review criteria, tracked as an external source (section 02.2)</span>
-  <span class="k">/viewer</span>  (Meetings Viewer — existing, unchanged pages + one new)
-    index.mdx, quick-start.mdx     <span class="k">— unchanged</span>
-    architecture.mdx               <span class="new-tag">NEW</span> <span class="k">— this app's own architecture: modes, data shapes, invariants, table-library rationale</span>
+    index.mdx, schema.mdx, rubric.mdx   <span class="fix-tag">FIX</span> <span class="k">, schema.mdx renders the generated constants table (section 03)</span>
+    review-process.mdx             <span class="new-tag">NEW</span> <span class="k">, the 5-stage pipeline, rendered as a Stepper (section 3.9)</span>
+    review-issues.mdx              <span class="new-tag">NEW</span> <span class="k">, external review criteria, tracked as an external source (section 02.2)</span>
+  <span class="k">/viewer</span>  (Meetings Viewer, existing, unchanged pages + one new)
+    index.mdx, quick-start.mdx     <span class="k">, unchanged</span>
+    architecture.mdx               <span class="new-tag">NEW</span> <span class="k">, this app's own architecture: modes, data shapes, invariants, table-library rationale</span>
   <span class="k">/pipeline</span>  (How the scraper-repo CI/CD fits together)  <span class="new-tag">NEW SECTION</span>
-    index.mdx                      <span class="k">— system architecture + data-flow diagram (§4.1) — Documenters.org's pipeline only, not the Viewer's</span>
-    scheduled-runs.mdx             <span class="k">— cron.yml / archive.yml (§4.2)</span>
-    airtable-sync.mdx              <span class="k">— two-workflow trust boundary, secrets, known limitation (§4.3)</span>
+    index.mdx                      <span class="k">, system architecture + data-flow diagram (section 4.1), Documenters.org's pipeline only, not the Viewer's</span>
+    scheduled-runs.mdx             <span class="k">, cron.yml / archive.yml (section 4.2)</span>
+    airtable-sync.mdx              <span class="k">, two-workflow trust boundary, secrets, known limitation (section 4.3)</span>
   <span class="k">/contributing</span>  (unchanged, this repo only)
-    index.mdx                      <span class="fix-tag">FIX</span> <span class="k">— how to add and edit pages, and how to read a conflict finding (section 02)</span>
-  <span class="k">/analytics</span>  (Fleet &amp; performance)  <span class="new-tag">NEW SECTION, §6</span>
-    index.mdx                      <span class="k">— for senior developers, not the two doors — fleet health + docs performance (§6, P7)</span>
-  <span class="k">/agents</span>  (Agents, memory &amp; skills)  <span class="new-tag">NEW SECTION, §7</span>
-    index.mdx, how-to-add-a-section.mdx   <span class="k">— vocabulary, decision method, the four-step process (§7)</span>
-    meetings-viewer.mdx            <span class="k">— ships now, honest and thin (§7)</span>
-    scrapers.mdx                   <span class="fix-tag">FIX</span> <span class="k">— no longer a stub: two real skills exist (§7.1)</span>
-    devops.mdx                     <span class="k">— stub, owned by whoever maintains /pipeline (§7)</span>
+    index.mdx                      <span class="fix-tag">FIX</span> <span class="k">, how to add and edit pages, and how to read a conflict finding (section 02)</span>
+  <span class="k">/analytics</span>  (Fleet &amp; performance)  <span class="new-tag">NEW SECTION, section 6</span>
+    index.mdx                      <span class="k">, for senior developers, not the two doors, fleet health + docs performance (section 6, P7)</span>
+  <span class="k">/agents</span>  (Agents, memory &amp; skills)  <span class="new-tag">NEW SECTION, section 7</span>
+    index.mdx, how-to-add-a-section.mdx   <span class="k">, vocabulary, decision method, the four-step process (section 7)</span>
+    meetings-viewer.mdx            <span class="k">, ships now, honest and thin (section 7)</span>
+    scrapers.mdx                   <span class="fix-tag">FIX</span> <span class="k">, no longer a stub: two real skills exist (section 7.1)</span>
+    devops.mdx                     <span class="k">, stub, owned by whoever maintains /pipeline (section 7)</span>
   <span class="k">/reference</span>  (Reference)  <span class="new-tag">NEW SECTION</span>
-    links.mdx                      <span class="k">— the curated external link index, generated from one registry file</span>
-    glossary.mdx                   <span class="k">— platform and program vocabulary</span>
+    links.mdx                      <span class="k">, the curated external link index, generated from one registry file</span>
+    glossary.mdx                   <span class="k">, platform and program vocabulary</span>
           </pre>
 
           <h3>
@@ -2252,9 +2475,10 @@ export function getMDXComponents(components?) {
             doors
           </h3>
           <p>
-            §5.6 of the original research is still right that the homepage
-            should force a two-way choice in the first three seconds — adding a
-            third homepage option would blunt that. <code>/pipeline</code>
+            section 5.6 of the original research is still right that the
+            homepage should force a two-way choice in the first three seconds,
+            adding a third homepage option would blunt that.
+            <code>/pipeline</code>
             isn't a third front door; it's reference material both existing
             doors occasionally link into (a QA reviewer wondering why staging
             behaves differently than production; a builder whose spider slug
@@ -2262,41 +2486,39 @@ export function getMDXComponents(components?) {
             in-context links, never competing with the homepage's choice.
           </p>
 
-          <h3>
-            The pipeline diagram missed a mode — corrected, then confirmed
-          </h3>
+          <h3>The pipeline diagram missed a mode, corrected, then confirmed</h3>
           <p>
             It would be easy to draw the Meetings Viewer as never touching
             production and stop there. That is wrong in a way that matters, and
             the now-provided Meetings Viewer Technical Specification confirms it
-            precisely (§6, its own "Production mode (not yet fully planned)"): a
-            second, planned mode fetches PR-scoped scraper output from a
-            dedicated public
+            precisely (section 6, its own "Production mode (not yet fully
+            planned)"): a second, planned mode fetches PR-scoped scraper output
+            from a dedicated public
             <code>meetings-viewer-data</code> repo, laid out as
             <code>prs/{scraper_repo}/{pr_number}/manifest.json</code>
-            plus a <code>scrapers/</code> subfolder — populated by two workflows
+            plus a <code>scrapers/</code> subfolder, populated by two workflows
             living in each scraper repo: <code>run-and-save.yml</code>
             (runs on PR open/update, commits output) and
             <code>cleanup-data.yml</code> (runs on PR close, deletes that PR's
             directory regardless of merge state). The viewer reads it via plain
             <code>raw.githubusercontent.com</code> URLs under a
-            <code>/pr/{repo}/{pr_number}/scrapers</code> route — no backend, no
-            database, no auth on the read side (§7's architectural invariants
-            are explicit about this). Same UI, same components, same routes as
-            local mode — only <code>lib/scraper-data.ts</code>'s implementation
-            changes (§5.2). That mode doesn't touch Documenters.org's
-            Azure/ETL/Postgres pipeline either, but it's explicitly meant to be
-            used <em>during PR review</em> — which means by PDW and CB, not just
-            by a CTD apprentice at their own keyboard. The corrected diagram
-            below draws three paths, not two, and the caption says which ones
-            exist today.
+            <code>/pr/{repo}/{pr_number}/scrapers</code> route, no backend, no
+            database, no auth on the read side (section 7's architectural
+            invariants are explicit about this). Same UI, same components, same
+            routes as local mode, only <code>lib/scraper-data.ts</code>'s
+            implementation changes (section 5.2). That mode doesn't touch
+            Documenters.org's Azure/ETL/Postgres pipeline either, but it's
+            explicitly meant to be used <em>during PR review</em>, which means
+            by PDW and CB, not just by a CTD apprentice at their own keyboard.
+            The corrected diagram below draws three paths, not two, and the
+            caption says which ones exist today.
           </p>
           <div class="diagram">
             <svg
               viewBox="0 0 1080 360"
               xmlns="http://www.w3.org/2000/svg"
               role="img"
-              aria-label="Data flow diagram: scraper output splits into three paths — a production data pipeline through Azure, ETL, and Postgres to Documenters.org; a planned path through a shared meetings-viewer-data repo into the Meetings Viewer's Production mode; and a local path straight into the Meetings Viewer's local mode."
+              aria-label="Data flow diagram: scraper output splits into three paths, a production data pipeline through Azure, ETL, and Postgres to Documenters.org; a planned path through a shared meetings-viewer-data repo into the Meetings Viewer's Production mode; and a local path straight into the Meetings Viewer's local mode."
             >
               <defs>
                 <marker
@@ -2465,7 +2687,7 @@ export function getMDXComponents(components?) {
                 meetings-viewer-data
               </text>
               <text x="390" y="170" text-anchor="middle" class="sub">
-                public repo, PR-scoped — planned
+                public repo, PR-scoped, planned
               </text>
 
               <path class="edge-pr" d="M490,158 C560,168 620,178 680,195" />
@@ -2503,13 +2725,13 @@ export function getMDXComponents(components?) {
                 Meetings Viewer
               </text>
               <text x="790" y="198" text-anchor="middle" class="sub">
-                production mode (planned) —
+                production mode (planned),
               </text>
               <text x="790" y="212" text-anchor="middle" class="sub">
                 used by CTD, PDW, CB during review
               </text>
               <text x="790" y="228" text-anchor="middle" class="sub">
-                local mode (built) — one contributor
+                local mode (built), one contributor
               </text>
 
               <!-- legend -->
@@ -2524,20 +2746,21 @@ export function getMDXComponents(components?) {
             </svg>
             <p class="diagram-caption">
               Neither path into the Meetings Viewer touches Azure, the ETL job,
-              or Postgres — that part of the original claim holds. What didn't
+              or Postgres, that part of the original claim holds. What didn't
               hold: "local-only." The viewer has a second, planned mode meant
-              for PDW and CB to use directly during PR review — confirmed, and
+              for PDW and CB to use directly during PR review, confirmed, and
               specified precisely, by the Meetings Viewer Technical
-              Specification's own §6, itself headed "Production mode (not yet
-              fully planned)." <code>/docs/viewer/architecture.mdx</code> (§3,
-              below) is where this belongs, not <code>/docs/pipeline</code>
-              — an earlier guess placed it there before the spec was available.
+              Specification's own section 6, itself headed "Production mode (not
+              yet fully planned)."
+              <code>/docs/viewer/architecture.mdx</code> (section 3, below) is
+              where this belongs, not <code>/docs/pipeline</code> - an earlier
+              guess placed it there before the spec was available.
             </p>
           </div>
 
           <div class="note tip">
             <span class="lab"
-              >Resolved — both source documents now provided</span
+              >Resolved, both source documents now provided</span
             >
             <p>
               The Meetings Viewer Technical Specification is the second document
@@ -2547,19 +2770,20 @@ export function getMDXComponents(components?) {
             <ul>
               <li>
                 <strong>Correction:</strong> it doesn't seed
-                <code>/pipeline</code> at all — that section is scraper-repo
+                <code>/pipeline</code> at all, that section is scraper-repo
                 CI/CD (the Documenters.org pipeline, the Airtable sync),
                 entirely from the Development Guidelines. The Viewer spec is
                 exclusively about this app's own architecture: modes, pages,
                 data shapes, invariants, table-library choice. It seeds a new
-                page, <code>/docs/viewer/architecture.mdx</code> (§3's tree),
-                which becomes its ongoing Docs-synced target per §1.1 — no
-                "which two files" ambiguity left, because the whole document
-                maps to one new page, not a slice of an existing section.
+                page, <code>/docs/viewer/architecture.mdx</code> (section 3's
+                tree), which becomes its ongoing Docs-synced target per section
+                1.1, no "which two files" ambiguity left, because the whole
+                document maps to one new page, not a slice of an existing
+                section.
               </li>
               <li>
                 <strong>Confirmation:</strong> the spec's own open-items list
-                names exactly four unresolved points — the token mechanism for
+                names exactly four unresolved points, the token mechanism for
                 cross-repo writes (PAT vs. GitHub App), concurrent-workflow
                 handling against the data repo, whether merged-PR data is
                 preserved or deleted like unmerged data, and a periodic sweep
@@ -2567,11 +2791,11 @@ export function getMDXComponents(components?) {
                 <code>/docs/viewer/architecture.mdx</code>'s Production mode
                 section as visible
                 <code>&lt;Callout type="warn"&gt;</code> blocks, quoted
-                near-verbatim — never flattened into prose that implies more
+                near-verbatim, never flattened into prose that implies more
                 certainty than the spec itself claims. Each one becomes an
                 actual tracked issue (file four, referencing this spec section)
-                that the callout links to, not permanent unowned "TBD" text (§8,
-                P2).
+                that the callout links to, not permanent unowned "TBD" text
+                (section 8, P2).
               </li>
             </ul>
           </div>
@@ -2584,21 +2808,21 @@ export function getMDXComponents(components?) {
             This is the part the original research under-weighted and this
             playbook doesn't: the platform choice and the CI checklist are both
             in service of pages people actually want to read. Two things need to
-            happen before the new content lands — one fix, one small component
-            set — plus a few standing rules for every page after.
+            happen before the new content lands, one fix, one small component
+            set, plus a few standing rules for every page after.
           </p>
 
           <h3>4.1 Ship the theme mapping that was always the plan</h3>
           <p>
             <code>globals.css</code> currently only imports Fumadocs' stock
-            <code>neutral.css</code> preset — none of the
-            <code>--color-fd-*</code> → <code>--mui-palette-*</code> mapping
-            from the original research's §8 was ever added. Dark mode switching
-            works (<code>DarkModeSync</code> correctly drives Fumadocs'
-            <code>.dark</code> class off MUI's color scheme), but
+            <code>neutral.css</code> preset, none of the
+            <code>--color-fd-*</code> -&gt; <code>--mui-palette-*</code> mapping
+            from the original research's section 8 was ever added. Dark mode
+            switching works (<code>DarkModeSync</code> correctly drives
+            Fumadocs' <code>.dark</code> class off MUI's color scheme), but
             <code>/docs</code> is still rendering in Fumadocs' generic gray, not
             the app's own palette. This is a five-variable, one-time fix with no
-            new dependency — do it before any of the new pages ship, so every
+            new dependency, do it before any of the new pages ship, so every
             page that follows is on-brand from day one instead of needing a
             re-skin later.
           </p>
@@ -2616,27 +2840,27 @@ export function getMDXComponents(components?) {
               <tbody>
                 <tr>
                   <td><code>&lt;RepoScope&gt;</code></td>
-                  <td>Nothing — new</td>
+                  <td>Nothing: new</td>
                   <td>
                     One-line callout stamping a page
                     "city-scrapers-meetings-viewer" or "city-scrapers (core +
-                    consumer repos)". Directly answers §3's cross-repo confusion
-                    risk. Cheapest, highest-leverage component on this list.
+                    consumer repos)". Directly answers section 3's cross-repo
+                    confusion risk. Cheapest, highest-leverage component on this
+                    list.
                   </td>
                 </tr>
                 <tr>
                   <td><code>&lt;SchemaTable&gt;</code></td>
                   <td>The hand-written table in <code>qa/schema.mdx</code></td>
                   <td>
-                    Generated from a single source (§5), so the "generated"
-                    claim in §1.3 becomes true instead of aspirational.
-                    Deep-linkable per field, kept from the original research's
-                    §5.3.
+                    Generated from a single source (section 5), so the
+                    "generated" claim in section 1.3 becomes true instead of
+                    aspirational. Deep-linkable per field, kept from the
+                    original research's section 5.3.
                     <strong
-                      >Permanently git-owned the moment this ships
-                      (§1.1)</strong
-                    >
-                    — <code>qa/schema.mdx</code> can never be a Docs-synced
+                      >Permanently git-owned the moment this ships (section
+                      1.1)</strong
+                    >, <code>qa/schema.mdx</code> can never be a Docs-synced
                     target again.
                   </td>
                 </tr>
@@ -2646,25 +2870,25 @@ export function getMDXComponents(components?) {
                   </td>
                   <td>Prose walkthrough of the 5-stage review</td>
                   <td>
-                    Native to the app's own design system already — no new
+                    Native to the app's own design system already, no new
                     dependency, no second visual language the way a Mermaid
-                    diagram would introduce. See §1.4.
+                    diagram would introduce. See section 1.4.
                   </td>
                 </tr>
                 <tr>
                   <td><code>&lt;CommandBlock&gt;</code></td>
                   <td>Static code fences repeating a spider name</td>
                   <td>
-                    Kept from the original research's §5.4, now more valuable —
-                    the guide adds <code>genspider</code>,
+                    Kept from the original research's section 5.4, now more
+                    valuable, the guide adds <code>genspider</code>,
                     <code>validate</code>,
                     <code>flake8</code>/<code>black</code>/<code>isort</code>,
                     and several <code>pytest</code> invocations on top of the
                     one <code>crawl -O</code> command it originally covered.
                     <strong
-                      >Permanently git-owned wherever it's used (§1.1)</strong
-                    >
-                    — this is why the Development Guidelines doc is a one-time
+                      >Permanently git-owned wherever it's used (section
+                      1.1)</strong
+                    >, this is why the Development Guidelines doc is a one-time
                     seed for <code>/docs/scrapers</code>, never an ongoing sync
                     source.
                   </td>
@@ -2672,19 +2896,21 @@ export function getMDXComponents(components?) {
                 <tr>
                   <td><code>&lt;RubricReport&gt;</code></td>
                   <td>
-                    Nothing — new (restored from §5.1 of the original research)
+                    Nothing: new (restored from section 5.1 of the original
+                    research)
                   </td>
                   <td>
                     Drop or paste a spider's JSON output on <code>/qa</code>,
-                    get a per-field verdict against the corrected rubric (§2) —
-                    timezone-naive check, link order, status logic, duplicate
-                    IDs. Runs client-side; mostly a lift from the
+                    get a per-field verdict against the corrected rubric
+                    (section 2), timezone-naive check, link order, status logic,
+                    duplicate IDs. Runs client-side; mostly a lift from the
                     already-existing <code>lib/duplicate-detection.ts</code> and
                     the app's own status/format helpers, so it stays true to
-                    "the viewer shows exactly what the spider produced" (§2)
-                    rather than reimplementing QA logic a second way.
-                    <strong>Permanently git-owned once it ships (§1.1)</strong>
-                    — <code>/qa/index.mdx</code> leaves the sync allowlist for
+                    "the viewer shows exactly what the spider produced" (section
+                    2) rather than reimplementing QA logic a second way.
+                    <strong
+                      >Permanently git-owned once it ships (section 1.1)</strong
+                    >: <code>/qa/index.mdx</code> leaves the sync allowlist for
                     good at that point.
                   </td>
                 </tr>
@@ -2694,7 +2920,7 @@ export function getMDXComponents(components?) {
                     Fumadocs per-page <code>.md</code> route + copy-as-markdown
                     button
                   </td>
-                  <td>Nothing — new (restored from §5.9)</td>
+                  <td>Nothing: new (restored from section 5.9)</td>
                   <td>
                     Ships free alongside the <code>llms.txt</code>/<code
                       >llms-full.txt</code
@@ -2707,11 +2933,11 @@ export function getMDXComponents(components?) {
                 <tr>
                   <td>Header <code>&lt;SearchTrigger&gt;</code></td>
                   <td>
-                    Nothing — <code>SiteHeader</code> has no search entry point
+                    Nothing: <code>SiteHeader</code> has no search entry point
                     today
                   </td>
                   <td>
-                    Restores §5.10 — ⌘K reachable from
+                    Restores section 5.10, Cmd-K reachable from
                     <code>/scrapers</code> and the landing page, not just
                     <code>/docs</code>. Fumadocs' search client can be mounted
                     outside <code>DocsLayout</code>; it already indexes via the
@@ -2726,7 +2952,7 @@ export function getMDXComponents(components?) {
                   <td>Parallel prose lists</td>
                   <td>
                     The Airtable sync docs already describe "core repo" vs.
-                    "consumer repo" file lists side by side — that's a tab pair,
+                    "consumer repo" file lists side by side, that's a tab pair,
                     not two headings.
                   </td>
                 </tr>
@@ -2748,9 +2974,9 @@ export function getMDXComponents(components?) {
 
           <p>
             What that stepper should look like on
-            <code>/qa/review-process</code> — five stages, each naming who's
+            <code>/qa/review-process</code> - five stages, each naming who's
             involved and what "done" looks like, replacing the guide's prose
-            walkthrough of §3.9:
+            walkthrough of section 3.9:
           </p>
           <div class="stepper">
             <div class="step">
@@ -2765,8 +2991,8 @@ export function getMDXComponents(components?) {
               <div class="step-badge">2</div>
               <h4>CTD review</h4>
               <p>
-                Team lead QAs output against §2.5 and reviews code — logic,
-                style, edge cases, tests.
+                Team lead QAs output against section 2.5 and reviews code,
+                logic, style, edge cases, tests.
               </p>
             </div>
             <div class="step">
@@ -2799,24 +3025,24 @@ export function getMDXComponents(components?) {
           <ul>
             <li>
               <strong>One repo-scope callout</strong> on any page describing the
-              scraper repos, placed above the fold — never assume the reader
+              scraper repos, placed above the fold, never assume the reader
               knows which codebase a command runs against.
             </li>
             <li>
               <strong>Commands are copy-pasteable as written.</strong> The guide
               is precise about flags that matter (<code>-O</code> not
-              <code>-o</code>, <code>pipenv run</code> prefixes) — docs must
+              <code>-o</code>, <code>pipenv run</code> prefixes), docs must
               never round that off for brevity, since the flag itself is the QA
               lesson.
             </li>
             <li>
               <strong>Good/bad example pairs</strong> (already used well for
-              title formatting) become a recurring pattern, not a one-off — it's
+              title formatting) become a recurring pattern, not a one-off, it's
               the exact shape a reviewer scans for.
             </li>
             <li>
               <strong>Dark mode + MUI parity checked before merge</strong> on
-              every new docs page — keep this as a standing PR habit, not a
+              every new docs page, keep this as a standing PR habit, not a
               one-time P0 spike item.
             </li>
           </ul>
@@ -2826,7 +3052,7 @@ export function getMDXComponents(components?) {
         <section id="s5" class="col">
           <h2><span class="num">05</span>Automation</h2>
           <p>
-            Five workflows were in scope for round two; all five now live under
+            Five workflows were in scope for round two; six now live under
             <code>.github/workflows</code>. The first implements section 02; the
             rest are the original research's quality gates, introduced in an
             order where each lands passing.
@@ -2837,7 +3063,7 @@ export function getMDXComponents(components?) {
             <div>
               <h3 style="margin-top: 0">docs-drift.yml</h3>
               <p>
-                <span class="pill done">SHIPPED</span> — planned as
+                <span class="pill done">SHIPPED</span> planned as
                 <code>docs-conflict-report.yml</code>, it landed as
                 <code>docs-drift.yml</code>. The main build. Runs the
                 comparators from section 02 across the source classes, emits one
@@ -2849,8 +3075,8 @@ export function getMDXComponents(components?) {
                 Non-blocking on arrival. Only <code>certain</code>-confidence
                 findings are ever promoted to blocking, and only after the
                 false-positive rate has been observed on real pull requests.
-                <span class="pill done">PROMOTED</span> — the advisory window
-                has closed: <code>BLOCKING_GATE_ENABLED</code> in
+                <span class="pill done">PROMOTED</span> the advisory window has
+                closed: <code>BLOCKING_GATE_ENABLED</code> in
                 <code>docs-platform/engine/evaluate.ts</code> turns a
                 <code>certain</code> finding into a failing check.
               </p>
@@ -2864,8 +3090,8 @@ export function getMDXComponents(components?) {
               <p>
                 <span class="pill done">SHIPPED</span>
                 <code>next build</code> plus an internal link and anchor checker
-                walking <code>source.getPages()</code>. Deterministic — a link
-                either resolves against a real page and heading or it doesn't —
+                walking <code>source.getPages()</code>. Deterministic, a link
+                either resolves against a real page and heading or it doesn't,
                 so this one can block from day one.
               </p>
             </div>
@@ -2894,7 +3120,7 @@ export function getMDXComponents(components?) {
                 <span class="pill done">SHIPPED</span> lychee, on a schedule
                 rather than per-PR, opening a single rollup issue. External link
                 rot has nothing to do with the pull request that happens to be
-                open — blocking a developer on another site's downtime is how a
+                open, blocking a developer on another site's downtime is how a
                 check earns a reputation for wasting time.
               </p>
             </div>
@@ -2906,7 +3132,7 @@ export function getMDXComponents(components?) {
               <h3 style="margin-top: 0">docs-quality.yml</h3>
               <p>
                 <span class="pill done">SHIPPED</span> axe-core for
-                accessibility — deterministic, and the one quality gate that
+                accessibility, deterministic, and the one quality gate that
                 should block. Lighthouse CI alongside it for performance and
                 SEO, as a warning only and on the median of three runs; shared
                 CI runners are too noisy to gate on, and a flaky performance
@@ -2918,7 +3144,7 @@ export function getMDXComponents(components?) {
           <div class="note info">
             <span class="lab">Where generation fits</span>
             <p>
-              Pages rendered from a source this repo owns — a type, a constant —
+              Pages rendered from a source this repo owns, a type, a constant,
               can't drift by construction, so they need no check. Where a
               generated file must be committed, the pattern is: regenerate in CI
               and fail if <code>git diff</code> is non-empty. That's narrower
@@ -2938,7 +3164,7 @@ export function getMDXComponents(components?) {
           <p>
             Everything so far serves two readers: someone building a spider,
             someone reviewing one. Neither view answers a question a team lead
-            actually has —
+            actually has,
             <em
               >across every spider this cohort has shipped, what's healthy,
               what's stale, and is the docs platform itself fast?</em
@@ -2948,7 +3174,7 @@ export function getMDXComponents(components?) {
           </p>
           <div class="note danger">
             <span class="lab"
-              >Correction — this is by design, not unfinished</span
+              >Correction, this is by design, not unfinished</span
             >
             <p>
               <code>components/scrapers/ScrapersTable.tsx</code> already defines
@@ -2958,26 +3184,27 @@ export function getMDXComponents(components?) {
               <code>SpiderEntry</code> type declares both fields, but
               <code>listScrapers()</code> only ever returns
               <code>{ slug }</code>. It looks half-built and never finished. The
-              Meetings Viewer spec says otherwise, explicitly (§5.4, "Local
-              fields explicitly out of scope"): <code>agency</code>,
+              Meetings Viewer spec says otherwise, explicitly (section 5.4,
+              "Local fields explicitly out of scope"): <code>agency</code>,
               <code>last_run</code>, and <code>last_run_status</code> are
-              deliberately unpopulated in local mode — "no local mechanism
+              deliberately unpopulated in local mode, "no local mechanism
               produces or stores them." The placeholder isn't a gap. It's the
-              local half of a shape whose other half is Production mode (§4.2 of
-              the spec: "The shape supports adding optional fields … in
+              local half of a shape whose other half is Production mode (section
+              4.2 of the spec: "The shape supports adding optional fields ... in
               production without breaking the local consumer").
             </p>
           </div>
 
           <h3>
-            Real fleet data waits on Production mode — it isn't a local
+            Real fleet data waits on Production mode, it isn't a local
             workaround
           </h3>
           <p>
-            That correction changes the plan, not just the framing. §3's diagram
-            already shows two things that aren't the Documenters.org production
-            pipeline: local mode and the viewer's own planned Production mode.
-            Fleet data belongs on the second one, not invented locally:
+            That correction changes the plan, not just the framing. section 3's
+            diagram already shows two things that aren't the Documenters.org
+            production pipeline: local mode and the viewer's own planned
+            Production mode. Fleet data belongs on the second one, not invented
+            locally:
           </p>
           <ul>
             <li>
@@ -2985,9 +3212,10 @@ export function getMDXComponents(components?) {
                 >The real source is Production mode's
                 <code>manifest.json</code></strong
               >, fetched the same way the viewer's own production mode will
-              (§3's spec citation) — <code>raw.githubusercontent.com</code>, no
-              backend. A local mtime-and-self-check substitute would directly
-              contradict the spec's §5.4 and §7 — considered and scrapped, not
+              (section 3's spec citation),
+              <code>raw.githubusercontent.com</code>, no backend. A local
+              mtime-and-self-check substitute would directly contradict the
+              spec's section 5.4 and section 7, considered and scrapped, not
               built.
             </li>
             <li>
@@ -2995,33 +3223,33 @@ export function getMDXComponents(components?) {
                 >This gates the fleet KPI panel on Production mode
                 shipping</strong
               >
-              (§8's flagged, not-scoped-here app feature). Until then,
+              (section 8's flagged, not-scoped-here app feature). Until then,
               <code>/docs/analytics</code>'s fleet panel ships as an honest
-              empty state — "waiting on Production mode," not a fabricated local
+              empty state, "waiting on Production mode," not a fabricated local
               number.
             </li>
             <li>
               <strong
                 >The Airtable-backed alternative is now weaker, not just bigger
                 scope</strong
-              >
-              — beyond the write-scoped PAT needing a server-only Route Handler,
-              that handler would be an application-managed API server, which the
-              spec's §7 lists as an architectural invariant that "should not be
-              broken without explicit revisit." Production mode's static-file
-              fetch doesn't have that problem. Prefer it once it exists, rather
-              than building a second, invariant-breaking path to the same data.
+              >, beyond the write-scoped PAT needing a server-only Route
+              Handler, that handler would be an application-managed API server,
+              which the spec's section 7 lists as an architectural invariant
+              that "should not be broken without explicit revisit." Production
+              mode's static-file fetch doesn't have that problem. Prefer it once
+              it exists, rather than building a second, invariant-breaking path
+              to the same data.
             </li>
           </ul>
 
           <h3>The other half: is the docs platform itself fast?</h3>
           <p>
-            §1.2 deferred axe-core + Lighthouse CI for having no place to show
-            results. This tab is that place — the condition is now met, so it's
-            back on the roadmap (§8, P7), scoped tightly: Lighthouse CI writes
-            one JSON artifact per build; this page renders it. No new runtime
-            dependency, no telemetry service, nothing that phones out from a
-            user's browser.
+            section 1.2 deferred axe-core + Lighthouse CI for having no place to
+            show results. This tab is that place, the condition is now met, so
+            it's back on the roadmap (section 8, P7), scoped tightly: Lighthouse
+            CI writes one JSON artifact per build; this page renders it. No new
+            runtime dependency, no telemetry service, nothing that phones out
+            from a user's browser.
           </p>
 
           <div class="scroll">
@@ -3037,11 +3265,11 @@ export function getMDXComponents(components?) {
                 <tr>
                   <td>Fleet health KPIs</td>
                   <td>
-                    Production mode's <code>manifest.json</code>, once it ships
-                    — empty state until then
+                    Production mode's <code>manifest.json</code>, once it ships,
+                    empty state until then
                   </td>
                   <td>
-                    Stat tiles, status-colored — a count is the whole story, no
+                    Stat tiles, status-colored, a count is the whole story, no
                     chart needed
                   </td>
                 </tr>
@@ -3049,7 +3277,7 @@ export function getMDXComponents(components?) {
                   <td>Fleet table</td>
                   <td>Same source</td>
                   <td>
-                    Extends the existing <code>ScrapersTable</code> DataGrid —
+                    Extends the existing <code>ScrapersTable</code> DataGrid,
                     the "table view" a KPI row always needs, for free
                   </td>
                 </tr>
@@ -3057,7 +3285,7 @@ export function getMDXComponents(components?) {
                   <td>Docs performance trend</td>
                   <td>Lighthouse CI JSON, one point per build</td>
                   <td>
-                    Single-hue sparkline, one axis, last value direct-labeled —
+                    Single-hue sparkline, one axis, last value direct-labeled,
                     never score and milliseconds on one dual-axis chart
                   </td>
                 </tr>
@@ -3067,7 +3295,7 @@ export function getMDXComponents(components?) {
 
           <p>
             Mocked below as it looks <em>once Production mode ships</em> and the
-            fleet numbers are real — with this document's own tokens for the
+            fleet numbers are real, with this document's own tokens for the
             mockup itself, but the real build must pull
             <code>success</code>/<code>warning</code>/<code>error</code>
             straight from the MUI theme (the same three values
@@ -3081,12 +3309,12 @@ export function getMDXComponents(components?) {
               <div class="kpi-tile good">
                 <div class="kpi-num">41</div>
                 <div class="kpi-lab">
-                  Healthy — ran &amp; validated within 24h
+                  Healthy, ran &amp; validated within 24h
                 </div>
               </div>
               <div class="kpi-tile warn">
                 <div class="kpi-num">6</div>
-                <div class="kpi-lab">Stale — no run in 24h+</div>
+                <div class="kpi-lab">Stale, no run in 24h+</div>
               </div>
               <div class="kpi-tile bad">
                 <div class="kpi-num">2</div>
@@ -3141,7 +3369,7 @@ export function getMDXComponents(components?) {
               <circle cx="500" cy="16" r="3.5" class="spark-end" />
               <text x="512" y="20" class="spark-lbl">94</text>
               <text x="10" y="86" class="spark-cap">
-                last 8 builds — Lighthouse performance score, /docs
+                last 8 builds, Lighthouse performance score, /docs
               </text>
             </svg>
           </div>
@@ -3149,9 +3377,9 @@ export function getMDXComponents(components?) {
           <h3>Where this lives</h3>
           <p>
             A new nav entry, <code>/docs/analytics</code>, in its own sidebar
-            group — not folded into the two-doors home, and not hidden: a short
+            group, not folded into the two-doors home, and not hidden: a short
             callout at the top states plainly who it's for ("team leads and
-            senior developers tracking fleet health — not needed for day-to-day
+            senior developers tracking fleet health, not needed for day-to-day
             scraper QA") so apprentices aren't left wondering why a page full of
             counts doesn't apply to them.
           </p>
@@ -3162,14 +3390,14 @@ export function getMDXComponents(components?) {
           <h2><span class="num">07</span>Agents, memory &amp; skills</h2>
           <p>
             A new category, deliberately started thin: a shared place for how
-            teams use AI coding agents effectively — not just CTD, but the
+            teams use AI coding agents effectively, not just CTD, but the
             frontend team on this repo, whoever owns the scraper repos, whoever
-            owns the CI/CD automation in §3's <code>/pipeline</code>, and any
-            team that comes after. The goal is the same one behind everything
-            else in this playbook: less duplicated tribal knowledge, less
-            onboarding by osmosis. The difference here is that almost none of
-            the content exists yet — so this section is a method for growing it
-            team by team, not a finished IA to fill in.
+            owns the CI/CD automation in section 3's <code>/pipeline</code>, and
+            any team that comes after. The goal is the same one behind
+            everything else in this playbook: less duplicated tribal knowledge,
+            less onboarding by osmosis. The difference here is that almost none
+            of the content exists yet, so this section is a method for growing
+            it team by team, not a finished IA to fill in.
           </p>
 
           <div class="note info">
@@ -3179,12 +3407,11 @@ export function getMDXComponents(components?) {
               app's pinned Next.js version has breaking changes versus a model's
               training data). No <code>.claude/skills/</code>, no
               <code>.claude/agents/</code>, no hooks. That's the honest starting
-              point — nothing below invents practices this repo doesn't have
-              yet.
+              point, nothing below invents practices this repo doesn't have yet.
             </p>
           </div>
 
-          <h3>The vocabulary — four mechanisms, one job each</h3>
+          <h3>The vocabulary, four mechanisms, one job each</h3>
           <div class="scroll">
             <table>
               <thead>
@@ -3203,7 +3430,7 @@ export function getMDXComponents(components?) {
                   </td>
                   <td>
                     Standing context every agent session in this repo loads
-                    automatically — the guardrails you'd otherwise repeat in
+                    automatically, the guardrails you'd otherwise repeat in
                     every prompt
                   </td>
                   <td>One rule (above)</td>
@@ -3212,7 +3439,7 @@ export function getMDXComponents(components?) {
                   <td><strong>Skill</strong></td>
                   <td><code>.claude/skills/&lt;name&gt;/SKILL.md</code></td>
                   <td>
-                    A packaged, reusable procedure — a checklist or workflow
+                    A packaged, reusable procedure, a checklist or workflow
                     invoked by name mid-session, not repeated from memory each
                     time
                   </td>
@@ -3223,7 +3450,7 @@ export function getMDXComponents(components?) {
                   <td><code>.claude/agents/&lt;name&gt;.md</code></td>
                   <td>
                     A specialized persona with its own tool access, for a
-                    recurring task worth a dedicated role — a reviewer, a
+                    recurring task worth a dedicated role, a reviewer, a
                     researcher
                   </td>
                   <td>None yet</td>
@@ -3232,7 +3459,7 @@ export function getMDXComponents(components?) {
                   <td><strong>Hook</strong></td>
                   <td><code>.claude/settings.json</code></td>
                   <td>
-                    An automated action on a session event — run a formatter
+                    An automated action on a session event, run a formatter
                     after every edit, block a risky command
                   </td>
                   <td>None yet</td>
@@ -3242,10 +3469,11 @@ export function getMDXComponents(components?) {
           </div>
           <p>
             The decision method is short: something every session must always
-            know → memory. A procedure you'd explain the same way every time → a
-            skill. A distinct role worth its own context and tool scope → a
-            subagent. Something that should happen automatically, unasked → a
-            hook. Most teams starting out will only ever need the first two.
+            know -&gt; memory. A procedure you'd explain the same way every time
+            -&gt; a skill. A distinct role worth its own context and tool scope
+            -&gt; a subagent. Something that should happen automatically,
+            unasked -&gt; a hook. Most teams starting out will only ever need
+            the first two.
           </p>
 
           <h3>The method: how a team adds its own section</h3>
@@ -3253,9 +3481,10 @@ export function getMDXComponents(components?) {
             <li>
               <strong>Write down one real thing, not a speculative one.</strong>
               The smallest actual convention your team already applies with an
-              agent — not an aspirational list of everything a well-run team's
+              agent, not an aspirational list of everything a well-run team's
               agent setup could someday include. This playbook's own rule
-              against building for hypothetical readers (§1) applies here too.
+              against building for hypothetical readers (section 1) applies here
+              too.
             </li>
             <li>
               <strong
@@ -3263,7 +3492,7 @@ export function getMDXComponents(components?) {
               >
               An agent session working in <code>city-scrapers-core</code> only
               ever reads that repo's <code>AGENTS.md</code> and
-              <code>.claude/</code> directory — nothing hosted only in
+              <code>.claude/</code> directory, nothing hosted only in
               <code>city-scrapers-meetings-viewer</code>'s docs is ever loaded
               by a session working elsewhere. Put the actual
               memory/skill/agent/hook file where it will actually be read.
@@ -3271,11 +3500,11 @@ export function getMDXComponents(components?) {
             <li>
               <strong
                 >This site links to it and summarizes intent in two or three
-                sentences — never a copy.</strong
+                sentences, never a copy.</strong
               >
-              Same reasoning as §1.3: a duplicate goes stale the moment the
-              source changes and nobody notices. A link can't drift out of sync
-              with itself.
+              Same reasoning as section 1.3: a duplicate goes stale the moment
+              the source changes and nobody notices. A link can't drift out of
+              sync with itself.
             </li>
             <li>
               <strong>List it on <code>/docs/agents</code>'s team table</strong>
@@ -3285,27 +3514,27 @@ export function getMDXComponents(components?) {
 
           <div class="note tip">
             <span class="lab"
-              >Lighter governance than §3's PDW/CB content — with one
+              >Lighter governance than section 3's PDW/CB content, with one
               exception</span
             >
             <p>
               Section 09 raises a real open question about who can correct
               content describing PDW/CB's own process, because they don't have
               git access to this repo. For most of this section that doesn't
-              apply: every team it's written for — scrapers, this app's frontend
-              team, whoever owns CI/CD — already has git access to their own
+              apply: every team it's written for, scrapers, this app's frontend
+              team, whoever owns CI/CD, already has git access to their own
               repo, and the only discipline needed is link-not-duplicate, above.
             </p>
             <p>
-              The exception is §7.1's code-review skill, which PDW owns. The
-              page describes it and links to it; it must not restate its
+              The exception is section 7.1's code-review skill, which PDW owns.
+              The page describes it and links to it; it must not restate its
               checklist or imply CTD maintains it. Link plus a two-sentence
-              summary of intent — step 3 of the method above — is the whole
+              summary of intent, step 3 of the method above, is the whole
               treatment.
             </p>
           </div>
 
-          <h3>7.1 Two skills already exist — the stub was wrong</h3>
+          <h3>7.1 Two skills already exist, the stub was wrong</h3>
           <p>
             The tree below listed <code>scrapers.mdx</code> as a stub owned by
             another team. That's now out of date: two real skills exist, they're
@@ -3330,9 +3559,9 @@ export function getMDXComponents(components?) {
                 </tr>
                 <tr>
                   <td><strong>When it fires</strong></td>
-                  <td>While writing a spider — build, refactor, debug</td>
+                  <td>While writing a spider, build, refactor, debug</td>
                   <td>
-                    After the PR opens — standalone or a GitHub Actions check
+                    After the PR opens, standalone or a GitHub Actions check
                   </td>
                 </tr>
                 <tr>
@@ -3350,7 +3579,7 @@ export function getMDXComponents(components?) {
                 <tr>
                   <td><strong>Invocation</strong></td>
                   <td>
-                    <code>trigger: model_decision</code> — fires on the model's
+                    <code>trigger: model_decision</code> - fires on the model's
                     judgment
                   </td>
                   <td>Invoked deliberately, per PR</td>
@@ -3381,7 +3610,7 @@ export function getMDXComponents(components?) {
                 understand when to use this skill</code
               >. Paired with <code>trigger: model_decision</code>, the
               description is the <em>only</em> signal the model has for when to
-              load it — so as written, it either never fires when it should or
+              load it, so as written, it either never fires when it should or
               fires when it shouldn't. The skill's own body has the real
               description in its first line ("Use this skill when building,
               refactoring, or debugging Scrapy spiders for city-scrapers
@@ -3401,58 +3630,58 @@ export function getMDXComponents(components?) {
               <strong>test-and-verify-scraper-outputs</strong> skill in
               development, and an <strong>anomaly detection system</strong>
               that is Phase 1 of something called the Scrapers Stability System.
-              It also states the target shape: a three-step automated pipeline —
+              It also states the target shape: a three-step automated pipeline,
               code-review check, spider output verification, staging deploy.
             </p>
             <p>
               That matters here for one reason.
               <code>&lt;RubricReport&gt;</code>
-              (§4.2) validates a spider's JSON output against the schema, and
-              step 2 of PDW's pipeline validates a spider's output against the
-              schema. Those are the same check in two places, built by two
+              (section 4.2) validates a spider's JSON output against the schema,
+              and step 2 of PDW's pipeline validates a spider's output against
+              the schema. Those are the same check in two places, built by two
               teams, and neither knows about the other yet.
-              <code>&lt;RubricReport&gt;</code> is still worth building — it's
+              <code>&lt;RubricReport&gt;</code> is still worth building, it's
               interactive, runs in the browser on a file you paste, and serves a
-              QA reviewer rather than a CI job — but it should be scoped
-              deliberately as the human-facing half and share §5's generated
-              constants with the automated half, not grow into a second
-              implementation of it. Raise this with PDW before P3 rather than
-              after.
+              QA reviewer rather than a CI job, but it should be scoped
+              deliberately as the human-facing half and share section 5's
+              generated constants with the automated half, not grow into a
+              second implementation of it. Raise this with PDW before P3 rather
+              than after.
             </p>
           </div>
 
           <h4>Skills cite the docs; they don't restate them</h4>
           <p>
             Both skills currently carry their own copies of facts the docs also
-            publish — the meeting schema, the status and classification
+            publish, the meeting schema, the status and classification
             constants, the lint and test commands, the validation checklist.
             Section 02 is what that costs: copies drift from
             <code>constants.py</code>, and one of them will fail a correct
-            spider in CI. The rule that prevents a repeat is the mirror of §7's
-            link-not-duplicate rule, pointed the other way:
+            spider in CI. The rule that prevents a repeat is the mirror of
+            section 7's link-not-duplicate rule, pointed the other way:
           </p>
           <div class="note tip">
             <span class="lab"
               >The docs hold the facts; the skills hold the judgment</span
             >
             <p>
-              A skill should carry procedure, heuristics, and worked examples —
+              A skill should carry procedure, heuristics, and worked examples,
               the things that are genuinely its own. For anything enumerable and
               generated (schema fields, constants, commands, the QA rubric) it
               should link to the doc anchor instead of restating it. That's only
               workable because the site publishes per-page
-              <code>.md</code> routes and <code>llms-full.txt</code> (§4.2): an
-              agent can follow the link and read the canonical text directly.
-              This is the concrete answer to "we want agents reading our docs to
-              give developers feedback" — the docs stop being a copy of the
-              skill and become the thing the skill defers to.
+              <code>.md</code> routes and <code>llms-full.txt</code> (section
+              4.2): an agent can follow the link and read the master text
+              directly. This is the concrete answer to "we want agents reading
+              our docs to give developers feedback", the docs stop being a copy
+              of the skill and become the thing the skill defers to.
             </p>
           </div>
           <p>
             Two consequences worth building for. First,
-            <code>&lt;RubricReport&gt;</code> (§4.2) and PDW's review checklist
-            are validating the same output against the same rules — both should
-            read §5's generated constants, so a fix in
+            <code>&lt;RubricReport&gt;</code> (section 4.2) and PDW's review
+            checklist are validating the same output against the same rules,
+            both should read section 5's generated constants, so a fix in
             <code>city-scrapers-core</code> reaches the interactive checker and
             the CI reviewer at once. Second, treat agent-readability as a page
             requirement rather than a nice-to-have: a page restating a source
@@ -3464,16 +3693,16 @@ export function getMDXComponents(components?) {
           <!-- prettier-ignore -->
           <pre class="tree">
 <span class="k">/docs/agents</span>
-  index.mdx                        <span class="k">— the vocabulary, the decision method, the team table</span>
-  how-to-add-a-section.mdx         <span class="k">— the four-step method above, as a copy-pasteable checklist</span>
-  meetings-viewer.mdx              <span class="k">— ships now: this repo's one real rule, honestly, plus what to add next</span>
-  scrapers.mdx                     <span class="fix-tag">FIX</span> <span class="k">— ships now, not a stub: the two-skill lifecycle split, both skills linked, the docs-hold-the-facts rule (§7.1)</span>
-  devops.mdx                       <span class="k">— stub: "owned by whoever maintains the CI/CD in /pipeline — not written yet"</span>
+  index.mdx                        <span class="k">, the vocabulary, the decision method, the team table</span>
+  how-to-add-a-section.mdx         <span class="k">, the four-step method above, as a copy-pasteable checklist</span>
+  meetings-viewer.mdx              <span class="k">, ships now: this repo's one real rule, honestly, plus what to add next</span>
+  scrapers.mdx                     <span class="fix-tag">FIX</span> <span class="k">, ships now, not a stub: the two-skill lifecycle split, both skills linked, the docs-hold-the-facts rule (section 7.1)</span>
+  devops.mdx                       <span class="k">, stub: "owned by whoever maintains the CI/CD in /pipeline, not written yet"</span>
   <span class="k">+ one page per team, added as each team runs the method above</span>
           </pre>
           <p>
-            <code>meetings-viewer.mdx</code>'s "what to add next" isn't a guess
-            — this playbook already wrote the candidate content in §4.3's
+            <code>meetings-viewer.mdx</code>'s "what to add next" isn't a guess,
+            this playbook already wrote the candidate content in section 4.3's
             standing rules (repo-scope callouts, commands copy-pasteable as
             written, dark-mode parity before merge). That's a real skill's worth
             of material sitting right there, unpackaged.
@@ -3489,10 +3718,10 @@ export function getMDXComponents(components?) {
             phase introduces a gate before the thing it gates exists.
           </p>
           <p>
-            Build state as of September 2026: P0–P5 are shipped.
+            Build state as of September 2026: P0-P5 are shipped.
             <code>/docs/analytics</code> is live (P6) with its fleet panel an
             intentional empty state until Production mode ships, and P7 is
-            underway — <code>/docs/agents</code> and its method page exist.
+            underway, <code>/docs/agents</code> and its method page exist.
           </p>
 
           <div class="phase">
@@ -3512,7 +3741,7 @@ export function getMDXComponents(components?) {
             <div>
               <h3 style="margin-top: 0">Finish the shell</h3>
               <p>
-                <span class="pill done">SHIPPED</span> — theme mapping in
+                <span class="pill done">SHIPPED</span> theme mapping in
                 <code>globals.css</code>, <code>llms-full.txt</code> emitting
                 page bodies, per-page <code>.md</code> routes through the
                 docs-md API, <code>&lt;RepoScope&gt;</code>, and fumadocs-ui's
@@ -3522,7 +3751,7 @@ export function getMDXComponents(components?) {
               <ul>
                 <li>
                   Theme variable mapping so <code>/docs</code> uses the app's
-                  palette (section 04) — five variables, do it first.
+                  palette (section 04), five variables, do it first.
                 </li>
                 <li>
                   Make <code>llms-full.txt</code> emit page bodies rather than
@@ -3530,7 +3759,7 @@ export function getMDXComponents(components?) {
                   copy-as-markdown.
                 </li>
                 <li>
-                  Build <code>&lt;RepoScope&gt;</code> — needed by most pages
+                  Build <code>&lt;RepoScope&gt;</code> - needed by most pages
                   that follow.
                 </li>
                 <li>
@@ -3545,10 +3774,10 @@ export function getMDXComponents(components?) {
             <div class="tag">P2<em>done</em></div>
             <div>
               <h3 style="margin-top: 0">
-                The conflict reporter — round two's main build
+                The conflict reporter, round two's main build
               </h3>
               <p>
-                <span class="pill done">SHIPPED</span> — the engine, claim
+                <span class="pill done">SHIPPED</span> the engine, claim
                 registry, fixture corpus, <code>CODEOWNERS</code> routing,
                 <code>docs-drift.yml</code>, and the
                 <code>/docs/conflicts</code> dashboard are all in the repo.
@@ -3564,7 +3793,7 @@ export function getMDXComponents(components?) {
                   02.4).
                 </li>
                 <li>
-                  Build the executable-source comparator first — highest
+                  Build the executable-source comparator first, highest
                   confidence, clearest value, and the only class that will ever
                   block.
                 </li>
@@ -3580,7 +3809,7 @@ export function getMDXComponents(components?) {
                 <li>
                   Everything non-blocking for two weeks. Promote
                   <code>certain</code> to blocking only once quiet.
-                  <span class="pill done">DONE</span> — promotion is live via
+                  <span class="pill done">DONE</span> promotion is live via
                   <code>BLOCKING_GATE_ENABLED</code> in
                   <code>docs-platform/engine/evaluate.ts</code>.
                 </li>
@@ -3593,18 +3822,18 @@ export function getMDXComponents(components?) {
             <div>
               <h3 style="margin-top: 0">The interactive layer</h3>
               <p>
-                <span class="pill done">SHIPPED</span> — all four components
-                live in <code>components/docs/</code>;
+                <span class="pill done">SHIPPED</span> all four components live
+                in <code>components/docs/</code>;
                 <code>&lt;SchemaTable&gt;</code> renders from the generated
                 <code>meeting-schema.json</code>.
               </p>
               <ul>
                 <li>
-                  <code>&lt;SchemaTable&gt;</code>, generated from types —
+                  <code>&lt;SchemaTable&gt;</code>, generated from types,
                   removes drift where this repo owns both sides.
                 </li>
                 <li>
-                  <code>&lt;RubricReport&gt;</code> — paste scraper output, get
+                  <code>&lt;RubricReport&gt;</code> - paste scraper output, get
                   a field-by-field verdict. The single highest-value page for a
                   scraper developer.
                 </li>
@@ -3621,14 +3850,14 @@ export function getMDXComponents(components?) {
             <div>
               <h3 style="margin-top: 0">Keystatic + governance</h3>
               <p>
-                <span class="pill done">SHIPPED</span> — mounted at
+                <span class="pill done">SHIPPED</span> mounted at
                 <code>/keystatic</code> with conditional storage: local mode in
                 dev, GitHub mode once the app slug is set.
               </p>
               <ul>
                 <li>
                   Mount Keystatic at <code>/keystatic</code> (1.1). Spike first:
-                  does an edit open a PR or commit directly? Answered — a PR:
+                  does an edit open a PR or commit directly? Answered, a PR:
                   <code>keystatic/*</code> branches become PRs via
                   <code>docs-editor-pr.yml</code> (section 09).
                 </li>
@@ -3645,7 +3874,7 @@ export function getMDXComponents(components?) {
             <div>
               <h3 style="margin-top: 0">The CI gates, in adoption order</h3>
               <p>
-                <span class="pill done">SHIPPED</span> — all four gates live:
+                <span class="pill done">SHIPPED</span> all four gates live:
                 <code>docs-build</code>, <code>docs-prose</code>,
                 <code>docs-links-external</code>, <code>docs-quality</code>.
                 Build+links, then cspell, then scheduled lychee, then Vale, then
@@ -3662,10 +3891,13 @@ export function getMDXComponents(components?) {
               <p>
                 <span class="pill change">PARTIAL</span>
                 <code>/docs/analytics</code> is live with the Lighthouse trend
-                and the conflict dashboard from 02.4 as a standing view rather
-                than a per-PR notification. The fleet-health panel renders an
-                honest empty state until Production mode supplies a real
-                <code>manifest.json</code>.
+                component and the conflict dashboard from 02.4 as a standing
+                view rather than a per-PR notification. The fleet-health panel
+                renders an honest empty state until Production mode supplies a
+                real <code>manifest.json</code>. The trend chart is wired but
+                its <code>history.json</code> is still <code>points: []</code> -
+                no CI run has appended a score yet, so it seeds itself on the
+                first green build of <code>docs-quality.yml</code>.
               </p>
             </div>
           </div>
@@ -3676,11 +3908,53 @@ export function getMDXComponents(components?) {
               <h3 style="margin-top: 0">Agents, memory &amp; skills</h3>
               <p>
                 <span class="pill new">UNDERWAY</span> Section 07's method is
-                live — <code>/docs/agents</code> ships the vocabulary, the
-                four-step method, and the team table — and
+                live, <code>/docs/agents</code> ships the vocabulary, the
+                four-step method, and the team table, and
                 <code>findings.json</code> uploads as a workflow artifact an
                 agent can act on directly.
               </p>
+            </div>
+          </div>
+
+          <div class="phase">
+            <div class="tag">P8<em>next up</em></div>
+            <div>
+              <h3 style="margin-top: 0">Close the loop on the live gate</h3>
+              <p>
+                Concrete work the build state surfaces, in order. None of it is
+                new design, it is finishing what is already running.
+              </p>
+              <ul>
+                <li>
+                  <strong>Resolve or mute the five blocking findings.</strong>
+                  All five sit in mirrored upstream sources, so the developer
+                  they block cannot fix them by editing anything in this repo.
+                  Either the upstream correction lands, or each gets a mute with
+                  a reason while that conversation happens.
+                </li>
+                <li>
+                  <strong>Exercise the mute path once, deliberately.</strong>
+                  Zero findings are muted today, so the fingerprint-expiry
+                  behaviour has never actually run. Mute one, change the
+                  disagreeing value, confirm the mute invalidates.
+                </li>
+                <li>
+                  <strong
+                    >Get a <code>likely</code> and a <code>prompt</code> finding
+                    to fire.</strong
+                  >
+                  Only <code>certain</code> has ever been produced. The noisy
+                  end of the confidence ladder, the end that governs whether
+                  developers keep reading the output, is untested. The first TTL
+                  expiry in <code>sources.json</code> will produce a
+                  <code>prompt</code>; watch what it reads like.
+                </li>
+                <li>
+                  <strong>Seed the Lighthouse trend</strong> by letting
+                  <code>docs-quality.yml</code> complete one green run on its
+                  target branch.
+                </li>
+              </ul>
             </div>
           </div>
 
@@ -3697,23 +3971,23 @@ export function getMDXComponents(components?) {
               </p>
               <ul>
                 <li>
-                  <strong>Content-conflict resolution policy</strong> — who
+                  <strong>Content-conflict resolution policy</strong>: who
                   arbitrates when two organizations' documents disagree and
                   neither is executable code. The platform reports it; the
                   policy for settling it is a separate design problem.
                 </li>
                 <li>
-                  <strong>Source-of-truth consolidation</strong> — whether the
+                  <strong>Source-of-truth consolidation</strong>: whether the
                   program should reduce the number of places a given fact is
                   stated. A program-level decision, not this repo's to make.
                 </li>
                 <li>
-                  <strong>Cross-organization editing authority</strong> — how
+                  <strong>Cross-organization editing authority</strong>: how
                   teams outside CTD correct pages describing their own
                   processes.
                 </li>
                 <li>
-                  <strong>Scraper-domain content review</strong> — whether the
+                  <strong>Scraper-domain content review</strong>: whether the
                   substance of the scraper guidance is correct. Requires
                   expertise this platform round deliberately does not engage.
                 </li>
@@ -3737,7 +4011,7 @@ export function getMDXComponents(components?) {
             deliberately absent here.
           </p>
 
-          <h3>Blocking — needed before P2 starts</h3>
+          <h3>Blocking, needed before P2 starts</h3>
           <ul>
             <li>
               <strong
@@ -3745,25 +4019,25 @@ export function getMDXComponents(components?) {
                 <code>CODEOWNERS</code>?</strong
               >
               Routing is the whole point of section 02, and it resolves against
-              this file. It needs real teams or usernames with write access — a
+              this file. It needs real teams or usernames with write access, a
               placeholder routes nothing. Merge history suggests a small group
               already performs merges; confirming who should be paged for docs
               paths is a five-minute conversation that unblocks the phase.
-              <span class="pill done">RESOLVED</span> —
+              <span class="pill done">RESOLVED</span>
               <code>.github/CODEOWNERS</code> is merged; every path currently
               routes to <code>@msrezaie</code>, to be split by path as
               maintainers join.
             </li>
             <li>
               <strong
-                >Where do findings surface first — PR comment, dashboard, or
+                >Where do findings surface first, PR comment, dashboard, or
                 both?</strong
               >
               All three outputs come from one record, so this is about which
               ships in P2 versus P6. A PR comment reaches a developer at the
               moment of change; a dashboard is better for standing state.
               Recommendation: PR comment in P2, dashboard deferred to P6.
-              <span class="pill done">RESOLVED</span> — both shipped: the PR
+              <span class="pill done">RESOLVED</span> both shipped: the PR
               comment via <code>docs-drift.yml</code>, and
               <code>/docs/conflicts</code> as the standing view.
             </li>
@@ -3771,9 +4045,9 @@ export function getMDXComponents(components?) {
               <strong>What is the fixture corpus, concretely?</strong>
               Section 02.6 needs documents with known disagreements to measure
               recall and precision against. Any set of real program documents
-              works — the requirement is that a human has already read them and
+              works, the requirement is that a human has already read them and
               knows what the detector <em>should</em> find.
-              <span class="pill done">RESOLVED</span> —
+              <span class="pill done">RESOLVED</span>
               <code>docs-platform/fixtures/</code> holds the corpus;
               <code>engine/check.test.ts</code> runs the detector against it.
             </li>
@@ -3788,7 +4062,7 @@ export function getMDXComponents(components?) {
               Undocumented, and it decides whether editor changes pass through
               the conflict reporter at all. If they commit directly, the two
               need wiring together before the editor ships.
-              <span class="pill done">RESOLVED</span> — GitHub storage mode
+              <span class="pill done">RESOLVED</span> GitHub storage mode
               commits to <code>keystatic/*</code> branches, and
               <code>docs-editor-pr.yml</code> opens a PR per branch, so editor
               changes pass through the same gates as human PRs.
@@ -3801,7 +4075,7 @@ export function getMDXComponents(components?) {
               The self-hosted path is free but requires every editor to hold
               write access. This is a platform-capability question with a cost
               attached, not a content question.
-              <span class="pill done">RESOLVED</span> — self-hosted GitHub mode:
+              <span class="pill done">RESOLVED</span> self-hosted GitHub mode:
               editors OAuth against the repo, so write access is required; no
               hosted tier.
             </li>
@@ -3823,7 +4097,7 @@ export function getMDXComponents(components?) {
               The finding record carries a stable <code>id</code> for exactly
               this. What's undecided is where the mute list lives and who can
               add to it. Getting this wrong is the most likely way the reporter
-              gets ignored. <span class="pill done">RESOLVED</span> —
+              gets ignored. <span class="pill done">RESOLVED</span>
               <code>docs-platform/drift/mutes.json</code>, keyed on the
               finding's fingerprint; a mute expires on its own when the
               disagreeing values change.
@@ -3839,8 +4113,8 @@ export function getMDXComponents(components?) {
           <div class="note tip">
             <span class="lab">Nothing here blocks starting</span>
             <p>
-              P1's shell work — theme mapping, <code>llms-full.txt</code>, the
-              search trigger, <code>&lt;RepoScope&gt;</code> — depends on none
+              P1's shell work, theme mapping, <code>llms-full.txt</code>, the
+              search trigger, <code>&lt;RepoScope&gt;</code> - depends on none
               of these. The first blocking question only arrives at P2, which
               gives time to settle the ownership conversation in parallel.
             </p>
@@ -3852,7 +4126,7 @@ export function getMDXComponents(components?) {
           <h2><span class="num">10</span>R3 analyses</h2>
           <p>
             The roadmap's R3 entry parked four questions because none of them
-            changes what gets coded in round two — but each still benefits from
+            changes what gets coded in round two, but each still benefits from
             written analysis before the third research round picks them up. What
             follows is not a decision record; it is the shape of each problem,
             the options on the table, and the recommendation this playbook would
@@ -3863,9 +4137,9 @@ export function getMDXComponents(components?) {
           <p>
             The reporter detects that two documents disagree and routes the
             finding to an owner. What it deliberately does not do is decide who
-            is right when neither side is executable code — two prose sources
-            can contradict each other with no constants.py to arbitrate. Today
-            that produces a
+            is right when neither side is executable code, two prose sources can
+            contradict each other with no constants.py to arbitrate. Today that
+            produces a
             <code>likely</code>-confidence finding that sits open until a human
             settles it.
           </p>
@@ -3883,8 +4157,8 @@ export function getMDXComponents(components?) {
               orders executable &gt; structured &gt; synced &gt; git-prose &gt;
               external, and it could break prose-vs-prose ties by preferring the
               more recently synced mirror. Tempting, but it encodes "newest
-              wins" — a stale upstream doc corrected yesterday beats a fresh
-              copy of a wrong one only by accident.
+              wins", a stale upstream doc corrected yesterday beats a fresh copy
+              of a wrong one only by accident.
             </li>
             <li>
               <strong>A standing docs council.</strong> Correct authority, far
@@ -3892,9 +4166,9 @@ export function getMDXComponents(components?) {
             </li>
           </ul>
           <p>
-            Recommendation: the escalation ladder, plus one platform-side change
-            — an <em>ageing</em> signal on <code>/docs/conflicts</code> so an
-            unsettled finding gets louder with time rather than becoming
+            Recommendation: the escalation ladder, plus one platform-side
+            change, an <em>ageing</em> signal on <code>/docs/conflicts</code> so
+            an unsettled finding gets louder with time rather than becoming
             furniture. The platform's job is to make inaction visible, never to
             pick a winner: a tool that silently resolves a content dispute
             teaches the program to trust it less, not more.
@@ -3911,14 +4185,14 @@ export function getMDXComponents(components?) {
           <ul>
             <li>
               <strong>Consolidate into this platform.</strong> One place for
-              everything — but the migration cost is real, and several source
+              everything, but the migration cost is real, and several source
               owners don't have git access to this repo, so consolidation would
               strand them.
             </li>
             <li>
               <strong>Master-per-fact, link-not-duplicate.</strong> Every fact
               keeps exactly one master; everything else links to it or renders
-              from it. This is already the de facto policy —
+              from it. This is already the de facto policy,
               <code>sources.json</code> names origins and TTLs, and the claim
               registry names a master for every checked fact.
             </li>
@@ -3930,7 +4204,7 @@ export function getMDXComponents(components?) {
           </ul>
           <p>
             Recommendation: adopt the hybrid as the stated policy, because it is
-            already load-bearing — the generated schema is a consolidated
+            already load-bearing, the generated schema is a consolidated
             enumerable fact, and <code>constants.py</code> is the vocabulary
             master everything else defers to. Formalising it turns an emergent
             pattern into a rule a new team can be handed in one sentence:
@@ -3939,7 +4213,7 @@ export function getMDXComponents(components?) {
 
           <h3>Cross-organization editing authority</h3>
           <p>
-            Pages on this site describe processes owned by teams outside CTD —
+            Pages on this site describe processes owned by teams outside CTD,
             PDW's review skill, City Bureau's framework. Those teams hold no git
             access to this repo, so when their process changes, the page
             describing it is written by the wrong hands.
@@ -3948,14 +4222,15 @@ export function getMDXComponents(components?) {
           <ul>
             <li>
               <strong>Grant external repo access.</strong> Works technically;
-              fails organisationally — write access to CTD's repo for occasional
+              fails organisationally, write access to CTD's repo for occasional
               doc corrections is a permission grant nobody should want to
               maintain.
             </li>
             <li>
               <strong>Hosted Keystatic tier.</strong> Moves editing authority
-              out of GitHub permissions entirely; resolves the §9 question about
-              editor access at the same time. Real cost, real vendor dependency.
+              out of GitHub permissions entirely; resolves the section 9
+              question about editor access at the same time. Real cost, real
+              vendor dependency.
             </li>
             <li>
               <strong>Correction intake.</strong> An issue template or contact
@@ -3965,14 +4240,14 @@ export function getMDXComponents(components?) {
             <li>
               <strong>Shrink the surface.</strong> The stronger version of the
               fix: pages about another org's process hold a link plus a
-              two-sentence summary — the §7 rule — so most corrections happen at
-              the source and never need to reach this repo at all.
+              two-sentence summary, the section 7 rule, so most corrections
+              happen at the source and never need to reach this repo at all.
             </li>
           </ul>
           <p>
             Recommendation: shrink the surface first, intake second. If
             corrections still arrive faster than a maintainer can apply them,
-            <em>then</em> the hosted tier has earned its cost — not before. The
+            <em>then</em> the hosted tier has earned its cost, not before. The
             drift engine already tells you when an external process page is
             stale; the intake path is what turns that signal into a fix.
           </p>
@@ -3980,8 +4255,8 @@ export function getMDXComponents(components?) {
           <h3>Scraper-domain content review</h3>
           <p>
             The drift engine verifies that documents <em>agree</em> with each
-            other. It cannot verify that what they agree on is <em>correct</em>
-            — whether the spider guidance describes what actually works against
+            other. It cannot verify that what they agree on is <em>correct</em>,
+            whether the spider guidance describes what actually works against
             real agency sites. That judgment needs scraper-domain expertise this
             round does not hold.
           </p>
@@ -3989,7 +4264,7 @@ export function getMDXComponents(components?) {
           <ul>
             <li>
               <strong>Periodic expert review.</strong> A named reviewer per
-              content section, on a cadence, recorded in frontmatter —
+              content section, on a cadence, recorded in frontmatter,
               <code>last_verified</code> already exists as a convention in the
               mirrored PDW skill, which suggests the upstream teams think this
               way too.
@@ -4001,7 +4276,7 @@ export function getMDXComponents(components?) {
             </li>
             <li>
               <strong>Let drift findings drive review.</strong> A conflict
-              already forces a human to re-read both sources — review happens as
+              already forces a human to re-read both sources, review happens as
               a side effect of detection.
             </li>
           </ul>
@@ -4009,7 +4284,7 @@ export function getMDXComponents(components?) {
             Recommendation: all three, in that order of effort. The frontmatter
             field plus a rendered badge is an afternoon of work and converts "is
             this page still true?" from a guess into a displayed fact.
-            Correctness remains a human process — the platform's contribution is
+            Correctness remains a human process, the platform's contribution is
             making the review state visible, the same job it does for
             disagreement.
           </p>
@@ -4020,20 +4295,20 @@ export function getMDXComponents(components?) {
               All four parked questions resolve to the same division of labour
               the platform already embodies: humans own judgment, the platform
               owns visibility. Wherever an R3 answer drifts toward "the platform
-              decides" — picking a winner, choosing a master, declaring content
-              correct — it has drifted off the design.
+              decides", picking a winner, choosing a master, declaring content
+              correct, it has drifted off the design.
             </p>
           </div>
         </section>
 
         <footer>
           Companion to <code>cs-121-docs-platform-research.html</code> in this
-          same directory. Where the two disagree, this file — grounded in what's
+          same directory. Where the two disagree, this file, grounded in what's
           actually shipped, in the Development Guidelines v1.1, the Meetings
           Viewer Technical Specification, the City Scraper Project Tech Guide,
-          and <code>city-scrapers-core</code>'s own <code>constants.py</code> —
+          and <code>city-scrapers-core</code>'s own <code>constants.py</code> -
           is the current plan. Source set closed; this is the revision the build
-          works from. The <code>§</code>
+          works from. The <code>section</code>
           notation is planning shorthand and ships nowhere.
         </footer>
       </main>

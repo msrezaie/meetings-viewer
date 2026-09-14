@@ -23,7 +23,7 @@ import { Toolbar } from "@mui/material";
 type NavItem = {
   label: string;
   href: string;
-  variant?: "contained" | "text";
+  variant?: "contained" | "outlined" | "text" | "tonal";
 };
 
 function useNavItems() {
@@ -33,9 +33,10 @@ function useNavItems() {
     items.push({
       label: "Quick start",
       href: "/docs/viewer/quick-start",
+      variant: "tonal",
     });
   }
-  items.push({ label: "Docs", href: "/docs" });
+  items.push({ label: "Docs", href: "/docs", variant: "tonal" });
   items.push({ label: "Scrapers", href: "/scrapers", variant: "contained" });
   return items;
 }
@@ -182,9 +183,26 @@ export function SiteHeader() {
               <Button
                 key={item.href}
                 href={item.href}
-                color={item.variant === "contained" ? "primary" : "inherit"}
-                variant={item.variant ?? "text"}
-                sx={{ textTransform: "none" }}
+                color={
+                  !item.variant || item.variant === "text"
+                    ? "inherit"
+                    : "primary"
+                }
+                variant={
+                  item.variant === "tonal" ? "text" : (item.variant ?? "text")
+                }
+                sx={{
+                  textTransform: "none",
+                  px: 1.25,
+                  ...(item.variant === "tonal" && {
+                    bgcolor:
+                      "rgba(var(--mui-palette-primary-mainChannel) / 0.12)",
+                    "&:hover": {
+                      bgcolor:
+                        "rgba(var(--mui-palette-primary-mainChannel) / 0.2)",
+                    },
+                  }),
+                }}
                 size="small"
               >
                 {item.label}

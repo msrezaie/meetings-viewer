@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-14T03:10:16.534Z",
+  "generated_at": "2026-09-14T20:36:40.344Z",
   "findings": [
     {
       "id": "status-vocabulary::docs-platform/sources/city-scraper-project-tech-guide.md",
@@ -313,6 +313,10 @@
           "ref": "content/docs/viewer/architecture.mdx",
           "page": "/docs/viewer/architecture",
           "status": "agrees"
+        },
+        {
+          "ref": "README.md",
+          "status": "agrees"
         }
       ]
     },
@@ -360,6 +364,40 @@
         {
           "ref": "content/docs/qa/schema.mdx",
           "page": "/docs/qa/schema",
+          "status": "agrees"
+        }
+      ]
+    },
+    {
+      "subject": "Node.js version floor",
+      "claim": "node-version",
+      "restated": [
+        {
+          "ref": "package.json",
+          "status": "master"
+        },
+        {
+          "ref": "README.md",
+          "status": "agrees"
+        },
+        {
+          "ref": "content/docs/viewer/quick-start.mdx",
+          "page": "/docs/viewer/quick-start",
+          "status": "agrees"
+        }
+      ]
+    },
+    {
+      "subject": "docs:* npm scripts listed in contributing",
+      "claim": "docs-commands",
+      "restated": [
+        {
+          "ref": "package.json",
+          "status": "master"
+        },
+        {
+          "ref": "content/docs/contributing/index.mdx",
+          "page": "/docs/contributing",
           "status": "agrees"
         }
       ]

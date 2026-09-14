@@ -14,6 +14,7 @@ on:
       - "docs-platform/**"
       - "lib/**"
       - "data/**"
+      - "README.md"
       - ".github/CODEOWNERS"
   push:
     # `local` is the repo's default branch - merged PRs (incl. Keystatic
@@ -24,6 +25,7 @@ on:
       - "docs-platform/**"
       - "lib/**"
       - "data/**"
+      - "README.md"
 
 permissions:
   contents: read

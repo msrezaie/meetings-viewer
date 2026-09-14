@@ -13,7 +13,7 @@
  *   node docs-platform/engine/check-links.ts
  */
 
-import { readFileSync, readdirSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { resolve, relative } from "node:path";
 import { DOC_LINKS } from "../links.ts";
 
@@ -95,6 +95,9 @@ const files = walk(DOCS_DIR);
 const urlToFile = new Map<string, string>();
 for (const f of files) urlToFile.set(pageUrl(f), f);
 
+// Sources whose links are checked but which are not themselves docs pages.
+const EXTRA_SOURCES = [resolve(ROOT, "README.md")];
+
 const anchorCache = new Map<string, Set<string>>();
 const anchorsFor = (file: string) => {
   if (!anchorCache.has(file)) anchorCache.set(file, headings(file));
@@ -164,11 +167,49 @@ for (const file of files) {
   }
 }
 
+// Extra sources (e.g. README.md): relative links resolve against the repo
+// root, /-rooted links resolve against the site like any docs page's.
+for (const file of EXTRA_SOURCES) {
+  for (const { raw, line } of linksIn(file)) {
+    if (/^(https?:|mailto:)/.test(raw)) continue;
+    const [path, fragment] = raw.split("#");
+    const loc = `${relative(ROOT, file)}:${line} -> ${raw}`;
+    if (path === "") {
+      if (fragment && !anchorsFor(file).has(fragment))
+        problems.push(`${loc} (no anchor #${fragment} on this file)`);
+    } else if (path.startsWith("/docs")) {
+      const target = path === "/docs/" ? "/docs" : path.replace(/\/$/, "");
+      if (!urlToFile.has(target)) {
+        problems.push(`${loc} (no page for ${target})`);
+      } else if (
+        fragment &&
+        !anchorsFor(urlToFile.get(target)!).has(fragment)
+      ) {
+        problems.push(`${loc} (no anchor #${fragment} on ${target})`);
+      }
+    } else if (path.startsWith("/")) {
+      if (!APP_ROUTES.some((re) => re.test(path)))
+        problems.push(`${loc} (not a known app route)`);
+    } else {
+      const target = resolve(ROOT, path);
+      if (!existsSync(target)) {
+        problems.push(`${loc} (no such path)`);
+      } else if (
+        fragment &&
+        target.endsWith(".mdx") &&
+        !anchorsFor(target).has(fragment)
+      ) {
+        problems.push(`${loc} (no anchor #${fragment} on ${path})`);
+      }
+    }
+  }
+}
+
 if (problems.length) {
   console.error(`docs link check: ${problems.length} broken link(s)`);
   for (const p of problems) console.error(`  ${p}`);
   process.exit(1);
 }
 console.log(
-  `docs link check: ${files.length} pages, all internal links resolve`
+  `docs link check: ${files.length} pages + ${EXTRA_SOURCES.length} extra source(s), all internal links resolve`
 );

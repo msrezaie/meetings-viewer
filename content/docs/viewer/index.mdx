@@ -54,6 +54,10 @@ output of a `scrapy crawl <spider> -O data/scrapers/<spider-name>.json` run.
 The file format is a JSON array of meeting records matching the
 [schema](/docs/qa/schema).
 
+The filename without `.json` must match the spider's `name` attribute - it
+becomes the slug in the viewer's URL: `fortx_council.json` is served at
+`/scrapers/fortx_council`.
+
 ## Next steps
 
 - [Quick start](/docs/viewer/quick-start) - load your scraper output and start

@@ -1,6 +1,6 @@
 # Docs drift report
 
-5 finding(s) across 9 claims.
+5 finding(s) across 11 claims.
 
 Standing view: [/docs/conflicts](/docs/conflicts). Machine-readable: [docs-platform/drift/findings.json](findings.json).
 

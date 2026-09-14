@@ -296,6 +296,15 @@ export const claims: Claim[] = [
           options: ["no database", "a database"],
         },
       },
+      {
+        ref: "README.md",
+        class: "git-prose",
+        extract: {
+          type: "keyword-choice",
+          pattern: "[Nn]o database either way\\.",
+          options: ["no database", "a database"],
+        },
+      },
     ],
   },
   {
@@ -367,5 +376,55 @@ export const claims: Claim[] = [
       page: "/docs/qa/schema",
       extract: { type: "file-exists" },
     },
+  },
+  {
+    kind: "vocabulary",
+    id: "node-version",
+    subject: "Node.js version floor",
+    master: {
+      ref: "package.json",
+      class: "executable",
+      extract: { type: "regex-set", pattern: '"node":\\s*">=([0-9.]+)"' },
+    },
+    assertedBy: [
+      {
+        ref: "README.md",
+        class: "git-prose",
+        exhaustive: true,
+        extract: { type: "regex-set", pattern: "Node\\.js >=([0-9.]+)" },
+      },
+      {
+        ref: "content/docs/viewer/quick-start.mdx",
+        class: "git-prose",
+        page: "/docs/viewer/quick-start",
+        exhaustive: true,
+        extract: {
+          type: "regex-set",
+          pattern: "Node\\.js \\(`>=([0-9.]+)",
+        },
+      },
+    ],
+  },
+  {
+    kind: "vocabulary",
+    id: "docs-commands",
+    subject: "docs:* npm scripts listed in contributing",
+    master: {
+      ref: "package.json",
+      class: "executable",
+      extract: { type: "regex-set", pattern: '"(docs:[a-z:-]+)"\\s*:' },
+    },
+    assertedBy: [
+      {
+        ref: "content/docs/contributing/index.mdx",
+        class: "git-prose",
+        page: "/docs/contributing",
+        exhaustive: true,
+        extract: {
+          type: "regex-set",
+          pattern: "npm run (docs:[a-z:-]+)",
+        },
+      },
+    ],
   },
 ];

@@ -141,6 +141,15 @@ export function extract(spec: ExtractSpec, ref: string): ExtractResult | null {
       return { tokens: spec.ordered ? labelize(tokens) : tokens };
     }
 
+    case "regex-set": {
+      const text = readSource(ref);
+      if (!text) return null;
+      const tokens = [...text.matchAll(new RegExp(spec.pattern, "g"))].map(
+        (m) => m[1] ?? m[0]
+      );
+      return tokens.length ? { tokens } : null;
+    }
+
     case "json-field": {
       const text = readSource(ref);
       if (!text) return null;

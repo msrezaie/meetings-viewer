@@ -123,6 +123,27 @@ const fixtureClaims: Claim[] = [
     ],
   },
   {
+    id: "fixture-commands",
+    kind: "vocabulary",
+    subject: "fixture documented commands",
+    master: {
+      ref: `${F}/fixture-scripts.json`,
+      class: "executable",
+      extract: { type: "regex-set", pattern: '"(docs:[a-z:-]+)"\\s*:' },
+    },
+    assertedBy: [
+      {
+        ref: `${F}/fixture-commands-missing.mdx`,
+        class: "git-prose",
+        exhaustive: true,
+        extract: {
+          type: "regex-set",
+          pattern: "npm run (docs:[a-z:-]+)",
+        },
+      },
+    ],
+  },
+  {
     id: "fixture-structure",
     kind: "repo-paths",
     subject: "fixture project-structure paths",
@@ -155,6 +176,7 @@ const expectedFindings = new Set([
   "fixture-status-vocab::docs-platform/fixtures/fixture-data.json",
   "fixture-link-order::docs-platform/fixtures/fixture-order-wrong.mdx",
   "fixture-tz::docs-platform/fixtures/fixture-tz-aware.mdx",
+  "fixture-commands::docs-platform/fixtures/fixture-commands-missing.mdx",
   "fixture-structure::docs-platform/fixtures/fixture-tree-broken.mdx",
 ]);
 

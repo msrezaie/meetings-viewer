@@ -77,6 +77,33 @@ content/docs/  - MDX documentation content
 docs-platform/ - docs-only engine, sources, generated artifacts, playbooks
 ```
 
+### Code organization
+
+Code is organized by what kind of thing it is (pure logic vs. UI vs.
+constant) and how far it reaches (used in one place vs. shared), with the
+three surfaces kept separate: landing under `components/landing/`, docs
+under `components/docs/` + `content/docs/` + `docs-platform/`, viewer under
+`components/scrapers/` + `app/(viewer)/`.
+
+- Pure logic with no JSX that operates on data belongs in `lib/` -
+  meeting-specific helpers in `lib/meeting-utils.ts`, otherwise the relevant
+  `lib/` module. A hook or component needing this logic imports it from
+  `lib/`, never from another component.
+- A presentational component used by two or more parents belongs in
+  `components/ui/`.
+- A feature or page component belongs in its surface's folder
+  (`components/landing/`, `components/scrapers/`, `components/docs/`).
+- A sub-component used by exactly one parent stays un-exported in that
+  parent's file.
+- Constants live at the smallest scope that needs them: local to a file,
+  bound to the component that owns them, or in the shared
+  `lib/`/`components/ui/` module they belong to if genuinely shared across
+  files.
+- Docs-platform internals (drift engine, mirrored sources, generated
+  artifacts, prose/vocab config) live under `docs-platform/` - not the repo
+  root - unless the framework requires it (e.g. `keystatic.config.ts`,
+  `.vale.ini`).
+
 ### Running locally
 
 ```bash
@@ -85,6 +112,18 @@ npm run dev
 ```
 
 The dev server starts at [http://localhost:3000](http://localhost:3000).
+
+### Docs commands
+
+```bash
+npm run docs:drift        # rewrite findings.json + report.md
+npm run docs:drift:check  # same, exiting 1 on blocking findings
+npm run docs:drift:test   # fixture-corpus recall/precision test
+npm run docs:schema       # regenerate docs-platform/generated/meeting-schema.json
+npm run docs:schema:check # fail if the generated schema is stale
+npm run docs:links        # internal link + anchor check over content/docs
+npm run docs:sync         # re-sync mirrored upstream sources
+```
 
 ### Opening a PR
 

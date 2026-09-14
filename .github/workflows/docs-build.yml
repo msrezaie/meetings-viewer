@@ -15,6 +15,7 @@ on:
       - "components/**"
       - "source.config.ts"
       - "keystatic.config.ts"
+      - "README.md"
   push:
     branches: [main]
     paths:
@@ -23,6 +24,7 @@ on:
       - "lib/**"
       - "app/**"
       - "components/**"
+      - "README.md"
 
 permissions:
   contents: read

@@ -50,6 +50,11 @@ Supporting modules:
 - `lib/meeting-utils.ts` - record helpers: status normalization and location
   formatting.
 
+`/scrapers` itself is populated by `listScrapers()` in the same module,
+which returns `{ "spiders": [{ "slug": "..." }] }` built at request time
+from the `data/scrapers/` directory listing. There is no manifest file on
+disk - the listing is the source of truth.
+
 ## Why a table
 
 The spec documents why the table is the primary surface rather than a

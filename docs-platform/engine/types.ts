@@ -30,6 +30,11 @@ export type ExtractSpec =
       style?: "backticked" | "quoted" | "upper-words" | "bare";
       ordered?: boolean;
     }
+  // Apply `pattern` globally to file text; every match's capture group 1
+  // (or the whole match) is a token. For enumerated sets spread across a
+  // file - e.g. script names in package.json - where token-list's single
+  // captured region can't reach.
+  | { type: "regex-set"; pattern: string }
   // Apply `pattern` to file text; capture group 1 is searched for one of
   // `options`; the matched option is the extracted value.
   | { type: "keyword-choice"; pattern: string; options: string[] }

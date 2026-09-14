@@ -1,0 +1,7 @@
+{
+  "scripts": {
+    "docs:alpha": "run alpha",
+    "docs:beta": "run beta",
+    "docs:gamma": "run gamma"
+  }
+}

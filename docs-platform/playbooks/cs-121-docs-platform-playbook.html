@@ -679,7 +679,7 @@
               <div class="kpi-lab">MDX pages live across 9 sections</div>
             </div>
             <div class="kpi-tile good">
-              <div class="kpi-num">9</div>
+              <div class="kpi-num">11</div>
               <div class="kpi-lab">
                 Claims in the registry, checked every run
               </div>
@@ -734,8 +734,11 @@
                 </tr>
                 <tr>
                   <td>Claim registry</td>
-                  <td><code>docs-platform/drift/claims.ts</code></td>
-                  <td><span class="pill done">9 claims</span></td>
+                  <td>
+                    <code>docs-platform/drift/claims.ts</code> - incl. README
+                    assertions via the new <code>regex-set</code> extractor
+                  </td>
+                  <td><span class="pill done">11 claims</span></td>
                 </tr>
                 <tr>
                   <td>Source provenance + TTL</td>
@@ -772,8 +775,8 @@
                 <tr>
                   <td>Fixture corpus</td>
                   <td>
-                    <code>docs-platform/fixtures/</code> - 11 fixtures, agree /
-                    missing / extra / order / unreadable
+                    <code>docs-platform/fixtures/</code> - 14 fixtures, agree /
+                    missing / extra / order / unreadable / regex-set
                   </td>
                   <td><span class="pill done">2 tests pass</span></td>
                 </tr>
@@ -799,6 +802,18 @@
                     build, drift, prose, links-external, quality, editor-pr
                   </td>
                   <td><span class="pill done">6 WORKFLOWS</span></td>
+                </tr>
+                <tr>
+                  <td>README, checked both directions</td>
+                  <td>
+                    Slimmed to a 64-line entry point linking into
+                    <code>content/docs/</code>. Claims cover its remaining
+                    assertions (node version, docs commands, storage model);
+                    <code>README.md</code> is in the drift and build path
+                    filters; <code>check-links.ts</code> verifies its
+                    repo-relative doc links
+                  </td>
+                  <td><span class="pill done">BIDIRECTIONAL</span></td>
                 </tr>
               </tbody>
             </table>
@@ -3090,9 +3105,11 @@ export function getMDXComponents(components?) {
               <p>
                 <span class="pill done">SHIPPED</span>
                 <code>next build</code> plus an internal link and anchor checker
-                walking <code>source.getPages()</code>. Deterministic, a link
-                either resolves against a real page and heading or it doesn't,
-                so this one can block from day one.
+                walking every <code>.mdx</code> under <code>content/docs</code>,
+                with <code>README.md</code> scanned as an extra source whose
+                repo-relative links resolve against the repo root.
+                Deterministic, a link either resolves against a real page and
+                heading or it doesn't, so this one can block from day one.
               </p>
             </div>
           </div>
@@ -3722,6 +3739,9 @@ export function getMDXComponents(components?) {
             <code>/docs/analytics</code> is live (P6) with its fleet panel an
             intentional empty state until Production mode ships, and P7 is
             underway, <code>/docs/agents</code> and its method page exist.
+            Beyond the phase plan, the README is now a checked document: slimmed
+            to an entry point, asserted against the same masters, and scanned by
+            the link checker.
           </p>
 
           <div class="phase">

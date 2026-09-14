@@ -17,7 +17,8 @@
     "docs:drift:test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test docs-platform/engine/check.test.ts",
     "docs:schema": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON docs-platform/engine/generate-schema.ts",
     "docs:schema:check": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON docs-platform/engine/generate-schema.ts --check",
-    "docs:links": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON docs-platform/engine/check-links.ts"
+    "docs:links": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON docs-platform/engine/check-links.ts",
+    "docs:sync": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON docs-platform/engine/sync-sources.ts"
   },
   "dependencies": {
     "@emotion/cache": "^11.14.0",

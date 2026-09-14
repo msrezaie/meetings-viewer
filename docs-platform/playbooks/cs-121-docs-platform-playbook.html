@@ -630,6 +630,7 @@
         <a href="#s7"><span>07</span>Agents, memory &amp; skills</a>
         <a href="#s8"><span>08</span>Roadmap</a>
         <a href="#s9"><span>09</span>Open questions</a>
+        <a href="#s10"><span>10</span>R3 analyses</a>
       </nav>
 
       <main>
@@ -3662,6 +3663,10 @@ export function getMDXComponents(components?) {
                   expertise this platform round deliberately does not engage.
                 </li>
               </ul>
+              <p>
+                Analysis for each parked item, for whoever picks up the third
+                research round: <a href="#s10">section 10</a>.
+              </p>
             </div>
           </div>
         </section>
@@ -3763,6 +3768,185 @@ export function getMDXComponents(components?) {
               search trigger, <code>&lt;RepoScope&gt;</code> — depends on none
               of these. The first blocking question only arrives at P2, which
               gives time to settle the ownership conversation in parallel.
+            </p>
+          </div>
+        </section>
+
+        <!-- ============ 10 ============ -->
+        <section id="s10" class="col">
+          <h2><span class="num">10</span>R3 analyses</h2>
+          <p>
+            The roadmap's R3 entry parked four questions because none of them
+            changes what gets coded in round two — but each still benefits from
+            written analysis before the third research round picks them up. What
+            follows is not a decision record; it is the shape of each problem,
+            the options on the table, and the recommendation this playbook would
+            defend. Nothing here is implemented.
+          </p>
+
+          <h3>Content-conflict resolution policy</h3>
+          <p>
+            The reporter detects that two documents disagree and routes the
+            finding to an owner. What it deliberately does not do is decide who
+            is right when neither side is executable code — two prose sources
+            can contradict each other with no constants.py to arbitrate. Today
+            that produces a
+            <code>likely</code>-confidence finding that sits open until a human
+            settles it.
+          </p>
+          <p>Options:</p>
+          <ul>
+            <li>
+              <strong>Escalation ladder.</strong> The finding's owner proposes a
+              resolution naming both sources; the counter-document's owner
+              confirms or disputes; unresolved findings escalate to the program
+              manager after a fixed window. Cheap, uses the ownership routing
+              that already exists.
+            </li>
+            <li>
+              <strong>Precedence by source class.</strong> The taxonomy already
+              orders executable &gt; structured &gt; synced &gt; git-prose &gt;
+              external, and it could break prose-vs-prose ties by preferring the
+              more recently synced mirror. Tempting, but it encodes "newest
+              wins" — a stale upstream doc corrected yesterday beats a fresh
+              copy of a wrong one only by accident.
+            </li>
+            <li>
+              <strong>A standing docs council.</strong> Correct authority, far
+              too heavy for a program of this size.
+            </li>
+          </ul>
+          <p>
+            Recommendation: the escalation ladder, plus one platform-side change
+            — an <em>ageing</em> signal on <code>/docs/conflicts</code> so an
+            unsettled finding gets louder with time rather than becoming
+            furniture. The platform's job is to make inaction visible, never to
+            pick a winner: a tool that silently resolves a content dispute
+            teaches the program to trust it less, not more.
+          </p>
+
+          <h3>Source-of-truth consolidation</h3>
+          <p>
+            The same fact is currently restated across Google Docs, PDFs,
+            upstream repos, skills, and this site. The question is whether the
+            program should reduce the number of places a fact lives, or keep the
+            mesh and police it.
+          </p>
+          <p>Options:</p>
+          <ul>
+            <li>
+              <strong>Consolidate into this platform.</strong> One place for
+              everything — but the migration cost is real, and several source
+              owners don't have git access to this repo, so consolidation would
+              strand them.
+            </li>
+            <li>
+              <strong>Master-per-fact, link-not-duplicate.</strong> Every fact
+              keeps exactly one master; everything else links to it or renders
+              from it. This is already the de facto policy —
+              <code>sources.json</code> names origins and TTLs, and the claim
+              registry names a master for every checked fact.
+            </li>
+            <li>
+              <strong>Hybrid.</strong> Consolidate only enumerable facts
+              (vocabularies, schema fields, command lists) into generated
+              artifacts; leave stable prose distributed.
+            </li>
+          </ul>
+          <p>
+            Recommendation: adopt the hybrid as the stated policy, because it is
+            already load-bearing — the generated schema is a consolidated
+            enumerable fact, and <code>constants.py</code> is the vocabulary
+            master everything else defers to. Formalising it turns an emergent
+            pattern into a rule a new team can be handed in one sentence:
+            <em>one master per fact; generate or link, never copy.</em>
+          </p>
+
+          <h3>Cross-organization editing authority</h3>
+          <p>
+            Pages on this site describe processes owned by teams outside CTD —
+            PDW's review skill, City Bureau's framework. Those teams hold no git
+            access to this repo, so when their process changes, the page
+            describing it is written by the wrong hands.
+          </p>
+          <p>Options:</p>
+          <ul>
+            <li>
+              <strong>Grant external repo access.</strong> Works technically;
+              fails organisationally — write access to CTD's repo for occasional
+              doc corrections is a permission grant nobody should want to
+              maintain.
+            </li>
+            <li>
+              <strong>Hosted Keystatic tier.</strong> Moves editing authority
+              out of GitHub permissions entirely; resolves the §9 question about
+              editor access at the same time. Real cost, real vendor dependency.
+            </li>
+            <li>
+              <strong>Correction intake.</strong> An issue template or contact
+              path where external teams file corrections and a repo maintainer
+              applies them. Zero access granted; latency measured in days.
+            </li>
+            <li>
+              <strong>Shrink the surface.</strong> The stronger version of the
+              fix: pages about another org's process hold a link plus a
+              two-sentence summary — the §7 rule — so most corrections happen at
+              the source and never need to reach this repo at all.
+            </li>
+          </ul>
+          <p>
+            Recommendation: shrink the surface first, intake second. If
+            corrections still arrive faster than a maintainer can apply them,
+            <em>then</em> the hosted tier has earned its cost — not before. The
+            drift engine already tells you when an external process page is
+            stale; the intake path is what turns that signal into a fix.
+          </p>
+
+          <h3>Scraper-domain content review</h3>
+          <p>
+            The drift engine verifies that documents <em>agree</em> with each
+            other. It cannot verify that what they agree on is <em>correct</em>
+            — whether the spider guidance describes what actually works against
+            real agency sites. That judgment needs scraper-domain expertise this
+            round does not hold.
+          </p>
+          <p>Options:</p>
+          <ul>
+            <li>
+              <strong>Periodic expert review.</strong> A named reviewer per
+              content section, on a cadence, recorded in frontmatter —
+              <code>last_verified</code> already exists as a convention in the
+              mirrored PDW skill, which suggests the upstream teams think this
+              way too.
+            </li>
+            <li>
+              <strong>Surface the review state.</strong> Render
+              <code>last_verified</code> on the page so a reader can see whether
+              guidance is six days or six months stale before they trust it.
+            </li>
+            <li>
+              <strong>Let drift findings drive review.</strong> A conflict
+              already forces a human to re-read both sources — review happens as
+              a side effect of detection.
+            </li>
+          </ul>
+          <p>
+            Recommendation: all three, in that order of effort. The frontmatter
+            field plus a rendered badge is an afternoon of work and converts "is
+            this page still true?" from a guess into a displayed fact.
+            Correctness remains a human process — the platform's contribution is
+            making the review state visible, the same job it does for
+            disagreement.
+          </p>
+
+          <div class="note">
+            <span class="lab">Common thread</span>
+            <p>
+              All four parked questions resolve to the same division of labour
+              the platform already embodies: humans own judgment, the platform
+              owns visibility. Wherever an R3 answer drifts toward "the platform
+              decides" — picking a winner, choosing a master, declaring content
+              correct — it has drifted off the design.
             </p>
           </div>
         </section>

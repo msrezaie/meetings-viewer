@@ -1,43 +1,39 @@
 ---
 title: Scrapers
-description: The two-skill lifecycle split - one skill that helps you write a spider, one that checks what you wrote.
+description: The review-side skill that checks what a spider PR ships - and the lifecycle shape a write-side companion should take once adopted.
 ---
 
 <RepoScope repo="scrapers" />
 
 # Scrapers - agent setup
 
-The scraper repos have the most developed agent setup of any team on this
-project: two real skills, already in use, covering both ends of the scraper
-lifecycle.
+The scraper repos have one confirmed skill in use today, covering the review
+end of the scraper lifecycle.
 
-## The two-skill split
+## spider-review
 
-|                   | Spider Development skill                                                                                                                     | spider-review skill                                                                          |
-| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| **Owner**         | CTD                                                                                                                                          | PDW                                                                                          |
-| **When it fires** | While writing a spider - build, refactor, debug                                                                                              | After the PR opens - standalone or as a GitHub Actions check                                 |
-| **Shape**         | Prescriptive: seven spider types with code, required standards, API patterns (CivicClerk, Legistar, Diligent, Drupal), anti-blocking recipes | Evaluative: review mindset, a process, a large reference checklist, output-validation tables |
-| **Invocation**    | `trigger: model_decision` - fires on the model's judgment                                                                                    | Invoked deliberately, per PR                                                                 |
+|                   |                                                                                              |
+| ----------------- | -------------------------------------------------------------------------------------------- |
+| **Owner**         | PDW                                                                                          |
+| **When it fires** | After the PR opens - standalone or as a GitHub Actions check                                 |
+| **Shape**         | Evaluative: review mindset, a process, a large reference checklist, output-validation tables |
+| **Invocation**    | Invoked deliberately, per PR                                                                 |
 
-Two skills at two lifecycle stages is the recommended shape for any team that
-adds its own: **one skill that helps you write it, one that checks what you
-wrote, and no overlap between them.**
+Owned by PDW: this site describes it and links to it; it does not restate
+the checklist or imply CTD maintains it. A byte-faithful mirror (for drift
+detection, not the source of truth) lives at
+`docs-platform/sources/skills/spider-review/SKILL.md`.
 
-## Where they live
+## The recommended lifecycle shape
 
-- **Spider Development** - lives in the team's agent skills directory
-  (`devartslab-scrapy-resources`). Its frontmatter description now matches its
-  real trigger: "Use this skill when building, refactoring, or debugging
-  Scrapy spiders for city-scrapers projects."
-- **spider-review** - owned by PDW. This site describes it and links to it;
-  it does not restate the checklist or imply CTD maintains it. A
-  byte-faithful mirror (for drift detection, not the source of truth) lives
-  at `docs-platform/sources/skills/spider-review/SKILL.md`.
+`spider-review` covers what happens after a PR opens. The write side -
+building, refactoring, debugging a spider - is the natural companion slot,
+and the recommended shape for any team that adds one: **one skill that helps
+you write it, one that checks what you wrote, and no overlap between them.**
 
 ## The docs-hold-the-facts rule
 
-Both skills currently carry their own copies of facts these docs also publish
+Skills tend to carry their own copies of facts these docs also publish
 
 - the meeting schema, the status and classification constants, the lint and
   test commands, the validation checklist. Copies drift from `constants.py`,

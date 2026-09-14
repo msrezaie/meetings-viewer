@@ -3,7 +3,6 @@
 import type { Ref } from "react";
 import Button from "@mui/material/Button";
 import FilterList from "@mui/icons-material/FilterList";
-import { COMPACT_CONTROL_HEIGHT } from "@/lib/ui-constants";
 
 interface FilterButtonProps {
   /** Whether the panel this button controls is currently open. */
@@ -29,16 +28,16 @@ export default function FilterButton({
       size="small"
       disableRipple
       onClick={onToggle}
-      startIcon={<FilterList fontSize="small" />}
+      startIcon={<FilterList />}
       aria-expanded={open}
       aria-controls={panelId}
       sx={(theme) => ({
+        // textTransform: "none",
         color: open ? "primary.contrastText" : "primary.main",
         bgcolor: open ? "primary.main" : "transparent",
         borderColor: "primary.main",
         boxShadow: open ? 4 : "none",
         whiteSpace: "nowrap",
-        height: theme.spacing(COMPACT_CONTROL_HEIGHT),
         flexShrink: 0,
         transition: theme.transitions.create(
           ["background-color", "color", "box-shadow"],

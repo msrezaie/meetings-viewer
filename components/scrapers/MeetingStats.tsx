@@ -7,7 +7,6 @@ import Chip from "@mui/material/Chip";
 import type { MeetingRecord } from "@/lib/scraper-data";
 import { normalizeStatus } from "@/lib/meeting-utils";
 import { buildDuplicateGroups } from "@/lib/duplicate-detection";
-import { COMPACT_CONTROL_HEIGHT } from "@/lib/ui-constants";
 
 // Numbers use theme status colors and explicit text labels so
 // meaning never depends on color alone (WCAG 1.4.1).
@@ -36,7 +35,7 @@ function StatItem({
   color: ValueColor;
 }) {
   return (
-    // Match the small Button height (~32px) for visual consistency.
+    // Match the FilterButton height for visual consistency.
     <Chip
       label={
         <>
@@ -49,11 +48,11 @@ function StatItem({
         </>
       }
       variant="filled"
-      sx={(theme) => ({
+      size="medium"
+      sx={{
         bgcolor: "action.hover",
         borderRadius: 1,
-        height: theme.spacing(COMPACT_CONTROL_HEIGHT),
-      })}
+      }}
     />
   );
 }

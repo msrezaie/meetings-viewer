@@ -15,7 +15,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { usePathname } from "next/navigation";
 import { LogoMark } from "./logo-mark";
-import { SearchTrigger } from "./docs-search";
+import { FullSearchTrigger } from "fumadocs-ui/layouts/shared/slots/search-trigger";
 import { siteConfig } from "@/lib/site-config";
 import { PAGE_PADDING, NAV_DRAWER_WIDTH } from "@/lib/ui-constants";
 import { Toolbar } from "@mui/material";
@@ -72,6 +72,10 @@ export function SiteHeader() {
           {siteConfig.name}
         </Typography>
       </Link>
+
+      <Box sx={{ px: 1.5, pt: 1.5 }}>
+        <FullSearchTrigger style={{ width: "100%" }} />
+      </Box>
 
       <List sx={{ pt: 1, px: 1.5 }}>
         {navItems.map((item) => {
@@ -171,7 +175,9 @@ export function SiteHeader() {
               alignItems: "center",
             }}
           >
-            <SearchTrigger />
+            <FullSearchTrigger
+              style={{ backgroundColor: "transparent", width: "200px" }}
+            />
             {navItems.map((item) => (
               <Button
                 key={item.href}
@@ -179,6 +185,7 @@ export function SiteHeader() {
                 color={item.variant === "contained" ? "primary" : "inherit"}
                 variant={item.variant ?? "text"}
                 sx={{ textTransform: "none" }}
+                size="small"
               >
                 {item.label}
               </Button>

@@ -10,9 +10,6 @@ export const PAGE_PADDING = 2;
  */
 export const SECTION_GAP = 2;
 
-/* MUI spacing units for the height shared by compact toolbar controls. */
-export const COMPACT_CONTROL_HEIGHT = 4;
-
 /* MUI spacing units for uniform DataGrid cell padding on all sides. */
 export const DATAGRID_CELL_PADDING = 2;
 

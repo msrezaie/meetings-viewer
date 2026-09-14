@@ -641,7 +641,9 @@
             <span
               >Builds on&nbsp;<b>cs-121-docs-platform-research.html</b></span
             >
-            <span>Status&nbsp;<b>Ready for coding</b></span>
+            <span
+              >Status&nbsp;<b>P0–P5 shipped; P6 partial, P7 underway</b></span
+            >
           </div>
           <h1>The platform that tells you where the docs disagree</h1>
           <p class="standfirst">
@@ -2824,37 +2826,43 @@ export function getMDXComponents(components?) {
         <section id="s5" class="col">
           <h2><span class="num">05</span>Automation</h2>
           <p>
-            There is no CI for the docs in this repo today — no
-            <code>.github/workflows</code> directory at all. Five workflows are
-            in scope for round two. The first implements section 02; the rest
-            are the original research's quality gates, introduced in an order
-            where each lands passing.
+            Five workflows were in scope for round two; all five now live under
+            <code>.github/workflows</code>. The first implements section 02; the
+            rest are the original research's quality gates, introduced in an
+            order where each lands passing.
           </p>
 
           <div class="phase">
-            <div class="tag">W-1<em>P2</em></div>
+            <div class="tag">W-1<em>shipped</em></div>
             <div>
-              <h3 style="margin-top: 0">docs-conflict-report.yml</h3>
+              <h3 style="margin-top: 0">docs-drift.yml</h3>
               <p>
-                The main build. Runs the comparators from section 02 across the
-                source classes, emits one finding record per disagreement,
-                resolves the owner through <code>CODEOWNERS</code>, and posts a
-                PR comment. Writes the same findings as a JSON artifact for the
-                dashboard and for agents.
+                <span class="pill done">SHIPPED</span> — planned as
+                <code>docs-conflict-report.yml</code>, it landed as
+                <code>docs-drift.yml</code>. The main build. Runs the
+                comparators from section 02 across the source classes, emits one
+                finding record per disagreement, resolves the owner through
+                <code>CODEOWNERS</code>, and posts a PR comment. Writes the same
+                findings as a JSON artifact for the dashboard and for agents.
               </p>
               <p>
                 Non-blocking on arrival. Only <code>certain</code>-confidence
                 findings are ever promoted to blocking, and only after the
                 false-positive rate has been observed on real pull requests.
+                <span class="pill done">PROMOTED</span> — the advisory window
+                has closed: <code>BLOCKING_GATE_ENABLED</code> in
+                <code>docs-platform/engine/evaluate.ts</code> turns a
+                <code>certain</code> finding into a failing check.
               </p>
             </div>
           </div>
 
           <div class="phase">
-            <div class="tag">W-2<em>P5</em></div>
+            <div class="tag">W-2<em>shipped</em></div>
             <div>
               <h3 style="margin-top: 0">docs-build.yml</h3>
               <p>
+                <span class="pill done">SHIPPED</span>
                 <code>next build</code> plus an internal link and anchor checker
                 walking <code>source.getPages()</code>. Deterministic — a link
                 either resolves against a real page and heading or it doesn't —
@@ -2864,43 +2872,45 @@ export function getMDXComponents(components?) {
           </div>
 
           <div class="phase">
-            <div class="tag">W-3<em>P5</em></div>
+            <div class="tag">W-3<em>shipped</em></div>
             <div>
               <h3 style="margin-top: 0">docs-prose.yml</h3>
               <p>
-                cspell on changed files, then Vale once a project vocabulary is
-                seeded. Both report on the diff rather than the whole corpus, so
-                adoption doesn't begin with a wall of pre-existing findings.
-                Vale's style packages should be pinned to a release rather than
-                tracked, so an upstream rule change can't fail an unrelated PR.
+                <span class="pill done">SHIPPED</span> cspell on changed files,
+                then Vale once a project vocabulary is seeded. Both report on
+                the diff rather than the whole corpus, so adoption doesn't begin
+                with a wall of pre-existing findings. Vale's style packages
+                should be pinned to a release rather than tracked, so an
+                upstream rule change can't fail an unrelated PR.
               </p>
             </div>
           </div>
 
           <div class="phase">
-            <div class="tag">W-4<em>P5</em></div>
+            <div class="tag">W-4<em>shipped</em></div>
             <div>
               <h3 style="margin-top: 0">docs-links-external.yml</h3>
               <p>
-                lychee, on a schedule rather than per-PR, opening a single
-                rollup issue. External link rot has nothing to do with the pull
-                request that happens to be open — blocking a developer on
-                another site's downtime is how a check earns a reputation for
-                wasting time.
+                <span class="pill done">SHIPPED</span> lychee, on a schedule
+                rather than per-PR, opening a single rollup issue. External link
+                rot has nothing to do with the pull request that happens to be
+                open — blocking a developer on another site's downtime is how a
+                check earns a reputation for wasting time.
               </p>
             </div>
           </div>
 
           <div class="phase">
-            <div class="tag">W-5<em>P5</em></div>
+            <div class="tag">W-5<em>shipped</em></div>
             <div>
               <h3 style="margin-top: 0">docs-quality.yml</h3>
               <p>
-                axe-core for accessibility — deterministic, and the one quality
-                gate that should block. Lighthouse CI alongside it for
-                performance and SEO, as a warning only and on the median of
-                three runs; shared CI runners are too noisy to gate on, and a
-                flaky performance gate gets removed within a month.
+                <span class="pill done">SHIPPED</span> axe-core for
+                accessibility — deterministic, and the one quality gate that
+                should block. Lighthouse CI alongside it for performance and
+                SEO, as a warning only and on the median of three runs; shared
+                CI runners are too noisy to gate on, and a flaky performance
+                gate gets removed within a month.
               </p>
             </div>
           </div>
@@ -3478,6 +3488,12 @@ export function getMDXComponents(components?) {
             leave a scraper developer better off than the one before it, and no
             phase introduces a gate before the thing it gates exists.
           </p>
+          <p>
+            Build state as of September 2026: P0–P5 are shipped.
+            <code>/docs/analytics</code> is live (P6) with its fleet panel an
+            intentional empty state until Production mode ships, and P7 is
+            underway — <code>/docs/agents</code> and its method page exist.
+          </p>
 
           <div class="phase">
             <div class="tag">P0<em>done</em></div>
@@ -3492,9 +3508,17 @@ export function getMDXComponents(components?) {
           </div>
 
           <div class="phase">
-            <div class="tag">P1<em>close-out</em></div>
+            <div class="tag">P1<em>done</em></div>
             <div>
               <h3 style="margin-top: 0">Finish the shell</h3>
+              <p>
+                <span class="pill done">SHIPPED</span> — theme mapping in
+                <code>globals.css</code>, <code>llms-full.txt</code> emitting
+                page bodies, per-page <code>.md</code> routes through the
+                docs-md API, <code>&lt;RepoScope&gt;</code>, and fumadocs-ui's
+                <code>FullSearchTrigger</code> mounted in
+                <code>SiteHeader</code>.
+              </p>
               <ul>
                 <li>
                   Theme variable mapping so <code>/docs</code> uses the app's
@@ -3518,11 +3542,17 @@ export function getMDXComponents(components?) {
           </div>
 
           <div class="phase">
-            <div class="tag">P2<em>1 sprint</em></div>
+            <div class="tag">P2<em>done</em></div>
             <div>
               <h3 style="margin-top: 0">
                 The conflict reporter — round two's main build
               </h3>
+              <p>
+                <span class="pill done">SHIPPED</span> — the engine, claim
+                registry, fixture corpus, <code>CODEOWNERS</code> routing,
+                <code>docs-drift.yml</code>, and the
+                <code>/docs/conflicts</code> dashboard are all in the repo.
+              </p>
               <ol>
                 <li>
                   Add <code>.github/CODEOWNERS</code> on the base branch, with
@@ -3550,15 +3580,24 @@ export function getMDXComponents(components?) {
                 <li>
                   Everything non-blocking for two weeks. Promote
                   <code>certain</code> to blocking only once quiet.
+                  <span class="pill done">DONE</span> — promotion is live via
+                  <code>BLOCKING_GATE_ENABLED</code> in
+                  <code>docs-platform/engine/evaluate.ts</code>.
                 </li>
               </ol>
             </div>
           </div>
 
           <div class="phase">
-            <div class="tag">P3<em>1 sprint</em></div>
+            <div class="tag">P3<em>done</em></div>
             <div>
               <h3 style="margin-top: 0">The interactive layer</h3>
+              <p>
+                <span class="pill done">SHIPPED</span> — all four components
+                live in <code>components/docs/</code>;
+                <code>&lt;SchemaTable&gt;</code> renders from the generated
+                <code>meeting-schema.json</code>.
+              </p>
               <ul>
                 <li>
                   <code>&lt;SchemaTable&gt;</code>, generated from types —
@@ -3578,13 +3617,20 @@ export function getMDXComponents(components?) {
           </div>
 
           <div class="phase">
-            <div class="tag">P4<em>3–4 days</em></div>
+            <div class="tag">P4<em>done</em></div>
             <div>
               <h3 style="margin-top: 0">Keystatic + governance</h3>
+              <p>
+                <span class="pill done">SHIPPED</span> — mounted at
+                <code>/keystatic</code> with conditional storage: local mode in
+                dev, GitHub mode once the app slug is set.
+              </p>
               <ul>
                 <li>
                   Mount Keystatic at <code>/keystatic</code> (1.1). Spike first:
-                  does an edit open a PR or commit directly?
+                  does an edit open a PR or commit directly? Answered — a PR:
+                  <code>keystatic/*</code> branches become PRs via
+                  <code>docs-editor-pr.yml</code> (section 09).
                 </li>
                 <li>
                   Exclude component-importing pages from the editor's scope.
@@ -3595,10 +3641,13 @@ export function getMDXComponents(components?) {
           </div>
 
           <div class="phase">
-            <div class="tag">P5<em>4–5 days</em></div>
+            <div class="tag">P5<em>done</em></div>
             <div>
               <h3 style="margin-top: 0">The CI gates, in adoption order</h3>
               <p>
+                <span class="pill done">SHIPPED</span> — all four gates live:
+                <code>docs-build</code>, <code>docs-prose</code>,
+                <code>docs-links-external</code>, <code>docs-quality</code>.
                 Build+links, then cspell, then scheduled lychee, then Vale, then
                 axe-core as a blocking gate, then Lighthouse CI as warning-only
                 (1.2). One PR each; each lands green.
@@ -3607,13 +3656,16 @@ export function getMDXComponents(components?) {
           </div>
 
           <div class="phase">
-            <div class="tag">P6<em>1 sprint</em></div>
+            <div class="tag">P6<em>partial</em></div>
             <div>
               <h3 style="margin-top: 0">Fleet &amp; performance view</h3>
               <p>
-                The analytics surface (section 06), including the conflict
-                dashboard from 02.4 as a standing view rather than a per-PR
-                notification.
+                <span class="pill change">PARTIAL</span>
+                <code>/docs/analytics</code> is live with the Lighthouse trend
+                and the conflict dashboard from 02.4 as a standing view rather
+                than a per-PR notification. The fleet-health panel renders an
+                honest empty state until Production mode supplies a real
+                <code>manifest.json</code>.
               </p>
             </div>
           </div>
@@ -3623,7 +3675,10 @@ export function getMDXComponents(components?) {
             <div>
               <h3 style="margin-top: 0">Agents, memory &amp; skills</h3>
               <p>
-                Section 07's method, plus making the finding JSON something an
+                <span class="pill new">UNDERWAY</span> Section 07's method is
+                live — <code>/docs/agents</code> ships the vocabulary, the
+                four-step method, and the team table — and
+                <code>findings.json</code> uploads as a workflow artifact an
                 agent can act on directly.
               </p>
             </div>
@@ -3694,6 +3749,10 @@ export function getMDXComponents(components?) {
               placeholder routes nothing. Merge history suggests a small group
               already performs merges; confirming who should be paged for docs
               paths is a five-minute conversation that unblocks the phase.
+              <span class="pill done">RESOLVED</span> —
+              <code>.github/CODEOWNERS</code> is merged; every path currently
+              routes to <code>@msrezaie</code>, to be split by path as
+              maintainers join.
             </li>
             <li>
               <strong
@@ -3704,6 +3763,9 @@ export function getMDXComponents(components?) {
               ships in P2 versus P6. A PR comment reaches a developer at the
               moment of change; a dashboard is better for standing state.
               Recommendation: PR comment in P2, dashboard deferred to P6.
+              <span class="pill done">RESOLVED</span> — both shipped: the PR
+              comment via <code>docs-drift.yml</code>, and
+              <code>/docs/conflicts</code> as the standing view.
             </li>
             <li>
               <strong>What is the fixture corpus, concretely?</strong>
@@ -3711,6 +3773,9 @@ export function getMDXComponents(components?) {
               recall and precision against. Any set of real program documents
               works — the requirement is that a human has already read them and
               knows what the detector <em>should</em> find.
+              <span class="pill done">RESOLVED</span> —
+              <code>docs-platform/fixtures/</code> holds the corpus;
+              <code>engine/check.test.ts</code> runs the detector against it.
             </li>
           </ul>
 
@@ -3723,6 +3788,10 @@ export function getMDXComponents(components?) {
               Undocumented, and it decides whether editor changes pass through
               the conflict reporter at all. If they commit directly, the two
               need wiring together before the editor ships.
+              <span class="pill done">RESOLVED</span> — GitHub storage mode
+              commits to <code>keystatic/*</code> branches, and
+              <code>docs-editor-pr.yml</code> opens a PR per branch, so editor
+              changes pass through the same gates as human PRs.
             </li>
             <li>
               <strong
@@ -3732,6 +3801,9 @@ export function getMDXComponents(components?) {
               The self-hosted path is free but requires every editor to hold
               write access. This is a platform-capability question with a cost
               attached, not a content question.
+              <span class="pill done">RESOLVED</span> — self-hosted GitHub mode:
+              editors OAuth against the repo, so write access is required; no
+              hosted tier.
             </li>
           </ul>
 
@@ -3751,7 +3823,10 @@ export function getMDXComponents(components?) {
               The finding record carries a stable <code>id</code> for exactly
               this. What's undecided is where the mute list lives and who can
               add to it. Getting this wrong is the most likely way the reporter
-              gets ignored.
+              gets ignored. <span class="pill done">RESOLVED</span> —
+              <code>docs-platform/drift/mutes.json</code>, keyed on the
+              finding's fingerprint; a mute expires on its own when the
+              disagreeing values change.
             </li>
             <li>
               <strong>Should the conflict dashboard be public?</strong>

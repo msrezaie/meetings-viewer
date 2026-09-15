@@ -13,23 +13,36 @@ const GENERIC_WORDS = new Set([
   "to",
   "by",
   "regular",
-  "special",
   "called",
-  "emergency",
   "meeting",
-  "session",
-  "workshop",
-  "hearing",
 ]);
 
+function wordsOf(title: string): string[] {
+  return title
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, " ")
+    .split(/\s+/)
+    .filter((w) => w.length > 0);
+}
+
 function significantWords(title: string): Set<string> {
-  return new Set(
-    title
-      .trim()
-      .toLowerCase()
-      .replace(/[^a-z0-9\s]/g, " ")
-      .split(/\s+/)
-      .filter((w) => w.length > 0 && !GENERIC_WORDS.has(w))
+  return new Set(wordsOf(title).filter((w) => !GENERIC_WORDS.has(w)));
+}
+
+function normalizeAddressPart(value: string): string {
+  return value.trim().toLowerCase().replace(/\s+/g, " ");
+}
+
+export function addressesAreSame(
+  a: MeetingRecord["location"],
+  b: MeetingRecord["location"]
+): boolean {
+  return (
+    normalizeAddressPart(a?.name ?? "") ===
+      normalizeAddressPart(b?.name ?? "") &&
+    normalizeAddressPart(a?.address ?? "") ===
+      normalizeAddressPart(b?.address ?? "")
   );
 }
 
@@ -38,14 +51,12 @@ export function titlesAreSimilar(a: string, b: string): boolean {
   const nb = b.trim().toLowerCase().replace(/\s+/g, " ");
 
   if (na === nb) return true;
-  if (na.includes(nb) || nb.includes(na)) return true;
 
   const wa = significantWords(a);
   const wb = significantWords(b);
-  if (wa.size === 0 || wb.size === 0) return false;
+  if (wa.size === 0 || wb.size === 0 || wa.size !== wb.size) return false;
 
-  const [shorter, longer] = wa.size <= wb.size ? [wa, wb] : [wb, wa];
-  return [...shorter].every((w) => longer.has(w));
+  return [...wa].every((w) => wb.has(w));
 }
 
 export interface DuplicateInfo {
@@ -103,6 +114,10 @@ export function buildDuplicateGroups(
     for (let ii = 0; ii < indices.length; ii++) {
       for (let jj = ii + 1; jj < indices.length; jj++) {
         if (
+          addressesAreSame(
+            records[indices[ii]].location,
+            records[indices[jj]].location
+          ) &&
           titlesAreSimilar(
             records[indices[ii]].title,
             records[indices[jj]].title

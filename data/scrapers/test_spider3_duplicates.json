@@ -1,80 +1,151 @@
 [
-    {
-        "title": "9th District Council",
-        "description": "",
-        "classification": "Commission",
-        "end": "2026-11-18 20:30:00",
-        "all_day": false,
-        "time_notes": "Leonard Louie Fieldhouse - 1700 S Wentworth Chicago, IL United States",
-        "location": {"address": "", "name": ""},
-        "links": [],
-        "start": "2026-11-18 18:30:00",
-        "source": "https://ccpsa.chicago.gov/public-meeting-calendar/event/9th-district-council-november-18-2026/",
-        "status": "tentative",
-        "id": "chi_police_district_councils/202611181830/x/9th_district_council"
+  {
+    "title": "9th District Council",
+    "description": "",
+    "classification": "Commission",
+    "end": "2026-11-18 20:30:00",
+    "all_day": false,
+    "time_notes": "Leonard Louie Fieldhouse - 1700 S Wentworth Chicago, IL United States",
+    "location": { "address": "", "name": "" },
+    "links": [],
+    "start": "2026-11-18 18:30:00",
+    "source": "https://ccpsa.chicago.gov/public-meeting-calendar/event/9th-district-council-november-18-2026/",
+    "status": "tentative",
+    "id": "chi_police_district_councils/202611181830/x/9th_district_council"
+  },
+  {
+    "title": "19th District Council",
+    "description": "",
+    "classification": "Commission",
+    "end": "2026-11-18 20:30:00",
+    "all_day": false,
+    "time_notes": "TBD",
+    "location": { "address": "", "name": "" },
+    "links": [],
+    "start": "2026-11-18 18:30:00",
+    "source": "https://ccpsa.chicago.gov/public-meeting-calendar/event/19th-district-council-november-18-2026/",
+    "status": "tentative",
+    "id": "chi_police_district_councils/202611181830/x/19th_district_council"
+  },
+  {
+    "title": "19th District Council",
+    "description": "",
+    "classification": "Commission",
+    "end": "2026-08-26 20:30:00",
+    "all_day": false,
+    "time_notes": "",
+    "location": {
+      "name": "Uptown Church",
+      "address": "Uptown Church 4612 N Clifton Ave Chicago, IL 60640"
     },
-    {
-        "title": "19th District Council",
-        "description": "",
-        "classification": "Commission",
-        "end": "2026-11-18 20:30:00",
-        "all_day": false,
-        "time_notes": "TBD",
-        "location": {"address": "", "name": ""},
-        "links": [],
-        "start": "2026-11-18 18:30:00",
-        "source": "https://ccpsa.chicago.gov/public-meeting-calendar/event/19th-district-council-november-18-2026/",
-        "status": "tentative",
-        "id": "chi_police_district_councils/202611181830/x/19th_district_council"
+    "links": [
+      { "title": "Video", "href": "https://www.youtube.com/live/GIoCLCANHDU" },
+      {
+        "title": "Notice-and-Agenda_019-2026-08-26-Regular.pdf",
+        "href": "https://ccpsa.chicago.gov/wp-content/uploads/2025/12/Notice-and-Agenda_019-2026-08-26-Regular.pdf"
+      },
+      {
+        "title": "Meeting-Presentation-019-2026.08.26-regular.pdf",
+        "href": "https://ccpsa.chicago.gov/wp-content/uploads/2025/12/Meeting-Presentation-019-2026.08.26-regular.pdf"
+      },
+      {
+        "title": "8.26.26_Resolution-DC019-2026-001.pdf",
+        "href": "https://ccpsa.chicago.gov/wp-content/uploads/2025/12/8.26.26_Resolution-DC019-2026-001.pdf"
+      }
+    ],
+    "start": "2026-08-26 18:30:00",
+    "source": "https://ccpsa.chicago.gov/public-meeting-calendar/event/19th-district-council-august-26-2026/",
+    "status": "passed",
+    "id": "chi_police_district_councils/202608261830/x/19th_district_council"
+  },
+  {
+    "title": "9th District Council",
+    "description": "",
+    "classification": "Commission",
+    "end": "2026-08-26 20:30:00",
+    "all_day": false,
+    "time_notes": "",
+    "location": {
+      "address": "4830 S Western Chicago, IL",
+      "name": "Brighton Park Community Center"
     },
-    {
-        "title": "19th District Council",
-        "description": "",
-        "classification": "Commission",
-        "end": "2026-08-26 20:30:00",
-        "all_day": false,
-        "time_notes": "",
-        "location": {
-            "name": "Uptown Church",
-            "address": "Uptown Church 4612 N Clifton Ave Chicago, IL 60640"
-        },
-        "links": [
-            {"title": "Video", "href": "https://www.youtube.com/live/GIoCLCANHDU"},
-            {
-                "title": "Notice-and-Agenda_019-2026-08-26-Regular.pdf",
-                "href": "https://ccpsa.chicago.gov/wp-content/uploads/2025/12/Notice-and-Agenda_019-2026-08-26-Regular.pdf"
-            },
-            {
-                "title": "Meeting-Presentation-019-2026.08.26-regular.pdf",
-                "href": "https://ccpsa.chicago.gov/wp-content/uploads/2025/12/Meeting-Presentation-019-2026.08.26-regular.pdf"
-            },
-            {
-                "title": "8.26.26_Resolution-DC019-2026-001.pdf",
-                "href": "https://ccpsa.chicago.gov/wp-content/uploads/2025/12/8.26.26_Resolution-DC019-2026-001.pdf"
-            }
-        ],
-        "start": "2026-08-26 18:30:00",
-        "source": "https://ccpsa.chicago.gov/public-meeting-calendar/event/19th-district-council-august-26-2026/",
-        "status": "passed",
-        "id": "chi_police_district_councils/202608261830/x/19th_district_council"
+    "links": [
+      {
+        "title": "Notice-Agenda-009-2026-8-26.pdf",
+        "href": "https://ccpsa.chicago.gov/wp-content/uploads/2025/12/Notice-Agenda-009-2026-8-26.pdf"
+      }
+    ],
+    "start": "2026-08-26 18:30:00",
+    "source": "https://ccpsa.chicago.gov/public-meeting-calendar/event/9th-district-council-august-26-2026/",
+    "status": "passed",
+    "id": "chi_police_district_councils/202608261830/x/9th_district_council"
+  },
+  {
+    "title": "regular Board Meeting",
+    "description": "",
+    "classification": "Commission",
+    "end": "2026-09-15 15:00:00",
+    "all_day": false,
+    "time_notes": "",
+    "location": {
+      "name": "Community Center",
+      "address": "500 W Madison St Chicago, IL"
     },
-    {
-        "title": "9th District Council",
-        "description": "",
-        "classification": "Commission",
-        "end": "2026-08-26 20:30:00",
-        "all_day": false,
-        "time_notes": "",
-        "location": {"address": "4830 S Western Chicago, IL", "name": "Brighton Park Community Center"},
-        "links": [
-            {
-                "title": "Notice-Agenda-009-2026-8-26.pdf",
-                "href": "https://ccpsa.chicago.gov/wp-content/uploads/2025/12/Notice-Agenda-009-2026-8-26.pdf"
-            }
-        ],
-        "start": "2026-08-26 18:30:00",
-        "source": "https://ccpsa.chicago.gov/public-meeting-calendar/event/9th-district-council-august-26-2026/",
-        "status": "passed",
-        "id": "chi_police_district_councils/202608261830/x/9th_district_council"
-    }
+    "links": [],
+    "start": "2026-09-15 14:00:00",
+    "source": "https://example.gov/source-a/board-meeting",
+    "status": "tentative",
+    "id": "test_fuzzy_title_duplicate/1"
+  },
+  {
+    "title": "Board Meeting",
+    "description": "",
+    "classification": "Commission",
+    "end": "2026-09-15 15:00:00",
+    "all_day": false,
+    "time_notes": "",
+    "location": {
+      "name": "Community Center",
+      "address": "500 W Madison St Chicago, IL"
+    },
+    "links": [],
+    "start": "2026-09-15 14:00:00",
+    "source": "https://example.gov/source-b/regular-board-meeting",
+    "status": "tentative",
+    "id": "test_fuzzy_title_duplicate/2"
+  },
+  {
+    "title": "Public Safety Committee",
+    "description": "",
+    "classification": "Commission",
+    "end": "2026-09-22 13:00:00",
+    "all_day": false,
+    "time_notes": "",
+    "location": {
+      "name": "Chicago City Hall",
+      "address": "121 N LaSalle St Chicago, IL"
+    },
+    "links": [],
+    "start": "2026-09-22 12:00:00",
+    "source": "https://example.gov/source-a/public-safety-committee",
+    "status": "tentative",
+    "id": "test_address_normalization_duplicate/1"
+  },
+  {
+    "title": "Public Safety Committee",
+    "description": "",
+    "classification": "Commission",
+    "end": "2026-09-22 13:00:00",
+    "all_day": false,
+    "time_notes": "",
+    "location": {
+      "name": "  CHICAGO   city hall ",
+      "address": "  121  N   LASALLE ST   chicago, il  "
+    },
+    "links": [],
+    "start": "2026-09-22 12:00:00",
+    "source": "https://example.gov/source-b/public-safety-committee",
+    "status": "tentative",
+    "id": "test_address_normalization_duplicate/2"
+  }
 ]
